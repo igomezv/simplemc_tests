@@ -1,5 +1,3 @@
-
-
 from simplemc.likelihoods.BaseLikelihood import BaseLikelihood
 import scipy.linalg as la
 import scipy as sp
@@ -46,9 +44,15 @@ class Compressedfs8Likelihood(BaseLikelihood):
 class fs8Diagram(Compressedfs8Likelihood):
     # data from arXiv:1806.10822
     def __init__(self):
+
+        Compressedfs8Likelihood.__init__(self, "fs8", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/annfs850dropout.dat",
+                                "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/annfs8_cov50dropout.dat")
+
+
+        # Compressedfs8Likelihood.__init__(self, "fs8", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/annfs850_.dat",
+        #                                  "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/annfs8_cov50_.dat")
+
+
         # Compressedfs8Likelihood.__init__(self,"fs8", "simplemc/data/fs8Diagram.txt",
         #                                      "simplemc/data/fs8Diagram-cov.txt")
-        # Compressedfs8Likelihood.__init__(self, "fs8", "/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/notebooks/annfs850_.dat",
-        #                                  "/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/notebooks/annfs8_cov50_.dat")
-        Compressedfs8Likelihood.__init__(self, "fs8", "/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/notebooks/annfs850dropout.dat",
-                                         "/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/notebooks/annfs8_cov50dropout.dat")
+
