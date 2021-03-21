@@ -4,6 +4,7 @@ and creates a param file.
 """
 # from simplemc.tools.Simple_Plots import Simple_plots
 from simplemc.cosmo.Derivedparam import AllDerived
+from simplemc.analyzers.dynesty import utils as dyfunc
 from simplemc import logger
 import os.path as path
 import numpy as np
@@ -34,36 +35,6 @@ class PostProcessing:
             self.args.append(list_result[i])
 
 
-
-    def saveNestedChain(self):
-        """
-        This generates an output Simple(cosmo)MC style for dynesty Samplers.
-
-        Returns
-        -------
-
-        """
-
-        f = open(self.filename + '.txt', 'w+')
-        # Only for nestle
-        for i in range(len(self.result.samples)):
-            strweights  = self.cleanf(self.result.weights[i])
-            strlogl     = self.cleanf(-1 * self.result.logl[i])
-            strsamples  = self.cleanf(self.result.samples[i])
-            row  = strweights + ' ' + strlogl + ' ' + strsamples
-            nrow = " ".join(row.split())
-            if self.derived:
-                for pd in self.AD.listDerived(self.loglike):
-                    nrow = "{} {}".format(nrow, pd.value)
-            f.write(nrow + '\n')
-        f.close()
-
-
-
-    def cleanf(self, func):
-        return str(func).lstrip('[').rstrip(']')
-
-
     def writeSummary(self, time, *args):
         file = open(self.filename + "_Summary" + ".txt", 'w')
         file.write('SUMMARY\n-------\n')
@@ -88,10 +59,14 @@ class PostProcessing:
 
         if self.engine =='dynesty':
             pars = self.loglike.freeParameters()
-            dims = len(pars)
+            samples, weights = self.result.samples, np.exp(self.result.logwt - self.result.logz[-1])
+            means, cov = dyfunc.mean_and_cov(samples, weights)
+
+            stdevs = np.sqrt(np.diag(cov))
+
             for i, p in enumerate(pars):
-                mean = np.mean(self.result.samples[:, i])
-                std = np.std(self.result.samples[:, i])
+                mean = means[i]
+                std = stdevs[i]
                 print("{}: {:.4f} +/- {:.4f}".format(p.name, mean, std))
                 file.write("{}: {:.4f} +/- {:.4f}\n".format(p.name, mean, std))
 
