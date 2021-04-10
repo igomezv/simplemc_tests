@@ -51,6 +51,7 @@ class CosmoCalc:
         print (model)
 
 
+
     def run_plot(self, **kwargs):
 
         fig = plt.figure(figsize=(9, 6))

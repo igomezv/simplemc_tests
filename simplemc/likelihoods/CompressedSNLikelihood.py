@@ -50,16 +50,16 @@ class CompressedSNLikelihood(BaseLikelihood):
 class BetouleSN(CompressedSNLikelihood):
     def __init__(self):
     	
-        CompressedSNLikelihood.__init__(self, "BetouleSN", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLADO_inter.dat",
-                                        "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_COVAE_DO.dat")
+        # CompressedSNLikelihood.__init__(self, "BetouleSN", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLADO_inter.dat",
+        #                                 "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_COVAE_DO.dat")
 
 
         # CompressedSNLikelihood.__init__(self, "BetouleSN", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_inter.dat",
         #                                 "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_COVAE.dat")
 
 
-        # CompressedSNLikelihood.__init__(self, "BetouleSN", "simplemc/data/jla_binned_distances_31nodes_v1.txt",
-        #                                 "simplemc/data/cov_jla_binned_distances_31nodes_v1.txt")
+        CompressedSNLikelihood.__init__(self, "BetouleSN", "simplemc/data/jla_binned_distances_31nodes_v1.txt",
+                                        "simplemc/data/cov_jla_binned_distances_31nodes_v1.txt")
 
 
 

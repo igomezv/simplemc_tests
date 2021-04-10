@@ -5,7 +5,7 @@ from simplemc.cosmo.paramDefs import Ok_par, Om1_par, Om2_par
 
 
 class PolyCDMCosmology(LCDMCosmology):
-    def __init__(self, polyvary=['Om1','Om2'], Ok_prior=0.1):
+    def __init__(self, polyvary=['Om1','Om2','Ok'], Ok_prior=0.1):
         """
         This is LCDM cosmology with optional
         free parameters on the Hubble function

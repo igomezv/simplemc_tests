@@ -1,5 +1,11 @@
+
+#TODO check: if self.analyzername is None
+#TODO check: ttime
+#TODO GA_deap, using baseConfig
+
 from .analyzers import MaxLikeAnalyzer
 from .analyzers import SimpleGenetic
+from .analyzers import GA_deap
 from .analyzers import MCMCAnalyzer
 from .analyzers import DynamicNestedSampler, NestedSampler
 from .cosmo.Derivedparam import AllDerived
@@ -48,7 +54,7 @@ class DriverMC:
             The name of the analyzer. It can be a sampler: {mcmc, nested, emcee}
             or a optimizer: {maxlike, genetic}
 
-        addDerived : bool
+        compute_derived : bool
             True generates at the flight some derived parameters (such as
             Omega_Lambda or Universe Age, and save them in the output text file.
 
@@ -108,6 +114,7 @@ class DriverMC:
         #Initialize the Theory & Datasets
         T = ParseModel(self.model, custom_parameters=self.custom_parameters,
                                    custom_function=self.custom_function)
+
         L = ParseDataset(self.datasets, path_to_data=self.path_to_data,
                                         path_to_cov=self.path_to_cov, fn=self.fn)
 
@@ -159,6 +166,8 @@ class DriverMC:
             self.maxLikeRunner(iniFile=self.iniFile, **kwargs)
         elif self.analyzername == 'genetic':
             self.geneticRunner(iniFile=self.iniFile, **kwargs)
+        elif self.analyzername == 'ga_deap':
+            self.geneticdeap(iniFile=self.iniFile, **kwargs)
         else:
             sys.exit("{}: Sampler/Analyzer name invalid".format(self.analyzername))
         return True
@@ -565,22 +574,22 @@ class DriverMC:
         plot_par2 : bool
 
         """
-        if self.analyzername is None: self.analyzername = 'maxlike'
+        if self.analyzername is None:
+            self.analyzername = 'maxlike'
         self.outputpath = '{}_{}_optimization'.format(self.outputpath, self.analyzername)
         self.outputChecker()
         if iniFile:
-            withErrors = self.config.getboolean('maxlike', 'withErrors', fallback=False)
-            showplot   = self.config.getboolean('maxlike', 'showplot', fallback=False)
-            plot_par1  = self.config.get('maxlike', 'plot_par1', fallback=None)
-            plot_par2  = self.config.get('maxlike', 'plot_par2', fallback=None)
-            showderived= self.config.getboolean('maxlike', 'showderived', fallback=False)
-
+            compute_errors = self.config.getboolean('maxlike', 'compute_errors', fallback=False)
+            show_contours = self.config.getboolean('maxlike', 'show_contours', fallback=False)
+            plot_param1 = self.config.get('maxlike', 'plot_param1', fallback=None)
+            plot_param2 = self.config.get('maxlike', 'plot_param2', fallback=None)
+            compute_derived = self.config.getboolean('maxlike', 'compute_derived', fallback=False)
         else:
-            withErrors  = kwargs.pop('withErrors', False)
-            showplot    = kwargs.pop('showplot', False)
-            plot_par1   = kwargs.pop('plot_par1', None)
-            plot_par2   = kwargs.pop('plot_par2', None)
-            showderived = kwargs.pop('showderived', False)
+            compute_errors = kwargs.pop('compute_errors', False)
+            show_contours = kwargs.pop('show_contours', False)
+            plot_param1 = kwargs.pop('plot_param1', None)
+            plot_param2 = kwargs.pop('plot_param2', None)
+            compute_derived = kwargs.pop('compute_derived ', False)
             if kwargs:
                 logger.critical('Unexpected **kwargs for MaxLike: {}'.format(kwargs))
                 logger.info('You can skip writing any option and SimpleMC will use the default value.\n'
@@ -588,8 +597,9 @@ class DriverMC:
                             '\n\twithErrors (bool) Default: False')
                 sys.exit(1)
         ti = time.time()
-        A = MaxLikeAnalyzer(self.L, self.model, withErrors=withErrors, showderived=showderived,\
-                            showplot=showplot, param1=plot_par1, param2=plot_par2)
+        A = MaxLikeAnalyzer(self.L, self.model, compute_errors=compute_errors,
+                            compute_derived=compute_derived, show_contours=show_contours,\
+                            plot_param1=plot_param1, plot_param2=plot_param2)
         params = self.T.printParameters(A.params)
         self.ttime = time.time() - ti
         self.result = ['maxlike', A, params]
@@ -715,6 +725,28 @@ class DriverMC:
         return True
 
 
+##----------------------
+
+    def geneticdeap(self, iniFile=None, **kwargs):
+        if self.analyzername is None: self.analyzername = 'ga_deap'
+        self.outputpath = '{}_{}_ga_deap'.format(self.outputpath, self.analyzername)
+        self.outputChecker()
+        if iniFile:
+            plot_fitness = self.config.getboolean('ga_deap', 'plot_fitness', fallback=False)
+            compute_errors = self.config.getboolean('ga_deap', 'compute_errors', fallback=False)
+            show_contours = self.config.getboolean('ga_deap', 'show_contours', fallback=False)
+            plot_param1 = self.config.get('ga_deap', 'plot_param1', fallback=None)
+            plot_param2 = self.config.get('ga_deap', 'plot_param2', fallback=None)
+        else:
+            sys.exit(1)
+
+        M = GA_deap(self.L, self.model, plot_fitness=plot_fitness, compute_errors=compute_errors,
+                    show_contours=show_contours, plot_param1=plot_param1, plot_param2=plot_param2)
+        result = M.main()
+        #M.plotting()
+        self.result = ['genetic', M, result]
+        return True
+
 ##---------------------- logLike and prior Transform function ----------------------
 ##---------------------- for nested samplers ----------------------
 
@@ -828,22 +860,13 @@ class DriverMC:
         new one with extension _new in its name.
 
         """
-        while True:
-            if os.path.isfile(self.outputpath+".txt"):
-                logger.info("{0} file already exists, {0}_new was created".format(self.outputpath))
-                self.outputpath = "{}_new".format(self.outputpath)
-            else:
-                break
-        while True:
-            flag = False
-            for i in range(1,10):
-                if os.path.isfile("{}_{}.txt".format(self.outputpath, i)):
-                    flag = True
-            if flag:
-                logger.info("{0}_{1} file already exists, {0}_new was created".format(self.outputpath, i))
-                self.outputpath = "{}_new".format(self.outputpath)
-            else:
-                break
+        if os.path.isfile(self.outputpath+".txt"):
+            logger.info("{0} file already exists, {0}_new was created".format(self.outputpath))
+            self.outputpath = "{}_new".format(self.outputpath)
+        #for i in range(1,10):
+        #    if os.path.isfile("{}_{}.txt".format(self.outputpath, i)):
+        #        logger.info("{0}_{1} file already exists, {0}_new was created".format(self.outputpath, i))
+        #        self.outputpath = "{}_new".format(self.outputpath)
         self.paramFiles()
 
         return True

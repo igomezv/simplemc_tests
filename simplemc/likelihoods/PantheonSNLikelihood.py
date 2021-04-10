@@ -18,30 +18,15 @@ class PantheonSNLikelihood(BaseLikelihood):
         """
         ## first read data file
         self.name_="PantheonSN"
-        # Pantheon Original
-        file_data = 'simplemc/data/pantheon_lcparam_full_long_zhel.txt'
-        # file_cov = 'simplemc/data/pantheon_sys_full_long.txt'
-        # Full JLA
-        # file_data = '/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/data/jla_lcparams.txt'
-        # file_cov = '/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/data/jla_v0_covmatrix.dat'
-        # # Fake nn method 1
-        file_cov = '/home/isidro/Documents/gitHub/misRepos/neuralCosmoReconstruction/notebooks/fake_cov.dat'
-
-        da=[x.split() for x in open(file_data).readlines()[1:]]
-        # For full JLA and full pantheon uncomment the following 5 lines
+        da=[x.split() for x in open('simplemc/data/pantheon_lcparam_full_long_zhel.txt').readlines()[1:]]
         self.zcmb = np.array([float(line[1]) for line in da])
         self.zhelio = np.array([float(line[2]) for line in da])
         self.mag = np.array([float(line[4]) for line in da])
         self.dmag = np.array([float(line[5]) for line in da])
-        self.zhelio = np.array([float(line[2]) for line in da])
-        ## For fake datasets use the following 3
-        # self.zcmb = np.array([float(line[0]) for line in da])
-        # self.mag = np.array([float(line[1]) for line in da])
-        # self.dmag = np.array([float(line[2]) for line in da])
         self.N=len(self.mag)
-        self.syscov=np.loadtxt(file_cov, skiprows=1).reshape((self.N,self.N))
+        self.syscov=np.loadtxt('simplemc/data/pantheon_sys_full_long.txt',skiprows=1).reshape((self.N,self.N))
         self.cov=np.copy(self.syscov)
-        self.cov[np.diag_indices_from(self.cov)]+=self.dmag**2 #A partir de aquí
+        self.cov[np.diag_indices_from(self.cov)]+=self.dmag**2
         self.xdiag=1/self.cov.diagonal() ## diagonal before marginalising constant
         ## add marginalising over a constant
         self.cov+=3**2

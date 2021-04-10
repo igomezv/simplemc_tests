@@ -6,9 +6,7 @@ and creates a param file.
 from simplemc.cosmo.Derivedparam import AllDerived
 from simplemc.analyzers.dynesty import utils as dyfunc
 from simplemc import logger
-import os.path as path
 import numpy as np
-import sys
 import re
 
 #TODO EMCEE
@@ -33,6 +31,7 @@ class PostProcessing:
 
         for i in range(2, len(list_result)):
             self.args.append(list_result[i])
+
 
 
     def writeSummary(self, time, *args):
@@ -61,9 +60,8 @@ class PostProcessing:
             pars = self.loglike.freeParameters()
             samples, weights = self.result.samples, np.exp(self.result.logwt - self.result.logz[-1])
             means, cov = dyfunc.mean_and_cov(samples, weights)
-
             stdevs = np.sqrt(np.diag(cov))
-
+            
             for i, p in enumerate(pars):
                 mean = means[i]
                 std = stdevs[i]
@@ -108,7 +106,6 @@ class PostProcessing:
 
     # AJUSTAR!
     def saveEmceeSamples(self, thin=1):
-        dims = len(self.paramList)
         f = open(self.filename + '.txt', 'w+')
         logprobs = self.result.get_log_prob(discard=self.skip, flat=True, thin=thin)
         postsamples = self.result.get_chain(discard=self.skip, flat=True, thin=thin)
