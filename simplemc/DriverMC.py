@@ -982,7 +982,7 @@ class DriverMC:
         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
         self.outputpath = '{}_neuralike'.format(self.outputpath)
         if iniFile:
-            ndivsgrid = self.config.getint('neuralike', 'ndivsgrid', fallback=100)
+            ndivsgrid = self.config.getint('neuralike', 'ndivsgrid', fallback=50)
             epochs = self.config.getint('neuralike', 'epochs', fallback=200)
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=1e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=4)
@@ -991,7 +991,7 @@ class DriverMC:
                                                                      fallback=[100, 100, 200]).split(',')]
 
         else:
-            ndivsgrid = kwargs.pop('ndivsgrid', 100)
+            ndivsgrid = kwargs.pop('ndivsgrid', 50)
             epochs = kwargs.pop('epochs', 200)
             learning_rate = kwargs.pop('learning_rate', 1e-4)
             batch_size = kwargs.pop('batch_size', 4)
