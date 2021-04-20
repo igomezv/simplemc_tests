@@ -983,23 +983,27 @@ class DriverMC:
         self.outputpath = '{}_neuralike'.format(self.outputpath)
         if iniFile:
             ndivsgrid = self.config.getint('neuralike', 'ndivsgrid', fallback=50)
-            epochs = self.config.getint('neuralike', 'epochs', fallback=200)
-            learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=1e-4)
-            batch_size = self.config.getint('neuralike', 'batch_size', fallback=4)
+            epochs = self.config.getint('neuralike', 'epochs', fallback=500)
+            learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
+            batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
             psplit = self.config.getfloat('neuralike', 'psplit', fallback=0.8)
             hidden_layers_neurons = [int(x) for x in self.config.get('neuralike', 'hidden_layers_neurons',
                                                                      fallback=[100, 100, 200]).split(',')]
-
+            nproc = self.config.getint('neuralike', 'nproc', fallback=3)
         else:
             ndivsgrid = kwargs.pop('ndivsgrid', 50)
-            epochs = kwargs.pop('epochs', 200)
-            learning_rate = kwargs.pop('learning_rate', 1e-4)
-            batch_size = kwargs.pop('batch_size', 4)
+            epochs = kwargs.pop('epochs', 500)
+            learning_rate = kwargs.pop('learning_rate', 5e-4)
+            batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
             hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
-
-        print(ndivsgrid, epochs)
+            nproc = kwargs.pop('nproc', 3)
+        if nproc > 1:
+            import multiprocessing as mp
+            pool = mp.Pool(processes=nproc)
+        else:
+            pool = None
 
         return NeuralManager(self.logLike, self.bounds, self.root, ndivsgrid=ndivsgrid,
                              epochs=epochs, hidden_layers_neurons=hidden_layers_neurons, psplit=psplit,
-                             learning_rate=learning_rate, batch_size=batch_size)
+                             learning_rate=learning_rate, batch_size=batch_size, pool=pool)
