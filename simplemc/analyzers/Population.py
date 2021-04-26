@@ -1,9 +1,14 @@
 from .Individual import Individual
 import numpy as np
 import copy
-import pandas as pd
 import sys
 from simplemc import logger
+try:
+    import pandas as pd
+except:
+    import warnings
+    warnings.warn("Please install Pandas library if you want to use SimpleGenetic")
+
 
 
 class Population:

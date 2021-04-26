@@ -1,5 +1,9 @@
-from deap import tools
-from deap import algorithms
+try:
+    from deap import tools
+    from deap import algorithms
+except:
+    import warnings
+    warnings.warn("Please install DEAP library if you want to use ga_deap genetic algorithms.")
 
 def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
              halloffame=None, verbose=__debug__):
