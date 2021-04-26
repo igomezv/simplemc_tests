@@ -6,7 +6,8 @@ try:
     import tensorflow as tf
     import tensorflow.keras as K
 except:
-    sys.exit("You need to install tensorflow")
+    import warnings
+    warnings.warn("You need to install tensorflow for training neural networks.")
 
 
 class NeuralNet:
