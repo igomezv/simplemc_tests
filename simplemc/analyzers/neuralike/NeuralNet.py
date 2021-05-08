@@ -12,7 +12,7 @@ except:
 
 class NeuralNet:
 
-    def __init__(self, load=False, model_path=None, X=None, Y=None, topology=None, **kwargs):
+    def __init__(self, X=None, Y=None, topology=None, load=False, model_path=None, **kwargs):
         """
         Read the network params
         Parameters
@@ -93,14 +93,21 @@ class NeuralNet:
         return neural_model
 
     def predict(self, x):
-        if type(x) == type([1]):
-            x = np.array(x)
-        if type(x) == type(1):
-            x = np.array([x])
+        print("Using neural net predictions")
+        # if type(x) == type([1]):
+        #     x = np.array(x)
+        # if type(x) == type(1):
+        #     x = np.array([x])
+        x_ = np.atleast_2d(x)
+        y = self.model.predict(x_)
+        return float(np.squeeze(y))
+        # prediction = self.model.predict(x)
+        # return prediction
 
-        prediction = self.model.predict(x)
-
-        return prediction
+    def uncertainty(self):
+        """Uncertainty value for the trained keras model."""
+        test_loss = np.sqrt(self.history.history['val_loss'])
+        return np.squeeze(test_loss.min())
 
     def plot(self, save=False, figname=False, ylogscale=False, show=False):
         plt.plot(self.history.history['loss'], label='training set')

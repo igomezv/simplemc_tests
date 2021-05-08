@@ -55,7 +55,7 @@ class NeuralManager:
         else:
             return False
 
-    def loglikelihood(self, params):
+    def neural_loglikelihood(self, params):
         return self.neural_model.predict(params)
 
 

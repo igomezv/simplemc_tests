@@ -7,7 +7,6 @@ from .analyzers import SimpleGenetic
 from .analyzers import GA_deap
 from .analyzers import MCMCAnalyzer
 from .analyzers import DynamicNestedSampler, NestedSampler
-from .analyzers import NeuralManager
 from .cosmo.Derivedparam import AllDerived
 from . import ParseDataset, ParseModel
 from . import PostProcessing
@@ -139,9 +138,12 @@ class DriverMC:
                                       self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
+        self.logLike = self.get_logLike
         if self.useNeuralLike:
             neural_model = self.neuralLike(iniFile=self.iniFile)
-            self.logLike = neural_model.loglikelihood
+            print("Use neural!!!")
+            self.logLike = neural_model.neural_loglikelihood
+
 
     def executer(self, **kwargs):
         """
@@ -415,7 +417,7 @@ class DriverMC:
         ti = time.time()
         if neuralNetwork:
             logger.info("\tUsing neural network.")
-            from simplemc.analyzers.pybambi.bambi import bambi
+            from simplemc.analyzers.neuralike.bambi import bambi
             # self.logLike =
             thumper = bambi(self.logLike, self.dims,
                             split=split, numNeurons=numNeurons,
@@ -446,7 +448,8 @@ class DriverMC:
         elif self.engine == 'dynesty':
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
                                     bound=nestedType, sample='unif', nlive=nlivepoints,
-                                    pool=pool, queue_size=nprocess, use_pool={'loglikelihood': False})
+                                    pool=pool, queue_size=nprocess, use_pool={'loglikelihood': False},
+                                    use_neural=self.useNeuralLike)
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
                                addDerived=self.addDerived, simpleLike=self.L, dumper=dumper)
             M = sampler.results
@@ -739,7 +742,7 @@ class DriverMC:
     ##---------------------- logLike and prior Transform function ----------------------
     ##---------------------- for nested samplers ----------------------
 
-    def logLike(self, values):
+    def get_logLike(self, values):
         """
         If the sampler used isn't the MCMC of MCMCAnalyzer then, we need to set
         other types of likelihoods and priors objects. This method allows that. It is a
@@ -958,7 +961,6 @@ class DriverMC:
 
         """
         import multiprocessing as mp
-        from multiprocessing.pool import ThreadPool
         if nproc <= 0:
             ncores = mp.cpu_count()
             nprocess = ncores // 2
