@@ -120,6 +120,7 @@ class KerasNetInterpolation:
         """
         x_ = numpy.atleast_2d(x)
         y = self.model.predict(x_)
+        print("prediction with bambi neural network")
         return float(numpy.squeeze(y))
 
     def uncertainty(self):
