@@ -7,8 +7,8 @@ Modified for SimpleMC and dynesty use by I Gomez-Vargas (igomezv0701@alumno.ipn.
 Date: June 2020
 """
 
-# from simplemc.analyzers.neuralike.kerasnet import KerasNetInterpolation
-from simplemc.analyzers.neuralike.NeuralNet import NeuralNet
+from simplemc.analyzers.neuralike.kerasnet import KerasNetInterpolation
+# from simplemc.analyzers.neuralike.NeuralNet import NeuralNet
 import sys
 
 try:
@@ -47,14 +47,14 @@ class BambiManager(object):
 
     def make_learner(self, params, loglikes):
         """Construct a Predictor."""
-        # return KerasNetInterpolation(params, loglikes,
-        #                              split=self.split, numNeurons=self.numNeurons,
-        #                              epochs=self.epochs, model=self.model,
-        #                              savedmodelpath=self.savedmodelpath)
-        return NeuralNet(X=params, Y=loglikes,
-                        split=self.split, numNeurons=self.numNeurons,
-                        epochs=self.epochs, model=self.model,
-                        model_path=self.savedmodelpath)
+        return KerasNetInterpolation(params, loglikes,
+                                     split=self.split, numNeurons=self.numNeurons,
+                                     epochs=self.epochs, model=self.model,
+                                     savedmodelpath=self.savedmodelpath)
+        # return NeuralNet(X=params, Y=loglikes,
+        #                 split=self.split, numNeurons=self.numNeurons,
+        #                 epochs=self.epochs, model=self.model,
+        #                 model_path=self.savedmodelpath)
 
     def dumper(self, params, live_loglks=None, dlogz=1e4, it=0):
         """It sends datasets of physical points and likelihoods to neural net"""
