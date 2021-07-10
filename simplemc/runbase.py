@@ -16,8 +16,8 @@ from .models import SlowRDECosmology
 from .models import DGPCDMCosmology
 from .models import AnisotropicCosmology
 from .models import GraduatedCosmology
+from .models import QuintomCosmology
 from .models import RotationCurves
-from .models import PhiCosmology
 
 #Non-parametric functions
 from .models import SplineLCDMCosmology
@@ -27,9 +27,7 @@ from .models import CompressPantheon
 
 
 #Generic model
-from .models import GenericModel
-from .models import SimpleCosmoModel
-from .models import SimpleModel
+from .models.SimpleModel import SimpleModel, SimpleCosmoModel
 
 # Composite Likelihood
 from .likelihoods.CompositeLikelihood import CompositeLikelihood
@@ -39,13 +37,15 @@ from .likelihoods.LikelihoodMultiplier import LikelihoodMultiplier
 
 # Likelihood modules
 from .likelihoods.BAOLikelihoods import DR11LOWZ, DR11CMASS, DR14LyaAuto, DR14LyaCross, \
-        SixdFGS, SDSSMGS, DR11LyaAuto, DR11LyaCross, eBOSS, DR12Consensus
+                                        SixdFGS, SDSSMGS, DR11LyaAuto, DR11LyaCross, eBOSS, \
+                                        DR12Consensus
 from .likelihoods.SimpleCMBLikelihood import PlanckLikelihood, PlanckLikelihood_15, WMAP9Likelihood
-from .likelihoods.CompressedSNLikelihood    import BetouleSN, UnionSN, BinnedPantheon
-from .likelihoods.PantheonSNLikelihood      import PantheonSNLikelihood
-from .likelihoods.HubbleParameterLikelihood import RiessH0
-from .likelihoods.CompressedHDLikelihood    import HubbleDiagram
+from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN, BinnedPantheon
+from .likelihoods.SNLikelihood import JLASN_Full
+from .likelihoods.PantheonSNLikelihood import PantheonSNLikelihood
+from .likelihoods.CompressedHDLikelihood import HubbleDiagram
 from .likelihoods.Compressedfs8Likelihood import fs8Diagram
+from .likelihoods.HubbleParameterLikelihood import RiessH0
 
 from .likelihoods.SimpleLikelihood import GenericLikelihood
 from .likelihoods.SimpleLikelihood import StraightLine
@@ -151,22 +151,26 @@ def ParseModel(model, **kwargs):
         T.setVaryMnu()
     elif model == "Binned":
         T = BinnedWCosmology()
-    elif model == 'generic':
-        T = GenericModel()
     elif model == 'CPantheon':
         T = CompressPantheon()
     elif model == 'DGP':
         T = DGPCDMCosmology()
     elif model == 'Grad_Ok':
         T = GraduatedCosmology(varyOk=True)
+    elif model == 'Quintess':
+        T = QuintomCosmology(vary_mquin=True)
+    elif model == 'Phantom':
+        T = QuintomCosmology(vary_mphan=True)
+    elif model == 'Quintom':
+        T = QuintomCosmology(vary_mquin=True, vary_mphan=True)
+    elif model == 'Quintom_couple':
+        T = QuintomCosmology(vary_mquin=True, vary_mphan=True, vary_coupling=True)
     elif model == "Rotation":
         T = RotationCurves()
-    elif model == 'phi':
-        T = PhiCosmology()
-    elif model == 'custom':
+    elif model == 'simple':
         T = SimpleModel(custom_parameters, custom_function)
-    elif model == 'simpleCosmo':
-        T = SimpleCosmoModel()
+    elif model == 'simple_cosmo':
+        T = SimpleCosmoModel(custom_parameters, RHSquared=custom_function)
     else:
         print("Cannot recognize model", model)
         sys.exit(1)
@@ -282,6 +286,8 @@ def ParseDataset(datasets, **kwargs):
             L.addLikelihood(PantheonSNLikelihood())
         elif name == 'BPantheon':
             L.addLikelihood(BinnedPantheon())
+        elif name == 'JLA':
+            L.addLikelihood(JLASN_Full())
         elif name == 'SN':
             L.addLikelihood(BetouleSN())
         elif name == 'SNx10':
@@ -300,7 +306,7 @@ def ParseDataset(datasets, **kwargs):
         #    L.addLikelihood(PantheonLikelihood())
         elif name == 'RC':
             L.addLikelihood(RotationCurvesLike())
-        elif name == 'custom':
+        elif name == 'generic':
             L.addLikelihood(GenericLikelihood(path_to_data=path_to_data,
                                               path_to_cov=path_to_cov,
                                               fn=fn))

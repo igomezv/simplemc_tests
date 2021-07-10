@@ -18,8 +18,6 @@ from simplemc.CosmoCalc import CosmoCalc
 #C.run_plot(lw='1')
 
 
-# C = CosmoCalc('owaCDM', 'fs8', 'wa', -0.5, 0.5, 5, zmax=3.1, plot_data=True)
-# C.run_plot(lw='1')
-
-C = CosmoCalc('LCDM', 'SNIa', plot_data=True)
+C = CosmoCalc('owaCDM', 'fs8', 'wa', -0.5, 0.5, 5, zmax=3.1, plot_data=True)
 C.run_plot(lw='1')
+

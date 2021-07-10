@@ -10,7 +10,7 @@ try:
     from deap import base, creator, tools, algorithms
 except:
     import warnings
-    warnings.warn("Please install DEAP library if you want to use ga_deap genetic algorithms.")
+    warnings.warn("Pleas install DEAP library if you want to use ga_deap genetic algorithms.")
 
 # We import an independent module to implement elitism in the GA.
 from simplemc.analyzers import elitism
@@ -26,9 +26,19 @@ except:
     sys.exit('install numdifftools')
 
 class GA_deap:
+    """
+        Genetic algorithms from deap library
+
+        :param like: likelihood function
+        :param model: theoretical model model
+        :param plot_fitness: True if you want to generate a plot of the fitness.
+        :param compute_errors: True if you want to compute errors.
+        :param show_contours: True if you want to show the contours in a plot.
+        :param plot_param1: a parameter to plot in x-axis.
+        :param plot_param2: a parameter to plot in y-axis.
+    """
     def __init__(self, like, model, plot_fitness=False, compute_errors=False, \
                  show_contours=False, plot_param1=None, plot_param2=None):
-
         self.like = like
         self.model = model
         self.params = like.freeParameters()
@@ -56,11 +66,8 @@ class GA_deap:
         self.DIMENSIONS = len(self.params)        # number of dimensions
         self.BOUND_LOW, self.BOUND_UP = 0.0, 1.0  # boundaries for all dimensions
 
-
-
-
     def main(self):
-        toolbox= self.GA()
+        toolbox = self.GA()
 
         # create initial population (generation 0):
         population = toolbox.populationCreator(n=self.POPULATION_SIZE)
@@ -83,7 +90,6 @@ class GA_deap:
         print("-- Best Fitness = ", best.fitness.values[0])
         print("- Best solutions are:")
         best_params = [self.change_prior(i, x) for i, x in enumerate(best)]
-        print(best_params, type(best_params))
         for i, x in enumerate(best_params):
             print("-- Best %s = "%self.params[i].name , x)
 
@@ -127,9 +133,6 @@ class GA_deap:
     # it assumes that the range is the same for every dimension
     def randomFloat(self, low, up):
         return [random.uniform(l, u) for l, u in zip([low]*self.DIMENSIONS, [up]*self.DIMENSIONS)]
-
-
-
 
     def GA(self):
         random.seed(self.RANDOM_SEED)

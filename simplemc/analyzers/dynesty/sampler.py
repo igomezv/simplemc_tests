@@ -83,13 +83,14 @@ class Sampler(object):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, use_neural=False):
+                 queue_size, pool, use_pool):
+        self.usedNeural = False
         self.neural_counter = 0
-        self.use_neural = use_neural
         self.print_txt = "\rit: {} | ncall: {} | eff: {:.3f} | logz: {:.4f} | " \
                          "dlogz: {:.4f} | loglstar: {:.4f} | point {}"
 
         # distributions
+        self.loglikelihood_control = loglikelihood
         self.loglikelihood = loglikelihood
         self.prior_transform = prior_transform
         self.npdim = npdim
@@ -111,7 +112,6 @@ class Sampler(object):
 
         # parallelism
         self.pool = pool  # provided pool
-
         if self.pool is None:
             self.M = map
         else:
@@ -190,15 +190,8 @@ class Sampler(object):
                                                   np.array(self.live_v))))
         else:
             # Compute the log-likelihoods using the default `map` function.
-            if self.use_neural:
-            #     print("IN USE NEURAL")
-            #     self.live_logl = np.array(self.loglikelihood(self.live_v))
-            #     print("IN USE NEURAL 2")
-            # else:
-                self.live_logl = np.array(list(map(self.loglikelihood,
+            self.live_logl = np.array(list(map(self.loglikelihood,
                                                np.array(self.live_v))))
-            # print("TYPE LIVE_LOGL IN DYNESTY", type(self.live_logl))
-
         self.live_bound = np.zeros(self.nlive, dtype='int')
         self.live_it = np.zeros(self.nlive, dtype='int')
 

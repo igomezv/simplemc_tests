@@ -1,9 +1,25 @@
+
+## TODO: usar modelChecker once it is trained, and flag for overige
+
 from .GridLikes import GridLikes
 from .NeuralNet import NeuralNet
 import os
 
 
 class NeuralManager:
+    """
+        Manager for neural networks to learn likelihood function over a grid
+        Parameters
+        -----------
+        loglikelihood
+        pars_bounds
+        rootname
+        ndivsgrid
+        hidden_layers_neurons
+        epochs
+        plot
+    """
+
     def __init__(self, loglikelihood, pars_bounds, rootname, ndivsgrid=5, hidden_layers_neurons=None,
                  epochs=100, plot=True, **kwargs):
         if hidden_layers_neurons is None:
@@ -37,7 +53,7 @@ class NeuralManager:
         neural_model.train()
         neural_model.save_model('{}'.format(self.model_path))
         if self.plot:
-            neural_model.plot(save=True, figname='{}'.format(self.fig_path))
+            neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
 
         return True
 
@@ -55,7 +71,7 @@ class NeuralManager:
         else:
             return False
 
-    def neural_loglikelihood(self, params):
+    def loglikelihood(self, params):
         return self.neural_model.predict(params)
 
 

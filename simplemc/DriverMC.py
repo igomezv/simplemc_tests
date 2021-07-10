@@ -1,6 +1,7 @@
-# TODO check: if self.analyzername is None
-# TODO check: ttime
-# TODO GA_deap, using baseConfig
+
+#TODO check: if self.analyzername is None
+#TODO check: ttime
+#TODO GA_deap, using baseConfig
 
 from .analyzers import MaxLikeAnalyzer
 from .analyzers import SimpleGenetic
@@ -21,11 +22,7 @@ class DriverMC:
     """
         This class is the manager and wrapper between all
         the analyzers and the pertinent functions.
-    """
-
-    def __init__(self, iniFile=None, **kwargs):
-        """
-        Read the input parameters or ini file.
+        It reads the input parameters or ini file.
 
         Parameters
         -----------
@@ -73,28 +70,28 @@ class DriverMC:
 
         fn : str
             Type of function to use in the likelihood due a custom data {"generic", "hz", ...}.
-
-        """
+    """
+    def __init__(self, iniFile=None, **kwargs):
 
         self.iniFile = iniFile
-        if self.iniFile:
-            self.iniReader(iniFile)
+        if self.iniFile:    self.iniReader(iniFile)
         else:
-            self.chainsdir = kwargs.pop('chainsdir', 'simplemc/chains')
-            self.model = kwargs.pop('model', None)
-            self.prefact = kwargs.pop('prefact', 'phy')
-            self.varys8 = kwargs.pop('varys8', False)
-            self.datasets = kwargs.pop('datasets', 'HD')
+            self.chainsdir    = kwargs.pop('chainsdir', 'simplemc/chains')
+            self.model        = kwargs.pop('model',   None)
+            self.prefact      = kwargs.pop('prefact', 'phy')
+            self.varys8       = kwargs.pop('varys8',  False)
+            self.datasets     = kwargs.pop('datasets','HD')
             self.analyzername = kwargs.pop('analyzername', None)
-            self.addDerived = kwargs.pop('addDerived', False)
+            self.addDerived   = kwargs.pop('addDerived', False)
             self.useNeuralLike = kwargs.pop('useNeuralLike', False)
+
 
             ## Next two are for custom model
             self.custom_parameters = kwargs.pop('custom_parameters', None)
-            self.custom_function = kwargs.pop('custom_function', None)
+            self.custom_function   = kwargs.pop('custom_function', None)
             ## Following two are for custom data
             self.path_to_data = kwargs.pop('path_to_data', None)
-            self.path_to_cov = kwargs.pop('path_to_cov', None)
+            self.path_to_cov  = kwargs.pop('path_to_cov', None)
             self.fn = kwargs.pop("fn", "generic")
 
             if os.path.exists(os.path.join(self.chainsdir)):
@@ -111,54 +108,45 @@ class DriverMC:
                             '\n\tchainsdir Default: SimpleMC_chains\n\t')
                 sys.exit(1)
 
-        # Initialize the Theory & Datasets
+
+        #Initialize the Theory & Datasets
         T = ParseModel(self.model, custom_parameters=self.custom_parameters,
-                       custom_function=self.custom_function)
+                                   custom_function=self.custom_function)
 
         L = ParseDataset(self.datasets, path_to_data=self.path_to_data,
-                         path_to_cov=self.path_to_cov, fn=self.fn)
+                                        path_to_cov=self.path_to_cov, fn=self.fn)
 
         if self.prefact == "pre":  T.setVaryPrefactor()
-        if self.varys8 == True: T.setVarys8()
+        if self.varys8  == True: T.setVarys8()
         T.printFreeParameters()
 
-        # set the likelihood for a model
+        #set the likelihood for a model
         L.setTheory(T)
 
         self.T, self.L = T, L
 
-        self.pars_info = self.L.freeParameters()
-        self.bounds = [p.bounds for p in self.pars_info]
-        self.means = [p.value for p in self.pars_info]
-        self.paramsList = [p.name for p in self.pars_info]
-        self.dims = len(self.paramsList)
-        self.result = None
+        self.pars_info  = self.L.freeParameters()
+        self.bounds     = [p.bounds for p in self.pars_info]
+        self.means      = [p.value  for p in self.pars_info]
+        self.paramsList = [p.name   for p in self.pars_info]
+        self.dims       = len(self.paramsList)
+        self.result     = None
 
         self.root = "{}_{}_{}".format(self.model, self.prefact,
-                                      self.datasets)
+                                    self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
-        self.logLike = self.get_logLike
         if self.useNeuralLike:
             neural_model = self.neuralLike(iniFile=self.iniFile)
-            print("Use neural!!!")
-            self.logLike = neural_model.neural_loglikelihood
+            self.logLike = neural_model.loglikelihood
+
 
 
     def executer(self, **kwargs):
         """
         This is a wrapper of the runners of the analyzer in order to make
         easier the execution, mainly if is through an ini file.
-
-        Parameters
-        ----------
-        All the parameters of the methods:
-
-            - mcmcRunner
-            - nestedRunner
-            - emceeRunner
-            - geneticRunner
-            - maxlikeRunner
+        **kwargs from mcmcRunner, nestedRunner, emceeRunner, geneticRunner and maxlikeRunner.
 
         """
         if self.analyzername == 'mcmc':
@@ -177,7 +165,8 @@ class DriverMC:
             sys.exit("{}: Sampler/Analyzer name invalid".format(self.analyzername))
         return True
 
-    ##----------------------Initialization ------------------------
+
+##----------------------Initialization ------------------------
 
     def iniReader(self, iniFile):
         """
@@ -193,27 +182,31 @@ class DriverMC:
         self.config = configparser.ConfigParser()
 
         self.config.read(iniFile)
-        self.chainsdir = self.config.get('custom', 'chainsdir', \
+        self.chainsdir    = self.config.get(        'custom', 'chainsdir',\
                                          fallback=os.path.join('simplemc/chains'))
-        self.model = self.config.get('custom', 'model')
-        self.prefact = self.config.get('custom', 'prefact', fallback='phy')
-        self.datasets = self.config.get('custom', 'datasets', fallback='HD')
-        self.analyzername = self.config.get('custom', 'analyzername', fallback=None)
-        self.varys8 = self.config.getboolean('custom', 'varys8', fallback=False)
-        self.addDerived = self.config.getboolean('custom', 'addDerived', fallback=False)
+        self.model        = self.config.get(        'custom', 'model')
+        self.prefact      = self.config.get(        'custom', 'prefact',      fallback='phy')
+        self.datasets     = self.config.get(        'custom', 'datasets',     fallback='HD')
+        self.analyzername = self.config.get(        'custom', 'analyzername', fallback=None)
+        self.varys8       = self.config.getboolean( 'custom', 'varys8',       fallback=False)
+        self.addDerived   = self.config.getboolean( 'custom', 'addDerived',   fallback=False)
         self.useNeuralLike = self.config.getboolean('custom', 'useNeuralLike', fallback=False)
 
-        self.custom_parameters = self.config.get('custom', 'custom_parameters', fallback=None)
-        self.custom_function = self.config.get('custom', 'custom_function', fallback=None)
+        self.custom_parameters = self.config.get(   'custom', 'custom_parameters', fallback=None)
+        self.custom_function   = self.config.get(   'custom', 'custom_function',   fallback=None)
         ## Following two are for custom data
-        self.path_to_data = self.config.get('custom', 'path_to_data', fallback=None)
-        self.path_to_cov = self.config.get('custom', 'path_to_cov', fallback=None)
-        self.fn = self.config.get('custom', 'path_to_cov', fallback="generic")
+        self.path_to_data = self.config.get(        'custom', 'path_to_data', fallback=None)
+        self.path_to_cov  = self.config.get(        'custom', 'path_to_cov',  fallback=None)
+        self.fn = self.config.get('custom', 'fn',  fallback="generic")
         return True
 
-    ##======== ======== ======== Samplers ======== ======== ========
 
-    ##---------------------- MCMC ----------------------
+
+
+##======== ======== ======== Samplers ======== ======== ========
+
+
+##---------------------- MCMC ----------------------
 
     def mcmcRunner(self, iniFile=None, **kwargs):
         """
@@ -242,21 +235,21 @@ class DriverMC:
 
         """
         if iniFile:
-            nsamp = self.config.getint('mcmc', 'nsamp', fallback=50000)
-            skip = self.config.getint('mcmc', 'skip', fallback=300)
+            nsamp    = self.config.getint(      'mcmc', 'nsamp',   fallback=50000)
+            skip     = self.config.getint(      'mcmc', 'skip',    fallback=300)
             ## temperature at which to sample, weights get readjusted on the fly
-            temp = self.config.getfloat('mcmc', 'temp', fallback=2)
-            chainno = self.config.getint('mcmc', 'chainno', fallback=1)
-            GRstop = self.config.getfloat('mcmc', 'GRstop', fallback=0.01)
-            checkGR = self.config.getfloat('mcmc', 'checkGR', fallback=500)
-            evidence = self.config.getboolean('mcmc', 'evidence', fallback=False)
+            temp     = self.config.getfloat(    'mcmc', 'temp',    fallback=2)
+            chainno  = self.config.getint(      'mcmc', 'chainno', fallback=1)
+            GRstop   = self.config.getfloat(    'mcmc', 'GRstop',  fallback=0.01)
+            checkGR  = self.config.getfloat(    'mcmc', 'checkGR', fallback=500)
+            evidence = self.config.getboolean(  'mcmc', 'evidence',fallback=False)
         else:
-            nsamp = kwargs.pop('nsamp', 50000)
-            skip = kwargs.pop('skip', 300)
-            temp = kwargs.pop('temp', 2)
-            chainno = kwargs.pop('chainno', 1)
-            GRstop = kwargs.pop('GRstop', 0.01)
-            checkGR = kwargs.pop('checkGR', 500)
+            nsamp    = kwargs.pop('nsamp', 50000)
+            skip     = kwargs.pop('skip',  300)
+            temp     = kwargs.pop('temp',  2)
+            chainno  = kwargs.pop('chainno', 1)
+            GRstop   = kwargs.pop('GRstop', 0.01)
+            checkGR  = kwargs.pop('checkGR', 500)
             evidence = kwargs.pop('evidence', False)
             if kwargs:
                 logger.critical('Unexpected **kwargs for MCMC: {}'.format(kwargs))
@@ -266,31 +259,31 @@ class DriverMC:
                             '\n\tchainno (int) Default: 1\n\t'
                             'evidence (bool) Default: False')
                 sys.exit(1)
-                # raise TypeError('Unexpected **kwargs: {}'.format(kwargs))
+                #raise TypeError('Unexpected **kwargs: {}'.format(kwargs))
         logger.info("\n\tnsamp: {}\n\tskip: {}\n\t"
                     "temp: {}\n\tchain num: {}\n\tevidence: {}".format(
-            nsamp, skip, temp, chainno, evidence))
+                    nsamp, skip, temp, chainno, evidence))
         if self.analyzername is None: self.analyzername = 'mcmc'
         self.outputpath = "{}_{}".format(self.outputpath, self.analyzername)
-        # Check whether the file already exists
+        #Check whether the file already exists
         self.outputChecker()
         ti = time.time()
 
-        # Main process
-        M = MCMCAnalyzer(self.L, self.outputpath, skip=skip, nsamp=nsamp, temp=temp,
-                         chain_num=chainno, addDerived=self.addDerived, GRstop=GRstop, checkGR=checkGR)
+        #Main process
+        M = MCMCAnalyzer(self.L, self.outputpath, skip=skip, nsamp=nsamp, temp = temp,
+                        chain_num=chainno, addDerived=self.addDerived, GRstop=GRstop, checkGR=checkGR)
 
         self.ttime = time.time() - ti
 
-        # Compute Bayesian Evidence
+        #Compute Bayesian Evidence
         if evidence:
             try:
                 from MCEvidence import MCEvidence
                 logger.info("Aproximating bayesian evidence with MCEvidence (arXiv:1704.03472)\n")
-                MLE = MCEvidence(self.outputpath + ".txt").evidence()
+                MLE = MCEvidence(self.outputpath + ".txt" ).evidence()
                 self.result = ['mcmc', M, "Evidence with MCEvidence : {}\n".format(MLE), strresult]
             except:
-                # writeSummary(self.chainsdir, outputname, ttime)
+                #writeSummary(self.chainsdir, outputname, ttime)
                 # print("Warning!")
                 # print("MCEvidence could not calculate the Bayesian evidence [very small weights]\n")
                 logger.error("MCEvidence could not calculate the Bayesian evidence [very small weights]")
@@ -299,11 +292,13 @@ class DriverMC:
 
         return True
 
-    ##---------------------- Nested ----------------------
+
+
+##---------------------- Nested ----------------------
 
     def nestedRunner(self, iniFile=None, **kwargs):
         """
-        This method calls Dynesty samplers.
+        This method calls Dynesty nested samplers.
 
         Parameters
         ___________
@@ -339,23 +334,23 @@ class DriverMC:
 
         """
         if iniFile:
-            self.engine = self.config.get('nested', 'engine', fallback='dynesty')
-            dynamic = self.config.getboolean('nested', 'dynamic', fallback=False)
-            neuralNetwork = self.config.getboolean('nested', 'neuralNetwork', fallback=False)
-            nestedType = self.config.get('nested', 'nestedType', fallback='multi')
-            nlivepoints = self.config.getint('nested', 'nlivepoints', fallback=1024)
-            accuracy = self.config.getfloat('nested', 'accuracy', fallback=0.01)
-            nproc = self.config.getint('nested', 'nproc', fallback=1)
+            self.engine = self.config.get(          'nested', 'engine',       fallback='dynesty')
+            dynamic     = self.config.getboolean(   'nested', 'dynamic',      fallback=False)
+            neuralNetwork = self.config.getboolean( 'nested', 'neuralNetwork',fallback=False)
+            nestedType  = self.config.get(          'nested', 'nestedType',   fallback='multi')
+            nlivepoints = self.config.getint(       'nested', 'nlivepoints',  fallback=1024)
+            accuracy    = self.config.getfloat(     'nested', 'accuracy',     fallback=0.01)
+            nproc       = self.config.getint(       'nested', 'nproc',        fallback=1)
 
             self.priortype = self.config.get('nested', 'priortype', fallback='u')
-            # nsigma is the default value for sigma in gaussian priors
+            #nsigma is the default value for sigma in gaussian priors
             self.nsigma = self.config.get('nested', 'sigma', fallback=2)
 
             # Neural network settings
-            split = self.config.getfloat('neural', 'split', fallback=0.8)
+            split      = self.config.getfloat('neural', 'split', fallback=0.8)
             numNeurons = self.config.getint('neural', 'numNeurons', fallback=100)
             epochs = self.config.getint('neural', 'epochs', fallback=100)
-            model = self.config.get('model', 'model', fallback=None)
+            model  = self.config.get( 'model', 'model',   fallback=None)
             savedmodelpath = self.config.get('neural', 'savedmodelpath', fallback=None)
             it_to_start_net = self.config.getint('neural', 'it_to_start_net', fallback=None)
             dlogz_start = self.config.getfloat('neural', 'dlogz_start', fallback=5)
@@ -364,13 +359,13 @@ class DriverMC:
             failure_tolerance = self.config.getfloat('neural', 'failure_tolerance', fallback=0.5)
 
         else:
-            self.engine = kwargs.pop('engine', 'dynesty')
-            dynamic = kwargs.pop('dynamic', False)
+            self.engine = kwargs.pop('engine',    'dynesty')
+            dynamic     = kwargs.pop('dynamic',    False)
             neuralNetwork = kwargs.pop('neuralNetwork', False)
-            nestedType = kwargs.pop('nestedType', 'multi')
+            nestedType  = kwargs.pop('nestedType', 'multi')
             nlivepoints = kwargs.pop('nlivepoints', 1024)
-            accuracy = kwargs.pop('accuracy', 0.01)
-            nproc = kwargs.pop('nproc', 1)
+            accuracy    = kwargs.pop('accuracy',    0.01)
+            nproc       = kwargs.pop('nproc', 1)
 
             self.priortype = kwargs.pop('priortype', 'u')
             self.nsigma = kwargs.pop('sigma', 2)
@@ -399,7 +394,7 @@ class DriverMC:
                             'engine {"dynesty", "nestle"} Default: "dynesty"')
                 sys.exit(1)
 
-        # stored output files
+        #stored output files
         if self.analyzername is None: self.analyzername = 'nested'
         self.outputpath = '{}_{}_{}_{}'.format(self.outputpath, self.analyzername, self.engine, nestedType)
         if neuralNetwork:
@@ -407,7 +402,7 @@ class DriverMC:
         self.outputChecker()
 
         self.neuralNetwork = neuralNetwork
-        # paralel run
+        #paralel run
         pool, nprocess = self.mppool(nproc)
         logger.info("\n\tnlivepoints: {}\n"
                     "\taccuracy: {}\n"
@@ -417,7 +412,7 @@ class DriverMC:
         ti = time.time()
         if neuralNetwork:
             logger.info("\tUsing neural network.")
-            from simplemc.analyzers.neuralike.bambi import bambi
+            from simplemc.analyzers.pybambi.bambi import bambi
             # self.logLike =
             thumper = bambi(self.logLike, self.dims,
                             split=split, numNeurons=numNeurons,
@@ -433,6 +428,7 @@ class DriverMC:
         else:
             dumper = None
 
+
         if dynamic:
             logger.info("\nUsing dynamic nested sampling...")
             sampler = DynamicNestedSampler(self.logLike, self.priorTransform,
@@ -440,16 +436,15 @@ class DriverMC:
                                            queue_size=nprocess)
 
             sampler.run_nested(nlive_init=nlivepoints, dlogz_init=0.05, nlive_batch=100,
-                               maxiter_init=10000, maxiter_batch=1000, maxbatch=10,
-                               outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L)
+                            maxiter_init=10000, maxiter_batch=1000, maxbatch=10,
+                            outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L)
             M = sampler.results
 
 
         elif self.engine == 'dynesty':
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
-                                    bound=nestedType, sample='unif', nlive=nlivepoints,
-                                    pool=pool, queue_size=nprocess, use_pool={'loglikelihood': False},
-                                    use_neural=self.useNeuralLike)
+                        bound=nestedType, sample = 'unif', nlive = nlivepoints,
+                        pool = pool, queue_size=nprocess, use_pool={'loglikelihood': False})
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
                                addDerived=self.addDerived, simpleLike=self.L, dumper=dumper)
             M = sampler.results
@@ -459,8 +454,8 @@ class DriverMC:
             try:
                 import nestle
                 M = nestle.sample(self.logLike, self.priorTransform, ndim=self.dims, method=nestedType,
-                                  npoints=nlivepoints, dlogz=accuracy, callback=nestle.print_progress,
-                                  pool=pool, queue_size=nprocess)
+                npoints=nlivepoints, dlogz=accuracy, callback=nestle.print_progress,
+                pool = pool, queue_size = nprocess)
             except ImportError as error:
                 sys.exit("{}: Please install nestle module"
                          "or use dynesty engine".format(error.__class__.__name__))
@@ -476,7 +471,8 @@ class DriverMC:
                        'engine: {}'.format(self.engine)]
         return True
 
-    ##---------------------- EMCEE ----------------------
+
+##---------------------- EMCEE ----------------------
 
     def emceeRunner(self, iniFile=None, **kwargs):
         """
@@ -498,15 +494,15 @@ class DriverMC:
 
         """
         if iniFile:
-            walkers = self.config.getint('emcee', 'walkers', fallback=self.dims * 2 + 2)
-            nsamp = self.config.getint('emcee', 'nsamp', fallback=10000)
-            burnin = self.config.getint('emcee', 'burnin', fallback=0)
-            nproc = self.config.getint('emcee', 'nproc', fallback=1)
+            walkers = self.config.getint('emcee', 'walkers', fallback=self.dims*2+2)
+            nsamp   = self.config.getint('emcee', 'nsamp', fallback=10000)
+            burnin  = self.config.getint('emcee', 'burnin', fallback=0)
+            nproc   = self.config.getint('emcee', 'nproc', fallback=1)
         else:
-            walkers = kwargs.pop('walkers', self.dims * 2 + 2)
-            nsamp = kwargs.pop('nsamp', 10000)
-            burnin = kwargs.pop('burnin', 0)
-            nproc = kwargs.pop('nproc', 1)
+            walkers = kwargs.pop('walkers', self.dims*2+2)
+            nsamp   = kwargs.pop('nsamp', 10000)
+            burnin  = kwargs.pop('burnin', 0)
+            nproc   = kwargs.pop('nproc', 1)
             if kwargs:
                 logger.critical('Unexpected **kwargs for emcee sampler: {}'.format(kwargs))
                 logger.info('You can skip writing any option and SimpleMC will use the default value.\n'
@@ -529,13 +525,13 @@ class DriverMC:
         ini = []
         for bound in self.bounds:
             ini.append(np.random.uniform(bound[0], bound[1], walkers))
-        inisamples = np.array(ini).T  # initial samples
+        inisamples = np.array(ini).T # initial samples
         try:
             import emcee
             ti = time.time()
             sampler = emcee.EnsembleSampler(walkers, self.dims,
                                             self.logPosterior, pool=pool)
-            # testing
+            #testing
             sampler.sample(initial_state=self.means, tune=True, thin_by=3)
             # pass the initial samples and total number of samples required
             sampler.run_mcmc(inisamples, nsamp + burnin,
@@ -552,9 +548,12 @@ class DriverMC:
         self.result = ['emcee', sampler, 'walkers : {}'.format(walkers), 'samples: {}'.format(nsamp)]
         return True
 
-    ##======== ======== ======== Optimizers ======== ======== ========
 
-    ##---------------------- MaxLikeAnalizer ----------------------
+
+##======== ======== ======== Optimizers ======== ======== ========
+
+
+##---------------------- MaxLikeAnalizer ----------------------
 
     def maxLikeRunner(self, iniFile=None, **kwargs):
         """
@@ -563,10 +562,13 @@ class DriverMC:
         Parameters
         ----------
         withErrors : bool
+            Plot errors.
 
         plot_par1 : bool
+            First parameter to plot.
 
         plot_par2 : bool
+            Second parameter to plot.
 
         """
         if self.analyzername is None:
@@ -593,14 +595,16 @@ class DriverMC:
                 sys.exit(1)
         ti = time.time()
         A = MaxLikeAnalyzer(self.L, self.model, compute_errors=compute_errors,
-                            compute_derived=compute_derived, show_contours=show_contours, \
+                            compute_derived=compute_derived, show_contours=show_contours,\
                             plot_param1=plot_param1, plot_param2=plot_param2)
         params = self.T.printParameters(A.params)
         self.ttime = time.time() - ti
         self.result = ['maxlike', A, params]
         return True
 
-    ##---------------------- Genetic Algorithms ----------------------
+
+##---------------------- Genetic Algorithms ----------------------
+
 
     def geneticRunner(self, iniFile=None, **kwargs):
         """
@@ -659,7 +663,7 @@ class DriverMC:
 
         if iniFile:
             n_individuals = self.config.getint('genetic', 'n_individuals', fallback=400)
-            n_generations = self.config.getint('genetic', 'n_generations', fallback=1000)
+            n_generations = self.config.getint('genetic', 'n_generations' , fallback=1000)
             selection_method = self.config.get('genetic', 'selection_method', fallback='tournament')
             mut_prob = self.config.getfloat('genetic', 'mut_prob', fallback=0.6)
             distribution = self.config("distribution", fallback="uniform")
@@ -695,7 +699,7 @@ class DriverMC:
         logger.info("\n\tn_individuals: {}\n\tn_generations: {}"
                     "\n\tselection method: {}\n\t"
                     "mut prob: {}".format(n_individuals, n_generations,
-                                          selection_method, mut_prob))
+                                        selection_method,mut_prob))
         ti = time.time()
 
         M = SimpleGenetic(self.logLike, self.dims, self.bounds,
@@ -717,9 +721,14 @@ class DriverMC:
         self.result = ['genetic', M, result]
         return True
 
-    ##----------------------
+
+##----------------------
 
     def geneticdeap(self, iniFile=None, **kwargs):
+        """
+        Genetic algorithms from Deap library.
+
+        """
         if self.analyzername is None: self.analyzername = 'ga_deap'
         self.outputpath = '{}_{}_ga_deap'.format(self.outputpath, self.analyzername)
         self.outputChecker()
@@ -735,14 +744,14 @@ class DriverMC:
         M = GA_deap(self.L, self.model, plot_fitness=plot_fitness, compute_errors=compute_errors,
                     show_contours=show_contours, plot_param1=plot_param1, plot_param2=plot_param2)
         result = M.main()
-        # M.plotting()
+        #M.plotting()
         self.result = ['genetic', M, result]
         return True
 
-    ##---------------------- logLike and prior Transform function ----------------------
-    ##---------------------- for nested samplers ----------------------
+##---------------------- logLike and prior Transform function ----------------------
+##---------------------- for nested samplers ----------------------
 
-    def get_logLike(self, values):
+    def logLike(self, values):
         """
         If the sampler used isn't the MCMC of MCMCAnalyzer then, we need to set
         other types of likelihoods and priors objects. This method allows that. It is a
@@ -763,32 +772,41 @@ class DriverMC:
 
         self.T.updateParams(self.pars_info)
         self.L.setTheory(self.T)
-        if (self.L.name() == "Composite"):
-            cloglikes = self.L.compositeLogLikes_wprior()
-            loglike = cloglikes.sum()
+        if (self.L.name()=="Composite"):
+            cloglikes=self.L.compositeLogLikes_wprior()
+            loglike=cloglikes.sum()
         else:
             loglike = self.L.loglike_wprior()
         return loglike
 
-    # priorsTransform
+
+    #priorsTransform
     def priorTransform(self, theta):
-        """Prior Transform for gaussian and flat priors"""
+        """
+        Prior Transform for gaussian and flat priors
+
+        Parameters
+        -----------
+
+        theta : array
+            Vector of the parameter space
+        """
         priors = []
         n = self.nsigma
 
         if self.priortype == 'g':
             for c, bound in enumerate(self.bounds):
                 mu = self.means[c]
-                sigma = (bound[1] - bound[0]) / n
-                priors.append(mu + sigma * (ndtri(theta[c])))
+                sigma = (bound[1]-bound[0])/n
+                priors.append(mu+sigma*(ndtri(theta[c])))
         else:
             for c, bound in enumerate(self.bounds):
-                # When theta 0-> append bound[0], if theta 1-> append bound[1]
-                priors.append(theta[c] * (bound[1] - bound[0]) + bound[0])
+               # When theta 0-> append bound[0], if theta 1-> append bound[1]
+                priors.append(theta[c]*(bound[1]-bound[0])+bound[0])
                 # At this moment, np.array(priors) has shape (dims,)
         return np.array(priors)
 
-    ############# for emcee: logPosterior and logPrior
+############# for emcee: logPosterior and logPrior
     def logPosterior(self, theta):
         """
         The natural logarithm of the joint posterior.
@@ -841,29 +859,23 @@ class DriverMC:
         else:
             return -np.inf
 
-    ###############################Post-processing############################################
+
+
+
+###############################Post-processing############################################
     def outputChecker(self):
         """
         This method check if the name of the outputfile exists, if it already exists creates a
         new one with extension _new in its name.
 
         """
-        while True:
-            if os.path.isfile(self.outputpath + ".txt"):
-                logger.info("{0} file already exists, {0}_new was created".format(self.outputpath))
-                self.outputpath = "{}_new".format(self.outputpath)
-            else:
-                break
-        while True:
-            flag = False
-            for i in range(1, 10):
-                if os.path.isfile("{}_{}.txt".format(self.outputpath, i)):
-                    flag = True
-            if flag:
-                logger.info("{0}_{1} file already exists, {0}_new was created".format(self.outputpath, i))
-                self.outputpath = "{}_new".format(self.outputpath)
-            else:
-                break
+        if os.path.isfile(self.outputpath+".txt"):
+            logger.info("{0} file already exists, {0}_new was created".format(self.outputpath))
+            self.outputpath = "{}_new".format(self.outputpath)
+        #for i in range(1,10):
+        #    if os.path.isfile("{}_{}.txt".format(self.outputpath, i)):
+        #        logger.info("{0}_{1} file already exists, {0}_new was created".format(self.outputpath, i))
+        #        self.outputpath = "{}_new".format(self.outputpath)
         self.paramFiles()
 
         return True
@@ -881,7 +893,7 @@ class DriverMC:
             L is result of ParseDataset(datasets)
 
         """
-        cpars = self.L.freeParameters()
+        cpars   = self.L.freeParameters()
         parfile = self.outputpath + ".paramnames"
         fpar = open(parfile, 'w')
         for p in cpars:
@@ -890,12 +902,13 @@ class DriverMC:
             AD = AllDerived()
             for pd in AD.list:
                 fpar.write(pd.name + "\t\t\t" + pd.Ltxname + "\n")
-        if self.analyzername == 'mcmc' or (self.analyzername == 'nested' and self.engine == 'dynesty'):
+        if self.analyzername == 'mcmc' or (self.analyzername == 'nested' and self.engine=='dynesty'):
             if (self.L.name() == "Composite"):
                 self.sublikenames = self.L.compositeNames()
                 for name in self.sublikenames:
                     fpar.write(name + "_like \t\t\t" + name + "\n")
                 fpar.write("theory_prior \t\t\t None \n")
+
 
     def postprocess(self, summary=True, stats=False, addtxt=None):
         """
@@ -913,7 +926,7 @@ class DriverMC:
             self.result.extend(addtxt)
         if self.analyzername == 'nested':
             pp = PostProcessing(self.result, self.paramsList, self.outputpath,
-                                engine=self.engine, addDerived=self.addDerived, loglike=self.L)
+                engine=self.engine, addDerived=self.addDerived, loglike=self.L)
             if self.engine == 'nestle':
                 pp.saveNestedChain()
         elif self.analyzername == 'emcee':
@@ -940,7 +953,7 @@ class DriverMC:
             figure.simplex_vs_y(xlabel="iterations", ylabel="best fitness")
         return figure
 
-    # ### pool from multiprocessing
+# ### pool from multiprocessing
 
     def mppool(self, nproc):
         """
@@ -961,9 +974,10 @@ class DriverMC:
 
         """
         import multiprocessing as mp
+        from multiprocessing.pool import ThreadPool
         if nproc <= 0:
             ncores = mp.cpu_count()
-            nprocess = ncores // 2
+            nprocess = ncores//2
             logger.info("Using  {} processors of {}.".format(nprocess, ncores))
         elif nproc == 1:
             logger.info("Using 1 processor")
@@ -975,12 +989,15 @@ class DriverMC:
             logger.info("Using {} processors of {} .".format(nprocess, ncores))
 
         if nprocess != None:
-            pool = mp.Pool(processes=nprocess)
+                pool = mp.Pool(processes=nprocess)
 
         return pool, nprocess
 
-    # ### neural network to predict likelihoods functions
     def neuralLike(self, iniFile=None, **kwargs):
+        """
+        Under construction.
+        This method trains a neural network in order to learn the likelihood function.
+        """
         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
         self.outputpath = '{}_neuralike'.format(self.outputpath)
         if iniFile:
