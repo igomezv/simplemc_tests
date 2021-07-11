@@ -2,6 +2,8 @@ import os
 import numpy as np
 import time
 
+# TODO Optimize likelihood function before the grid 
+# TODO Generate the grid with a normal distribution centerd into the maximum of the likelihood
 
 class GridLikes:
     def __init__(self, like, pars_bounds, ndivs=5, pool=None, files_path='grid'):
