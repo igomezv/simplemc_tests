@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Likelihoods &mdash; SuperMC latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'latest',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Models" href="models.html" />
+    <link rel="prev" title="Run modules" href="Run.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SuperMC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#quick-start">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#general-flow">General flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samplers.html">Samplers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Toy Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Run.html"><strong>Run modules</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Likelihoods</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-likelihoods.BaseLikelihood">BaseLikelihood</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-likelihoods.CompositeLikelihood">CompositeLikelihood</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-likelihoods.LikelihoodMultiplier">LikelihoodMultiplier</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-likelihoods.CompressedSNLikelihood">CompressedSNLikelihood</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-likelihoods.CompressedGenericLikelihood">likelihoods.CompressedGenericLikelihood</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#others-modules-with-likelihoods">Others modules with likelihoods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html"><strong>Models</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="nested_samplers.html"><strong>Nested samplers</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html"><strong>Data</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotters.html"><strong>Plotters</strong></a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SuperMC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li><strong>Likelihoods</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/likelihoods.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="likelihoods">
+<h1><strong>Likelihoods</strong><a class="headerlink" href="#likelihoods" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li><strong>BaseLikelihood</strong> is the basic structure of the likelihoods objects.</li>
+<li><strong>CompositeLikelihood</strong> and <strong>LikelihoodMultiplier</strong> allow to create more complex probabilities from the combination of two or more.</li>
+</ul>
+</div>
+<div class="section" id="module-likelihoods.BaseLikelihood">
+<span id="baselikelihood"></span><h2>BaseLikelihood<a class="headerlink" href="#module-likelihoods.BaseLikelihood" title="Permalink to this headline">¶</a></h2>
+<p>This is the base likelihood object. Base for all other likelihoods.</p>
+<dl class="class">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood">
+<em class="property">class </em><code class="descclassname">likelihoods.BaseLikelihood.</code><code class="descname">BaseLikelihood</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.freeParameters">
+<code class="descname">freeParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.freeParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.freeParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the free parameters of the chosen model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.loglike_wprior">
+<code class="descname">loglike_wprior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.loglike_wprior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.loglike_wprior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.name">
+<code class="descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the Likelihood Object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.setTheory">
+<code class="descname">setTheory</code><span class="sig-paren">(</span><em>theory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.setTheory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.setTheory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the cosmological theory or other one</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.theory">
+<code class="descname">theory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.theory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.theory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.theory_loglike_prior">
+<code class="descname">theory_loglike_prior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.theory_loglike_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.theory_loglike_prior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.BaseLikelihood.BaseLikelihood.updateParams">
+<code class="descname">updateParams</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/BaseLikelihood.html#BaseLikelihood.updateParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.BaseLikelihood.BaseLikelihood.updateParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates parameters in each step of sampling</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-likelihoods.CompositeLikelihood">
+<span id="compositelikelihood"></span><h2>CompositeLikelihood<a class="headerlink" href="#module-likelihoods.CompositeLikelihood" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood">
+<em class="property">class </em><code class="descclassname">likelihoods.CompositeLikelihood.</code><code class="descname">CompositeLikelihood</code><span class="sig-paren">(</span><em>llist=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#likelihoods.BaseLikelihood.BaseLikelihood" title="likelihoods.BaseLikelihood.BaseLikelihood"><code class="xref py py-class docutils literal"><span class="pre">likelihoods.BaseLikelihood.BaseLikelihood</span></code></a></p>
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.addLikelihood">
+<code class="descname">addLikelihood</code><span class="sig-paren">(</span><em>like</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.addLikelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.addLikelihood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.addLikelihoods">
+<code class="descname">addLikelihoods</code><span class="sig-paren">(</span><em>likes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.addLikelihoods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.addLikelihoods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.compositeLogLikes">
+<code class="descname">compositeLogLikes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.compositeLogLikes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.compositeLogLikes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.compositeLogLikes_wprior">
+<code class="descname">compositeLogLikes_wprior</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.compositeLogLikes_wprior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.compositeLogLikes_wprior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.compositeNames">
+<code class="descname">compositeNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.compositeNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.compositeNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.loglike">
+<code class="descname">loglike</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.loglike"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.loglike" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="likelihoods.CompositeLikelihood.CompositeLikelihood.setTheory">
+<code class="descname">setTheory</code><span class="sig-paren">(</span><em>theory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompositeLikelihood.html#CompositeLikelihood.setTheory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompositeLikelihood.CompositeLikelihood.setTheory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-likelihoods.LikelihoodMultiplier">
+<span id="likelihoodmultiplier"></span><h2>LikelihoodMultiplier<a class="headerlink" href="#module-likelihoods.LikelihoodMultiplier" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="likelihoods.LikelihoodMultiplier.LikelihoodMultiplier">
+<code class="descclassname">likelihoods.LikelihoodMultiplier.</code><code class="descname">LikelihoodMultiplier</code><span class="sig-paren">(</span><em>LikeInstance</em>, <em>mult</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/LikelihoodMultiplier.html#LikelihoodMultiplier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.LikelihoodMultiplier.LikelihoodMultiplier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="examples">
+<h3>Examples:<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="module-likelihoods.CompressedSNLikelihood">
+<span id="compressedsnlikelihood"></span><h2>CompressedSNLikelihood<a class="headerlink" href="#module-likelihoods.CompressedSNLikelihood" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="likelihoods.CompressedSNLikelihood.BetouleSN">
+<em class="property">class </em><code class="descclassname">likelihoods.CompressedSNLikelihood.</code><code class="descname">BetouleSN</code><a class="reference internal" href="_modules/likelihoods/CompressedSNLikelihood.html#BetouleSN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedSNLikelihood.BetouleSN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#likelihoods.CompressedSNLikelihood.CompressedSNLikelihood" title="likelihoods.CompressedSNLikelihood.CompressedSNLikelihood"><code class="xref py py-class docutils literal"><span class="pre">likelihoods.CompressedSNLikelihood.CompressedSNLikelihood</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="likelihoods.CompressedSNLikelihood.CompressedSNLikelihood">
+<em class="property">class </em><code class="descclassname">likelihoods.CompressedSNLikelihood.</code><code class="descname">CompressedSNLikelihood</code><span class="sig-paren">(</span><em>name</em>, <em>values_filename</em>, <em>cov_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompressedSNLikelihood.html#CompressedSNLikelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedSNLikelihood.CompressedSNLikelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#likelihoods.BaseLikelihood.BaseLikelihood" title="likelihoods.BaseLikelihood.BaseLikelihood"><code class="xref py py-class docutils literal"><span class="pre">likelihoods.BaseLikelihood.BaseLikelihood</span></code></a></p>
+<dl class="method">
+<dt id="likelihoods.CompressedSNLikelihood.CompressedSNLikelihood.loglike">
+<code class="descname">loglike</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompressedSNLikelihood.html#CompressedSNLikelihood.loglike"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedSNLikelihood.CompressedSNLikelihood.loglike" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="likelihoods.CompressedSNLikelihood.UnionSN">
+<em class="property">class </em><code class="descclassname">likelihoods.CompressedSNLikelihood.</code><code class="descname">UnionSN</code><a class="reference internal" href="_modules/likelihoods/CompressedSNLikelihood.html#UnionSN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedSNLikelihood.UnionSN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#likelihoods.CompressedSNLikelihood.CompressedSNLikelihood" title="likelihoods.CompressedSNLikelihood.CompressedSNLikelihood"><code class="xref py py-class docutils literal"><span class="pre">likelihoods.CompressedSNLikelihood.CompressedSNLikelihood</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-likelihoods.CompressedGenericLikelihood">
+<span id="likelihoods-compressedgenericlikelihood"></span><h2>likelihoods.CompressedGenericLikelihood<a class="headerlink" href="#module-likelihoods.CompressedGenericLikelihood" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood">
+<em class="property">class </em><code class="descclassname">likelihoods.CompressedGenericLikelihood.</code><code class="descname">CompressedGenericLikelihood</code><span class="sig-paren">(</span><em>name</em>, <em>values_filename</em>, <em>cov_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompressedGenericLikelihood.html#CompressedGenericLikelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#likelihoods.BaseLikelihood.BaseLikelihood" title="likelihoods.BaseLikelihood.BaseLikelihood"><code class="xref py py-class docutils literal"><span class="pre">likelihoods.BaseLikelihood.BaseLikelihood</span></code></a></p>
+<dl class="method">
+<dt id="likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood.loglike">
+<code class="descname">loglike</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/likelihoods/CompressedGenericLikelihood.html#CompressedGenericLikelihood.loglike"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood.loglike" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="likelihoods.CompressedGenericLikelihood.GenericLikelihood">
+<em class="property">class </em><code class="descclassname">likelihoods.CompressedGenericLikelihood.</code><code class="descname">GenericLikelihood</code><a class="reference internal" href="_modules/likelihoods/CompressedGenericLikelihood.html#GenericLikelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#likelihoods.CompressedGenericLikelihood.GenericLikelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood" title="likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood"><code class="xref py py-class docutils literal"><span class="pre">likelihoods.CompressedGenericLikelihood.CompressedGenericLikelihood</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="others-modules-with-likelihoods">
+<h2>Others modules with likelihoods<a class="headerlink" href="#others-modules-with-likelihoods" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BAOLikelihoods</li>
+<li>GaussBAODVLikelihood</li>
+<li>TabulatedBAOLikelihood</li>
+<li>TabulatedBAODVLikelihood</li>
+<li>HubbleParameterLikelihood</li>
+<li>SimpleCMB</li>
+<li>WangWangCMB</li>
+<li>CompressedHDLikelihood</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="models.html" class="btn btn-neutral float-right" title="Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Run.html" class="btn btn-neutral float-left" title="Run modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, A Slosar, JA Vazquez, I Gomez-Vargas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

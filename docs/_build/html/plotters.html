@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Plotters &mdash; SuperMC latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'latest',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Data" href="data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SuperMC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#quick-start">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samplers.html">Samplers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Run.html"><strong>Run modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html"><strong>Likelihoods</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html"><strong>Models</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="nested_samplers.html"><strong>Nested samplers</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html"><strong>Data</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Plotters</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#plot-with-getdist">Plot with getdist:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plot-with-corner">Plot with corner:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plotter-class">Plotter class</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SuperMC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li><strong>Plotters</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/plotters.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="plotters">
+<h1><strong>Plotters</strong><a class="headerlink" href="#plotters" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="plot-with-getdist">
+<h2>Plot with getdist:<a class="headerlink" href="#plot-with-getdist" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<img alt="_images/LCDM_SN+HD_snest_0.6_getdist.png" src="_images/LCDM_SN+HD_snest_0.6_getdist.png" />
+</div>
+</div>
+<div class="section" id="plot-with-corner">
+<h2>Plot with corner:<a class="headerlink" href="#plot-with-corner" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<img alt="_images/LCDM_SN+HD_snest_0.6_corner.png" src="_images/LCDM_SN+HD_snest_0.6_corner.png" />
+</div>
+</div>
+<div class="section" id="plotter-class">
+<h2>Plotter class<a class="headerlink" href="#plotter-class" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>Plotter class</strong> reads the chains to draw with the chosen option.</p>
+<span class="target" id="module-py.Plotter"></span><dl class="class">
+<dt id="py.Plotter.Plotter">
+<em class="property">class </em><code class="descclassname">py.Plotter.</code><code class="descname">Plotter</code><span class="sig-paren">(</span><em>outputname</em>, <em>chainsdir</em>, <em>samplername</em>, <em>ndim</em>, <em>truths</em>, <em>weights</em>, <em>plottername</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class make plots with getdist or corner.</p>
+<dl class="method">
+<dt id="py.Plotter.Plotter.cornerPlotter">
+<code class="descname">cornerPlotter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter.cornerPlotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter.cornerPlotter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Corner method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="py.Plotter.Plotter.cosmichPlotter">
+<code class="descname">cosmichPlotter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter.cosmichPlotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter.cosmichPlotter" title="Permalink to this definition">¶</a></dt>
+<dd><p>cosmich plotter method</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="py.Plotter.Plotter.getdistPlotter">
+<code class="descname">getdistPlotter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter.getdistPlotter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter.getdistPlotter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getdist method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="py.Plotter.Plotter.readFile">
+<code class="descname">readFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter.readFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter.readFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method reads the samples and the .param file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="py.Plotter.Plotter.rootDirWithFile">
+<code class="descname">rootDirWithFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter.rootDirWithFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter.rootDirWithFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="py.Plotter.Plotter.showFig">
+<code class="descname">showFig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/py/Plotter.html#Plotter.showFig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#py.Plotter.Plotter.showFig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays the plots after the samples are generated.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, A Slosar, JA Vazquez, I Gomez-Vargas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

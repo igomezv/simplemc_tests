@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Requirements &mdash; SuperMC latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'latest',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Samplers" href="samplers.html" />
+    <link rel="prev" title="Welcome to SuperMC’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> SuperMC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#general-flow">General flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samplers.html">Samplers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Toy Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Run.html"><strong>Run modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="likelihoods.html"><strong>Likelihoods</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html"><strong>Models</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="nested_samplers.html"><strong>Nested samplers</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html"><strong>Data</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotters.html"><strong>Plotters</strong></a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SuperMC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Requirements</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<p>This code runs both in Python 2x and 3x. However, we highly recommend Python 3x.</p>
+<p>You need the following scientific modules:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo pip install numpy matplotlib scipy nestle
+</pre></div>
+</div>
+<p>In addition, MCEvidence is necessary to estimate the bayesian evidence in the Metropolis-Hastings sampler:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install git+https://github.com/yabebalFantaye/MCEvidence
+</pre></div>
+</div>
+<p>For use Artificial Neural Networks with multinest and ellipsoidal sampling (as in pyBAMBI), you need to install:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install tensorflow keras
+</pre></div>
+</div>
+<p>If you want to use the full options to plot:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install Pillow mpl_toolkits corner getdist
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>All in one copy-paste line:</p>
+<div class="last highlight-bash"><div class="highlight"><pre><span></span>pip install numpy matplotlib scipy nestle tensorflow keras Pillow mpl_toolkits corner getdist git+https://github.com/yabebalFantaye/MCEvidence
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>Create an <em>ini file</em> :</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>[DEFAULT]
+
+prefact = py ;[py, pre] only for Metropolis-Hastings
+
+chainsdir=chains
+
+priortype = u
+
+[custom]
+
+model = LCDM
+
+datasets = SN+HD+BBAO
+
+sampler = mnest
+
+nsamp = 5000
+
+nlivepoints = 800
+
+accuracy= 0.6
+
+skip = 0
+
+plotter= getdist
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Considerations:</p>
+<ul class="last">
+<li><p class="first"><em>prefact</em> and <em>nsamp</em> are only for Metropolis-Hastings.</p>
+</li>
+<li><p class="first"><em>nlivepoints</em> and <em>accuracy</em> are only for nested sampling.</p>
+</li>
+<li><p class="first"><em>sampler</em> options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>mh : Metropolis-Hastings.</li>
+<li>snest : Single Nested Sampling (Ellipsoidal Nested Sampling)</li>
+<li>mnest : MULTINEST</li>
+<li>sbambi : snest + Artificial Neural Network</li>
+<li>bambi : mnest + ANN</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><em>plotter</em> can be getdist, corner or cosmich.</p>
+</li>
+<li><p class="first"><em>skip</em> is burnin.</p>
+</li>
+<li><p class="first">For <em>priortype</em> u is uniform prior and g gaussian prior. At this time, only nested sampling accept both of them.</p>
+</li>
+<li><p class="first"><em>chainsdir</em> is the directory where the chains in a text file and the plots will be saved.</p>
+</li>
+</ul>
+</div>
+<p>Then you can run in the <em>SuperMC</em> directory:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>python Run/driver.py file.ini
+</pre></div>
+</div>
+<ul class="simple">
+<li>See the <a class="reference external" href="plotters.html">plots</a> .</li>
+</ul>
+</div>
+<div class="section" id="general-flow">
+<h1>General flow<a class="headerlink" href="#general-flow" title="Permalink to this headline">¶</a></h1>
+<div class="figure">
+<img alt="_images/SuperMCDiagram.png" src="_images/SuperMCDiagram.png" />
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="samplers.html" class="btn btn-neutral float-right" title="Samplers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to SuperMC’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, A Slosar, JA Vazquez, I Gomez-Vargas
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
