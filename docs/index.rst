@@ -1,105 +1,76 @@
-=======================================
-Welcome to SuperMC's documentation!
-=======================================
+===========
+SimpleMC
+===========
 
-.. figure:: img/canvas4.png
+**[Under construction]**
 
-   Temporary figure
+This is the ``SimpleMC`` documentation, a code for cosmological parameter estimation and model comparison using Bayesian inference, optimization and machine learning algorithms.
 
-
-
-About
--------------
-
-This is the documentation for SuperMC a bayesian code for cosmological parameter estimation and model comparison.
-
-* :doc:`First steps and installation <intro>`.
-
-* :doc:`Samplers and analyzers <samplers>` describes the samplers and analyzers in SuperMC.
-
-
-We have gathered great previous codes made by others and put them to work together in the cosmological context. In particular, we use the following codes:
-
-   * `SimpleMC <https://github.com/ja-vazquez/SimpleMC>`_ written by Anže Slosar and Jose Vazquez. This is the previous version of SuperMC and both have roughly the same structure.  
-   * `Nestle <http://kylebarbary.com/nestle/>`_ developed by Kyle Barbary. This contains Ellipsoidal Nested Sampling and Multinest.
-   * `MCEvidence <https://github.com/yabebalFantaye/MCEvidence>`_ by Yabebal Fantaye. This code allows us to estimate bayesian evidence since the chains produced by a Metropolis-Hastings. 
-   * `pyBambi <https://pybambi.readthedocs.io/en/latest/>`_ by Will Handley . We use the set of Neural Networks of this code to provide at the Nestle samplers to Neural Networks. 
-   * `Corner <https://corner.readthedocs.io/en/latest/index.html>`_ by Daniel Foreman-Mackey. This library is for create smooth corner plots. 
-   * `Getdist <https://getdist.readthedocs.io>`_ by Antony Lewis. A package for analysing and plotting Monte Carlo (or other) samples
-  
-
-
-Get SuperMC
--------------------------------
-
-* You can download the source code from the `GitHub code repository <https://github.com/igomezv/SuperMC>`_.
+You can visit the `GitHub code repository <https://github.com/ja-vazquez/SimpleMC.git>`_, download the `source code here <https://github.com/ja-vazquez/SimpleMC/archive/refs/heads/master.zip>`_ or clone it as follows:
 
    .. code-block:: bash
 
-      git clone https://github.com/igomezv/SuperMC.git
+      git clone https://github.com/ja-vazquez/SimpleMC.git
 
-* See the `requirements <intro.html>`_ .
+Please read the `introduction <intro.html>`_ section where you can see the `requirements <intro.html#requirements>`_  and a simple `quick start <intro.html#quick-start>`_.
 
-Citing SuperMC
--------------------------------
+In ``SimpleMC`` we use amazing external codes, please if you consider pertinent cite them, go to the `citation  section <Citation.html#cite-external-codes>`_ to details. 
 
-   * Vazquez, JA., Gómez-Vargas, I., & Slosar, A. (2019). SuperMC: A package for cosmological parameter estimation and model comparison.
-
-If you consider it pertinent, please also cite:
-
-   * For Ellipsoidal Nested Sampling (snest):
-
-      * `Mukherjee, P., Parkinson, D., & Liddle, A. R. (2006). A nested sampling algorithm for cosmological model selection. The Astrophysical Journal Letters, 638(2), L51.  <https://iopscience.iop.org/article/10.1086/501068/metal>`_
-
-   * For Multinest (mnest):
-
-      * `Feroz, F., Hobson, M. P., & Bridges, M. (2009). MultiNest: an efficient and robust Bayesian inference tool for cosmology and particle physics. Monthly Notices of the Royal Astronomical Society, 398(4), 1601-1614. <https://academic.oup.com/mnras/article/398/4/1601/981502>`_
-
-   * For Artificial Neural Networks in nested sampling (bambi):
-
-      * `Graff, P., Feroz, F., Hobson, M. P., & Lasenby, A. (2012). BAMBI: blind accelerated multimodal Bayesian inference. Monthly Notices of the Royal Astronomical Society, 421(1), 169-180. <https://academic.oup.com/mnras/article/421/1/169/989639>`_
-
-   * For MCEvidence:
-      
-      * `Heavens, A., Fantaye, Y., Mootoovaloo, A., Eggers, H., Hosenie, Z., Kroon, S., & Sellentin, E. (2017). Marginal Likelihoods from Monte Carlo Markov Chains. arXiv preprint arXiv:1704.03472. <https://arxiv.org/abs/1704.03472>`_
-
-   * If use Corner plots: 
-
-      * `Foreman-Mackey, D. (2016). corner: Scatterplot matrices in Python. The Journal of Open Source Software, 1. <https://joss.theoj.org/papers/10.21105/joss.00024#>`_
-
-   * If use Getdist:
-    
-      * `Lewis, A. (2019). GetDist: a Python package for analysing Monte Carlo samples. arXiv preprint arXiv:1910.13970. <https://arxiv.org/abs/1910.13970>`_
-
-
-
-Documentation:
-=================
+Index:
+-------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    intro
-
-   samplers
-
-   examples
-	
-   Run
-
-   likelihoods
-
-   models 
- 
-   nested_samplers
    
-   data    
+   inifile    
+
+   data
+
+   models
+
+   analyzers
 
    plotters
 
-Indices and tables
-==================
+   tutorials
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   Citation
+
+   API
+
+
+Changelog
+----------
+
+- **0.9.6 (7/06/2021)** Unify simple and generic models, test generic likelihood.
+- **0.9.5.8 (26/04/2021)** Quintom with coupling and curvature. Beta version of neuralike. Warnings for non-essential libraries.
+- **0.9.5.4 (21/03/2021)** Fixed parameter estimation problem in Summary of nested chains.
+- **0.9.5.2 (07/02/2021)** GA from deap working with fisher matrix for errors.
+- **0.9.5 (19/09/2020)** Test and fix bambi with modified dynesty.
+- **0.9.4 (25/06/2020)** Working on neutrinos. New models: logt, IBEG, anisotropic, brans-dickie. Maxanalizer and fisher working. 
+- **0.9.3.5 (05/06/2020)** SimpleMC Workshop via Zoom for ICF-UNAM
+- **0.9.3 (02/06/2020)** Fix typos and little errrors. DriverMC. Testing models and cosmology. Running and cleanning genetic functions.
+- **0.9.2 (23/04/2020)** adding modified dynesty. Postprocessing. Compressed data. GR for a single chain.
+- **0.9.1 (06/04/2020)** paralelise MCMC and added GR. Simple plots. Nested samplers. Updating hubble diagram to 31 points. 
+- **0.9.0 (28/11/2019)** Gelman-Rubin diagnostics for MCMCAnalyzer. Ini files. Generic models and likelihoods.
+- **0.8.9 (25/11/2019)** Moving likelihoods into a likelihoods folder and models on to models folder.
+- **0.8.7 (20/11/2019)** Adding HD and full JLA. Ordering directories.
+- **0.8.6 (20/08/2019)** Bug in the MCMC sampler.
+- **0.8.5 (29/04/2019)** Updated Lya likelihood to DR14.
+- **0.8.4 (23/03/2019)** python 3, towards eBOSS.
+- **0.8.3 (10/10/2017)** Added binned cosmology.
+- **0.8.2 (25/07/2017)** DR12 and DR14 data.
+- **0.8.1 (06/01/2016)** Added sampling test for demonstration of MCMC.
+- **0.8.0 (01/09/2014)** Initial version.
+
+
+TODO
+-----
+
+- Add more DE EoS for comparison, for example, in CPL (owaCDM).
+- Unify pybambi and nerualike. 
+- Neural networks methods with dynesty multiprocessing fails.
+
+
