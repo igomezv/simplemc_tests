@@ -16,15 +16,12 @@ Plot with corner:
 
 
 
-
 Plotter class
 ---------------
 
 The **Plotter class** reads the chains to draw with the chosen option.
 
-.. automodule:: py.Plotter
-    :members:
-    :undoc-members:
-    :show-inheritance:
+
+
 
 

@@ -1,110 +1,185 @@
+==================
+Introduction
+==================
+
+* :ref:`Requirements`
+
+* :ref:`Quick Start`
+
+* :ref:`General structure`
+
+
+After proper installation of the :ref:`requirements`, generally speaking, the steps to run ``SimpleMC``  are as follows: 1) configure an :ref:`ini file`, 2) read this in a :ref:`Python script`, 3) :ref:`run in terminal`, and 4) :ref:`analyze outputs`.
+
+The output chains of Bayesian inference algoritms (mcmc and nested) are text files that have the same structure as the `CosmoMC <https://cosmologist.info/cosmomc/>`_ chains consisting in:
+
+	- First column.- weights of the sampling method. 
+	- Second column.- log-likelihood function.
+	- Third to N+2 columns.- N free parameters of the cosmological model under analysis. 
+	- Last columns.- log-likelihood function per each type of data and derived parameters.
+
+In addition, two other output files are generated: a summary and a ``.paramnames`` file with the names of the free parameters of the cosmological model. 
+
+
+..  _requirements:
+
 Requirements
-=============
+-------------
 
-This code runs both in Python 2x and 3x. However, we highly recommend Python 3x.
+This code runs both in Python 2x and 3x. However, we highly recommend Python 3x. 
 
-You need the following scientific modules:
+Imperative libraries are:
 
 .. code-block:: bash
    
-   sudo pip install numpy matplotlib scipy nestle 
+   sudo pip install numpy matplotlib scipy 
 
 
-In addition, MCEvidence is necessary to estimate the bayesian evidence in the Metropolis-Hastings sampler:
+Only if you want to use EMCEE sampler: 
+
+.. code-block:: bash
+   
+   sudo pip install emcee
+
+
+Optionally, MCEvidence is necessary to estimate the bayesian evidence in the Metropolis-Hastings sampler:
 
 .. code-block:: bash
    
    pip install git+https://github.com/yabebalFantaye/MCEvidence
 
-For use Artificial Neural Networks with multinest and ellipsoidal sampling (as in pyBAMBI), you need to install:
+To use Artificial Neural Networks with nested sampling or to learn likelihood functions, you need to install:
 
 .. code-block:: bash
    
    pip install tensorflow keras
 
-
-If you want to use the full options to plot:
+To use genetic algorithms in order to maximize the Likelihood function:
 
 .. code-block:: bash
    
-   pip install Pillow mpl_toolkits corner getdist
+   pip install deap
+
+
+If you want the full options to plot:
+
+.. code-block:: bash
+   
+   pip install corner getdist
+
 
 .. note:: All in one copy-paste line: 
 
    .. code-block:: bash
    
-      pip install numpy matplotlib scipy nestle tensorflow keras Pillow mpl_toolkits corner getdist git+https://github.com/yabebalFantaye/MCEvidence
+      pip install numpy matplotlib scipy tensorflow keras corner getdist deap git+https://github.com/yabebalFantaye/MCEvidence
 
-
-
-Quick Start
-============
-
-Create an *ini file* :
-
-.. code-block:: none
-
-   [DEFAULT]
-
-   prefact = py ;[py, pre] only for Metropolis-Hastings
-
-   chainsdir=chains 
-
-   priortype = u    
-
-   [custom]
- 
-   model = LCDM 
- 
-   datasets = SN+HD+BBAO 
- 
-   sampler = mnest 
-
-   nsamp = 5000
-   
-   nlivepoints = 800 
-   
-   accuracy= 0.6 
-   
-   skip = 0 
-
-   plotter= getdist 
-
-.. note::
-
-   Considerations:
-  
-   * *prefact* and *nsamp* are only for Metropolis-Hastings.
-
-   * *nlivepoints* and *accuracy* are only for nested sampling.
-
-   * *sampler* options are:
-   
-      * mh : Metropolis-Hastings.
-      * snest : Single Nested Sampling (Ellipsoidal Nested Sampling)
-      * mnest : MULTINEST
-      * sbambi : snest + Artificial Neural Network
-      * bambi : mnest + ANN
-
-   * *plotter* can be getdist, corner or cosmich.
-
-   * *skip* is burnin. 
-  
-   * For *priortype* u is uniform prior and g gaussian prior. At this time, only nested sampling accept both of them.
-   
-   * *chainsdir* is the directory where the chains in a text file and the plots will be saved.
-
-Then you can run in the *SuperMC* directory:
+To run MCMC analyzer (Metropolis-Hastings) in parallel you need to have `MPI <https://www.open-mpi.org/>`_  in your computer and then install the Python library:
 
 .. code-block:: bash
    
-   python Run/driver.py file.ini
+   pip install mpi4py
 
-* See the `plots <plotters.html>`_ .
+this requirement is not necessary if you want to use nested sampling or optimization algorithms.
+
+..  _Quick Start:
+
+Quick Start
+------------
+
+In this section we show a basic four steps to use ``SimpleMC``:
+
+1. Set an :ref:`ini file`.
+2. Read the configuration in a :ref:`Python script`.
+3. Then :ref:`run in terminal`. 
+4. Finally :ref:`analyze outputs`. 
 
 
-General flow
-=============
+..  _ini file:
 
-.. figure:: /img/SuperMCDiagram.png
+ini file
+***********
 
+
+The ``ini file`` has all the necessary options to ``SimpleMC``, the mandatory options are in the ``[custom]`` section, the rest have default values corresponding to specific analyzers and you can modify them accordingly with your needs  (see `Customize inifile <inifile.html>`_ or  `baseConfig <inifile.html#baseconfig-ini>`_.ini file for more information).
+
+The ``[custom]`` section has the following structure:
+
+.. code-block::
+
+        [custom]
+
+        chainsdir = chains
+        
+        model = LCDM
+        
+        datasets = BBAO+HD+SN
+
+        analyzer = mcmc
+
+
+you must choose an existing directory to save the outputs (chains, summary, and .paramnames). The options for model, datasets and analyzer are as follows:
+
+.. note::
+
+	* model: visit `Models section <models.html>`_ to see the options.
+
+	* analyzer options: 
+		* mcmc, nested, emcee, MaxLikeAnalyzer, genetic, ga_deap
+
+	* data options (you can combine any of them): visit `Data section <data.html>`_ to see the options.
+
+
+..  _Python script:
+
+Python script
+*************
+
+We can use ``test.py`` with the path of the ``ini file``:
+
+.. code-block:: python
+   
+   from simplemc.DriverMC import DriverMC
+   
+   fileConfig = "path/baseConfig.ini"
+   D = DriverMC(fileConfig)
+
+
+..  _run in terminal:
+
+run in terminal
+****************
+
+For last, run in the terminal:
+
+.. code-block:: bash
+   
+   $ python test.py
+
+To run multiple MCMC (Metropolis-Hastings) chains in parallel:
+
+.. code-block:: bash
+   
+   mpirun -np 4 python test.py
+
+where 4 is the number of chains and the number of processors.  
+
+..  _analyze outputs:
+
+analyze outputs
+****************
+
+You can see the outputs in the chains directory and then make plots. See the `plots <plotters.html>`_ section for details. The name of the outputs begins with the name of the model, prefact (pre / phy), datasets and analyzer, for the example of the above ``ini file``: ``LCDM_phy_BBAO+HD+SN_mcmc``.
+
+In addition to the chain file, it is a summary where you can notice the parameter estimation, the execution time and in the case of nested sampling, the Bayesian evidence, useful for the comparison of models. 
+
+
+
+..  _General structure:
+
+General structure
+------------------
+
+The interconnection between the modules in ``SimpleMC`` can be seen in the following diagram: 
+
+.. figure:: /img/simplemc.png
