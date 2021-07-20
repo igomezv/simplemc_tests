@@ -1,7 +1,24 @@
-Toy Models
-=============
+===========
+Examples
+===========
 
-examples.toyModels
+.. TestPlot
+.. -----------------
+.. .. automodule:: examples.TestPlot
+..     :members:
+..     :undoc-members:
+..     :show-inheritance:
+
+.. toyModels
+.. -----------------
+.. .. automodule:: examples.toyModels
+..     :members:
+..     :undoc-members:
+..     :show-inheritance:
+
+
+
+Toy Models
 --------------------
 
 In the directory **SuperMC/Run** you can run a set of toy models in order to test the nested samplers. 
@@ -33,3 +50,4 @@ Other toy models:
 
 
 .. figure:: img/toymodels.png
+

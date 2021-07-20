@@ -46,8 +46,8 @@ for mod_name in MOCK_MODULES:
 
 # -- Project information -----------------------------------------------------
 
-project = 'SuperMC'
-copyright = '2019, A Slosar, JA Vazquez, I Gomez-Vargas'
+project = 'SimpleMC'
+copyright = '2021, A Slosar, JA Vazquez, I Gomez-Vargas'
 author = 'A Slosar, JA Vazquez, I Gomez-Vargas'
 
 # The short X.Y version
@@ -138,7 +138,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'SuperMCdoc'
+htmlhelp_basename = 'SimpleMCdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -165,7 +165,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'SuperMC.tex', 'SuperMC Documentation',
+    (master_doc, 'SimpleMC.tex', 'SimpleMC Documentation',
      'A Slosar, JA Vazquez', 'manual'),
 ]
 
@@ -175,7 +175,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'supermc', 'SuperMC Documentation',
+    (master_doc, 'simplemc', 'SimpleMC Documentation',
      [author], 1)
 ]
 
@@ -186,8 +186,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'SuperMC', 'SuperMC Documentation',
-     author, 'SuperMC', 'One line description of project.',
+    (master_doc, 'SimpleMC', 'SimpleMC Documentation',
+     author, 'SimpleMC', 'One line description of project.',
      'Miscellaneous'),
 ]
 

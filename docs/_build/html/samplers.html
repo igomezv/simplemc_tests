@@ -1,51 +1,46 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Samplers &mdash; SuperMC latest documentation</title>
+  <title>Samplers &mdash; SimpleMC latest documentation</title>
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'latest',
-              LANGUAGE:'None',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Toy Models" href="examples.html" />
-    <link rel="prev" title="Requirements" href="intro.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -59,7 +54,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> SuperMC
+            <a href="index.html" class="icon icon-home"> SimpleMC
           
 
           
@@ -86,6 +81,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -93,25 +89,22 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="intro.html#quick-start">Quick Start</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Samplers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#sampler-comparison">Sampler comparison</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Toy Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Run.html"><strong>Run modules</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="likelihoods.html"><strong>Likelihoods</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html"><strong>Models</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="nested_samplers.html"><strong>Nested samplers</strong></a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inifile.html">Customize ini file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html"><strong>Data</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html"><strong>Models</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzers.html"><strong>Analyzers</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plotters.html"><strong>Plotters</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -121,7 +114,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">SuperMC</a>
+          <a href="index.html">SimpleMC</a>
         
       </nav>
 
@@ -146,18 +139,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Samplers</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/samplers.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -176,39 +171,39 @@
 <p>SuperMC contains the nest samplers:</p>
 <blockquote>
 <div><ul class="simple">
-<li><dl class="first docutils">
-<dt>Metropolis-Hastings.</dt>
-<dd>It is implemented in the <strong>MCMCAnalyzer class</strong>.</dd>
+<li><dl class="simple">
+<dt>Metropolis-Hastings.</dt><dd><p>It is implemented in the <strong>MCMCAnalyzer class</strong>.</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>Ellipsoidal Nested Sampling.</dt>
-<dd><a class="reference external" href="https://iopscience.iop.org/article/10.1086/501068/metal">Mukherjee, P., Parkinson, D., &amp; Liddle, A. R. (2006). A nested sampling algorithm for cosmological model selection. The Astrophysical Journal Letters, 638(2), L51.</a>.</dd>
+<li><dl class="simple">
+<dt>Ellipsoidal Nested Sampling.</dt><dd><p><a class="reference external" href="https://iopscience.iop.org/article/10.1086/501068/metal">Mukherjee, P., Parkinson, D., &amp; Liddle, A. R. (2006). A nested sampling algorithm for cosmological model selection. The Astrophysical Journal Letters, 638(2), L51.</a>.</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>MULTINEST</dt>
-<dd><a class="reference external" href="https://academic.oup.com/mnras/article/398/4/1601/981502">Feroz, F., Hobson, M. P., &amp; Bridges, M. (2009). MultiNest: an efficient and robust Bayesian inference tool for cosmology and particle physics. Monthly Notices of the Royal Astronomical Society, 398(4), 1601-1614.</a>.</dd>
+<li><dl class="simple">
+<dt>MULTINEST</dt><dd><p><a class="reference external" href="https://academic.oup.com/mnras/article/398/4/1601/981502">Feroz, F., Hobson, M. P., &amp; Bridges, M. (2009). MultiNest: an efficient and robust Bayesian inference tool for cosmology and particle physics. Monthly Notices of the Royal Astronomical Society, 398(4), 1601-1614.</a>.</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>BAMBI = MULTINEST + Artificial Neural Networks.</dt>
-<dd><a class="reference external" href="https://academic.oup.com/mnras/article/421/1/169/989639">Graff, P., Feroz, F., Hobson, M. P., &amp; Lasenby, A. (2012). BAMBI: blind accelerated multimodal Bayesian inference. Monthly Notices of the Royal Astronomical Society, 421(1), 169-180.</a>.</dd>
+<li><dl class="simple">
+<dt>BAMBI = MULTINEST + Artificial Neural Networks.</dt><dd><p><a class="reference external" href="https://academic.oup.com/mnras/article/421/1/169/989639">Graff, P., Feroz, F., Hobson, M. P., &amp; Lasenby, A. (2012). BAMBI: blind accelerated multimodal Bayesian inference. Monthly Notices of the Royal Astronomical Society, 421(1), 169-180.</a>.</p>
+</dd>
 </dl>
 </li>
-<li>Ellipsoidal Nested Sampling with Artificial Neural Networks</li>
+<li><p>Ellipsoidal Nested Sampling with Artificial Neural Networks</p></li>
 </ul>
 </div></blockquote>
 <p>Also, for a previous quickly test, SuperMC have <strong>MaxAnalyzer</strong> that analyze the most probably values of the parameters.</p>
 <div class="section" id="sampler-comparison">
 <h2>Sampler comparison<a class="headerlink" href="#sampler-comparison" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">To verify the consistency of the parameter estimation among the different samplers available, we have made the following graph.</p>
+<p class="admonition-title">Note</p>
+<p>To verify the consistency of the parameter estimation among the different samplers available, we have made the following graph.</p>
 </div>
-<div class="figure" id="id1">
+<div class="figure align-default" id="id1">
 <img alt="_images/samplersTriangle.png" src="_images/samplersTriangle.png" />
-<p class="caption"><span class="caption-text">We estimates the posteriors of the parameters of the owaCDM model (dark energy with timedependent equation-of-state in a model of unknown curvature) using Supernovae type Ia, Cosmic Chronometers (Hubble Distance) and BAO .</span></p>
+<p class="caption"><span class="caption-text">We estimates the posteriors of the parameters of the owaCDM model (dark energy with timedependent equation-of-state in a model of unknown curvature) using Supernovae type Ia, Cosmic Chronometers (Hubble Distance) and BAO .</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 </div>
@@ -218,29 +213,25 @@
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="examples.html" class="btn btn-neutral float-right" title="Toy Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="intro.html" class="btn btn-neutral float-left" title="Requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, A Slosar, JA Vazquez, I Gomez-Vargas
+        &#169; Copyright 2021, A Slosar, JA Vazquez, I Gomez-Vargas.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -248,7 +239,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
