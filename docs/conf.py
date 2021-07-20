@@ -20,31 +20,10 @@ a = os.getcwd()
 rootdir =  os.path.dirname(a)
 
 print(rootdir)
-#sys.path.append(rootdir)
+sys.path.append(rootdir)
 sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../..'))
 
-import mock
- 
-#MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate']
-
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'numpy.random', 'corner', 'getdist'\
-				,'scipy.special', 'mpl_toolkits.mplot3d', 'nestle', 'math','scipy'\
-				,'PIL', 'kerasnet', 'keras.models', 'keras.layers','scipy.integrate'\
-				, 'keras.callbacks', 'keras.layers.normalization','keras', 'MCEvidence', 'emcee', 'scipy.integrate'\
-				,'scipy.interpolate', 'scipy.linalg', 'scipy.optimize', 'scipy.arange','bambi','pybambimanager'\
-                ,'numdifftools','pandas','initializer','NuDensity','ParamDefs','CosmoApprox','ParamDefs','GenericParamDefs'\
-                'RunBase']
-
-
-
-
-for mod_name in MOCK_MODULES:
-	sys.modules[mod_name] = mock.Mock()
-
-
-
-# -- Project information -----------------------------------------------------
 
 project = 'SimpleMC'
 copyright = '2021, A Slosar, JA Vazquez, I Gomez-Vargas'
@@ -187,7 +166,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'SimpleMC', 'SimpleMC Documentation',
-     author, 'SimpleMC', 'One line description of project.',
+     author, 'SimpleMC', 'Cosmological parameter estimation.',
      'Miscellaneous'),
 ]
 
