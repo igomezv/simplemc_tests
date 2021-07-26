@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorials &mdash; SuperMC latest documentation</title>
+  <title>Requirements &mdash; SimpleMC latest documentation</title>
   
 
   
@@ -54,7 +54,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> SuperMC
+            <a href="index.html" class="icon icon-home"> SimpleMC
           
 
           
@@ -91,12 +91,11 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="inifile.html">Customize ini file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html"><strong>Data</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html"><strong>Models</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="analyzers.html"><strong>Analyzers</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotters.html"><strong>Plotters</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html"><strong>Structure</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html"><strong>Tools</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
 </ul>
 
             
@@ -112,7 +111,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">SuperMC</a>
+          <a href="index.html">SimpleMC</a>
         
       </nav>
 
@@ -145,13 +144,13 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Tutorials</li>
+      <li>Requirements</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/tutorials (copy).rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/requirements.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -164,13 +163,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="tutorials">
-<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Toy Models</a></li>
-</ul>
+  <div class="section" id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<p>This code runs both in Python 2x and 3x. However, we highly recommend Python 3x.</p>
+<p>Imperative libraries are:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip install numpy matplotlib scipy
+</pre></div>
 </div>
+<p>Only if you want to use EMCEE sampler:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip install emcee
+</pre></div>
+</div>
+<p>Optionally, MCEvidence is necessary to estimate the bayesian evidence in the Metropolis-Hastings sampler:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/yabebalFantaye/MCEvidence
+</pre></div>
+</div>
+<p>To use Artificial Neural Networks with nested sampling or to learn likelihood functions, you need to install:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install tensorflow keras
+</pre></div>
+</div>
+<p>To use genetic algorithms in order to maximize the Likelihood function:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install deap
+</pre></div>
+</div>
+<p>If you want the full options to plot:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install corner getdist
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All in one copy-paste line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install numpy matplotlib scipy tensorflow keras corner getdist deap git+https://github.com/yabebalFantaye/MCEvidence
+</pre></div>
+</div>
+</div>
+<p>To run MCMC analyzer (Metropolis-Hastings) in parallel you need to have <a class="reference external" href="https://www.open-mpi.org/">MPI</a>  in your computer and then install the Python library:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install mpi4py
+</pre></div>
+</div>
+<p>this requirement is not necessary if you want to use nested sampling or optimization algorithms.</p>
 </div>
 
 
@@ -183,7 +214,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2019, A Slosar, JA Vazquez, I Gomez-Vargas.
+        &#169; Copyright 2021, A Slosar, JA Vazquez, I Gomez-Vargas.
 
     </p>
   </div>

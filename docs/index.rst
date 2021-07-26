@@ -24,15 +24,9 @@ Index:
 
    intro
    
-   inifile    
+   structure
 
-   data
-
-   models
-
-   analyzers
-
-   plotters
+   tools
 
    tutorials
 
