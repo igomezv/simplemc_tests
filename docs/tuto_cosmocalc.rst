@@ -2,7 +2,6 @@
 ============================
 
 
-
 ``SimpleMC`` has a cosmological calculator that allows to estimate several cosmological quantities given a model. This calculator is contained in the `CosmoCalc class <_modules/simplemc/CosmoCalc.html#CosmoCalc>`_.
 
 Between the options to cosmological functions there are the Hubble parameter, BAO distances, :math:`f \sigma_8(z)`, the age of the Universe and distance modulus.

@@ -1,23 +1,23 @@
-**Plotters**
-=============
+Plot the outputs
+=================
 
+[Section in process...]
 
-
-Plot with getdist:
--------------------
+With getdist:
+-------------
 
 .. figure:: img/LCDM_SN+HD_snest_0.6_getdist.png
 
 
-Plot with corner:
-------------------
+With Corner:
+---------------
 
 .. figure:: img/LCDM_SN+HD_snest_0.6_corner.png
 
 
 
-Plotter class
----------------
+With Plotter class
+------------------
 
 The **Plotter class** reads the chains to draw with the chosen option.
 

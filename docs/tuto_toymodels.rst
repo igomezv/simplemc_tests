@@ -2,6 +2,7 @@
 Toy models
 ===========
 
+[Section in process...]
 
 In the directory **simplemc** you can run a set of toy models in order to test the nested samplers. 
 
