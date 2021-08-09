@@ -11,3 +11,8 @@ Any question or suggestion please contact me.
 TO DO:
 
 - Summary to MCMC 
+- ga_deap options in ini file.
+- Summary to MCMCAnalyzer
+- Add more DE EoS for comparison, for example, in CPL (owaCDM).
+- Unify pybambi and nerualike.
+- Neural networks methods with dynesty multiprocessing fails. 
