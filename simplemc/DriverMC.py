@@ -84,6 +84,7 @@ class DriverMC:
             self.analyzername = kwargs.pop('analyzername', None)
             self.addDerived   = kwargs.pop('addDerived', False)
             self.useNeuralLike = kwargs.pop('useNeuralLike', False)
+            self.mcevidence = kwargs.pop('mcevidence', False)
 
 
             ## Next two are for custom model
@@ -192,6 +193,7 @@ class DriverMC:
         self.varys8       = self.config.getboolean( 'custom', 'varys8',       fallback=False)
         self.addDerived   = self.config.getboolean( 'custom', 'addDerived',   fallback=False)
         self.useNeuralLike = self.config.getboolean('custom', 'useNeuralLike', fallback=False)
+        self.mcevidence = self.config.getboolean('custom', 'mcevidence', fallback=False)
 
         self.custom_parameters = self.config.get(   'custom', 'custom_parameters', fallback=None)
         self.custom_function   = self.config.get(   'custom', 'custom_function',   fallback=None)
@@ -270,21 +272,8 @@ class DriverMC:
 
         self.ttime = time.time() - ti
 
-        #Compute Bayesian Evidence
-        if evidence:
-            try:
-                from MCEvidence import MCEvidence
-                logger.info("Aproximating bayesian evidence with MCEvidence (arXiv:1704.03472)\n")
-                MLE = MCEvidence(self.outputpath + ".txt" ).evidence()
-                self.result = ['mcmc', M, "Evidence with MCEvidence : {}\n".format(MLE), strresult]
-            except:
-                #writeSummary(self.chainsdir, outputname, ttime)
-                # print("Warning!")
-                # print("MCEvidence could not calculate the Bayesian evidence [very small weights]\n")
-                logger.error("MCEvidence could not calculate the Bayesian evidence [very small weights]")
-        else:
-            self.result = ['mcmc', M.get_results()[:2], "Maxlike: {}".format(M.maxloglike),
-                           "Gelman-Rubin diagnostic: {}".format(M.get_results()[2])]
+        self.result = ['mcmc', M.get_results()[:2], "Maxlike: {}".format(M.maxloglike),
+                       "Gelman-Rubin diagnostic: {}".format(M.get_results()[2])]
 
         return True
 
@@ -867,6 +856,7 @@ class DriverMC:
         new one with extension _new in its name.
 
         """
+        self.paramFiles()
         i = 1
         f_unique = False
         while f_unique is False:
@@ -877,9 +867,6 @@ class DriverMC:
                 self.outputpath = "{}_{}".format(self.outputpath, i)
                 logger.info("{}.txt was created".format(self.outputpath))
                 f_unique = True
-
-        self.paramFiles()
-
         return True
 
     def paramFiles(self):
@@ -896,7 +883,7 @@ class DriverMC:
 
         """
         cpars   = self.L.freeParameters()
-        parfile = "{}/{}.paramnames".format(self.chainsdir, self.root)
+        parfile = "{}.paramnames".format(self.outputpath)
         fpar = open(parfile, 'w')
         for p in cpars:
             fpar.write(p.name + "\t\t\t" + p.Ltxname + "\n")
@@ -928,7 +915,15 @@ class DriverMC:
             self.result.extend(addtxt)
         pp = PostProcessing(self.result, self.paramsList, self.outputpath,
                             addDerived=self.addDerived, loglike=self.L)
-        pp.writeSummary(self.ttime)
+        if self.mcevidence:
+            try:
+                ev = pp.mcevidence()
+                pp.writeSummary(self.ttime, ev)
+            except:
+                pp.writeSummary(self.ttime)
+        else:
+            pp.writeSummary(self.ttime)
+
 
     def plot(self, show=False):
         """
