@@ -741,10 +741,8 @@ class DriverMC:
         self.paramFiles()
         i = 1
         if self.overwrite:
-            if self.analyzername == 'mcmc':
-                self.outputpath = "{}".format(self.outputpath)
-            else:
-                self.outputpath = "{}_1".format(self.outputpath)
+            self.outputpath = "{}".format(self.outputpath)
+
 
         else:
             filename_re = '{self.outputpath}_\d.txt'
