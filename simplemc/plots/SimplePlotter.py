@@ -4,6 +4,8 @@ from simplemc.plots.Simple_Plots import Simple_plots
 import matplotlib.pyplot as plt
 import numpy as np
 import webbrowser
+# ToDo clean
+
 
 class SimplePlotter:
     def __init__(self, chainsdir, listpars, path=None, root=None, show=False, weights=None):
@@ -17,8 +19,6 @@ class SimplePlotter:
         self.ndim = len(listpars)
         self.show = show
         self.weights = weights
-
-
 
     def simpleGetdist(self, **kwargs):
         """
@@ -54,7 +54,6 @@ class SimplePlotter:
 
         self.image = "{}_getdist.png".format(self.filename)
         self.saveFig(label)
-
 
     def simpleCorner(self, **kwargs):
         """
@@ -183,8 +182,6 @@ class SimplePlotter:
         self.image = "{}_{}_vs_{}.png".format(self.filename, xlabel, ylabel)
         self.saveFig()
 
-
-
     def readFile(self):
         """
          This method reads the samples and the .param file.
@@ -204,8 +201,6 @@ class SimplePlotter:
             npchain = np.loadtxt(self.filename + '_1.txt')
 
         self.samples = npchain[:, 2:self.ndim + 2]
-
-
 
     def saveFig(self, label=None):
         if label is not None:
