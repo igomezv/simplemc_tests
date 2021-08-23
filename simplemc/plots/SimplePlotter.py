@@ -4,7 +4,6 @@ from simplemc.plots.Simple_Plots import Simple_plots
 import matplotlib.pyplot as plt
 import numpy as np
 import webbrowser
-# ToDo clean
 
 
 class SimplePlotter:
@@ -126,7 +125,7 @@ class SimplePlotter:
         """
         Native simplemc plotter
         """
-        from simplemc.tools.Simple_Plots import Simple_plots
+        from simplemc.plots.Simple_Plots import Simple_plots
         type = kwargs.pop('type', 'triangle')
         roots = kwargs.pop('roots', [self.root])
         nchains = kwargs.pop('nchains', None)
