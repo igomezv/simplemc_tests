@@ -129,7 +129,7 @@ class PostProcessing:
         return '\nlog-Evidence with mcevidence: {}\n' \
                    'Burn-in fraction: {:.1}\n'.format(mcevres, burn_frac)
 
-    def plot(self, show=False):
+    def plot(self, chainsdir, show=False):
         """
         Simple connection with the plotters.
 
@@ -139,6 +139,6 @@ class PostProcessing:
             Default False
         """
         from .plots.SimplePlotter import SimplePlotter
-        figure = SimplePlotter(self.chainsdir, self.paramsList, path=self.outputpath, show=show)
+        figure = SimplePlotter(chainsdir, self.paramList, path=self.filename, show=show)
 
         return figure
