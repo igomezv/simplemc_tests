@@ -27,10 +27,10 @@ class SimplePlotter:
         from getdist import plots, MCSamples, chains
         smooth2d = kwargs.pop("smooth2d", 0.3)
         smooth1d = kwargs.pop("smooth1d", 0.3)
-        burnin = kwargs.pop("burnin", 0.2)
+        burnin = kwargs.pop("burnin", 0.1)
         colors = kwargs.pop("colors", ['red', 'blue', 'black', 'green', 'yellow', 'purple', 'gray'])
         legend_labels = kwargs.pop("legend_labels", [])
-        filled = kwargs.pop("filled", False)
+        filled = kwargs.pop("filled", True)
         normalized = kwargs.pop("normalized", False)
         shaded = kwargs.pop("shaded", False)
         label = kwargs.pop("label", None)
