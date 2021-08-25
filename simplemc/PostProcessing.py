@@ -100,12 +100,12 @@ class PostProcessing:
         file.write('\nElapsed time: {:.3f} minutes = {:.3f} seconds \n'.format(time / 60, time))
         file.close()
 
-    def mcevidence(self):
+    def mcevidence(self, k):
         if self.analyzername not in ['mcmc', 'nested', 'emcee']:
             sys.exit('MCEvidence only work on Bayesian samplers (mcmc, nested, '
                      'emcee) not in optimizers')
 
-        mcev = MCEvidence('{}'.format(self.filename))
+        mcev = MCEvidence('{}'.format(self.filename), kmax=k)
         mcevres = mcev.evidence(covtype='all')
 
         burn_frac = 0.0
@@ -118,7 +118,7 @@ class PostProcessing:
                 burn_frac += 0.1
                 logger.info("Burn-in: {}%".format(burn_frac*100))
                 mcev = MCEvidence('{}'.format(self.filename),
-                                  burnlen=burn_frac)
+                                  burnlen=burn_frac, kmax=k)
 
                 mcevres = mcev.evidence(covtype='all')
                 if not (mcevres == np.inf).all():
