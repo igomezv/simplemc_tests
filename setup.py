@@ -27,8 +27,7 @@ class PyTest(TestCommand):
 
 
 desc = open("README.rst").read()
-required = ["numpy", "emcee", "scipy", "nestle", "keras", "tensorflow", "matplotlib", 
-            "corner", "getdist"]
+required = ["numpy", "scipy", "keras", "tensorflow", "matplotlib", "corner", "getdist"]
 test_requires = ["mock"]
 
 PACKAGE_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
