@@ -47,10 +47,7 @@ setup(
     include_package_data=True,
     package_data={"": ["LICENSE"],
     			  'simplemc':['Makefile'],
-                  'data': ['data/*.dat'],
-                  'data': ['data/*.txt'],
-                  'data': ['data/*.scan'],
-                  'data': ['data/*.02']
+                  'data': ['data/*.dat', 'data/*.txt', 'data/*.scan', 'data/*.02']
                   },
     keywords=["SimpleMC",
               "parameter estimation",
@@ -60,7 +57,7 @@ setup(
               "MCMC"],
     cmdclass = {'test': PyTest},
     classifiers=[
-        "Development Status :: 2 - Beta",
+        "Development Status :: 0.9.2 - Beta",
         "Intended Audience :: Science/Research",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
