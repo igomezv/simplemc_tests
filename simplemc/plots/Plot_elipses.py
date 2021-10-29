@@ -3,6 +3,7 @@ from matplotlib.patches import Ellipse
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def plot_elipses(best, cov, par1, par2, ax=None, contour_col='g',
                  axis_sty='-r', lw=4, label='Fisher', addtxt=None):
             #fig = plt.figure(figsize=(6,6))

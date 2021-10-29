@@ -115,7 +115,7 @@ class CosmoCalc:
         if self.savepdf: plt.savefig('sm_{}_{}.pdf'.format(self.model, self.funct))
         plt.show()
         return fig
-        
+
 
     def selec_data(self, name):
         D = Data_plots()

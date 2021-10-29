@@ -19,6 +19,8 @@ class SimplePlotter:
         self.show = show
         self.weights = weights
 
+
+
     def simpleGetdist(self, **kwargs):
         """
         Lewis (2019)
@@ -53,6 +55,7 @@ class SimplePlotter:
 
         self.image = "{}_getdist.png".format(self.filename)
         self.saveFig(label)
+
 
     def simpleCorner(self, **kwargs):
         """
@@ -125,7 +128,6 @@ class SimplePlotter:
         """
         Native simplemc plotter
         """
-        from simplemc.plots.Simple_Plots import Simple_plots
         type = kwargs.pop('type', 'triangle')
         roots = kwargs.pop('roots', [self.root])
         nchains = kwargs.pop('nchains', None)
@@ -181,6 +183,8 @@ class SimplePlotter:
         self.image = "{}_{}_vs_{}.png".format(self.filename, xlabel, ylabel)
         self.saveFig()
 
+
+
     def readFile(self):
         """
          This method reads the samples and the .param file.
@@ -200,6 +204,8 @@ class SimplePlotter:
             npchain = np.loadtxt(self.filename + '_1.txt')
 
         self.samples = npchain[:, 2:self.ndim + 2]
+
+
 
     def saveFig(self, label=None):
         if label is not None:
