@@ -7,10 +7,8 @@ import os
 os.path = ["simplemc"] + os.path
 try:
     from setuptools import setup, Extension
-    setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
-    setup, Extension
 
 from setuptools.command.test import test as TestCommand
 
