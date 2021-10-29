@@ -3,7 +3,7 @@
 
 import sys
 import os
-from setuptools import find_packages
+
 os.path = ["simplemc"] + os.path
 try:
     from setuptools import setup, Extension
