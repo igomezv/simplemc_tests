@@ -12,7 +12,7 @@ then you can delete the cloned repo because you must have `simplemc` installed l
 
 Other way to install `simplemc` is:
 
-     $ pip3 install -e git+https://github.com/igomezv/simplemc_tests
+     $ pip3 install -e git+https://github.com/igomezv/simplemc_tests#egg=simplemc
 
 
 In the `requirements.txt` file there are the basic libraries to run `simplemc`, but some functions such as plots or neural networks can be unavailable. For full requirements use `requirements_full.txt`. You can install manually this dependencies with `pip3 install -r requirements_full.txt`.
