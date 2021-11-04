@@ -28,7 +28,7 @@ setup(
               "cosmology",
               "MCMC"],
     classifiers=[
-        "Development Status :: 0.9.8 - Beta",
+        "Development Status :: 0.9.8",
         "Intended Audience :: Science/Research",
         "Operating System :: OS Independent",
         'License :: OSI Approved :: GPLv3 License',
