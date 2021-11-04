@@ -5,9 +5,11 @@ from simplemc.likelihoods.BaseLikelihood import BaseLikelihood
 from simplemc import logger
 import scipy.linalg as la
 import scipy as sp
+from simplemc import cdir
+
 
 # uncoment lines for use a covariance matrix
-class SimpleLikelihood (BaseLikelihood):
+class SimpleLikelihood(BaseLikelihood):
     def __init__(self, name, values_filename, cov_filename, fn='generic'):
         BaseLikelihood.__init__(self, name)
         # print("Loading ", values_filename)
@@ -25,11 +27,11 @@ class SimpleLikelihood (BaseLikelihood):
         if self.fn == "generic":
             tvec  = sp.array([self.theory_.genericModel(z) for z in self.xx])
         elif self.fn == "h":
-            tvec = sp.array([100.0 * self.theory_.h * sp.sqrt(self.theory_.RHSquared_a(1.0 / (1 + z))) for z in self.zs])
+            tvec = sp.array([100.0 * self.theory_.h * sp.sqrt(self.theory_.RHSquared_a(1.0 / (1 + z))) for z in self.xx])
         elif self.fn == "fs8":
-            tvec = sp.array([self.theory_.fs8(z) for z in self.zs])
+            tvec = sp.array([self.theory_.fs8(z) for z in self.xx])
         elif self.fn == "distance_mod":
-            tvec = sp.array([self.theory_.distance_modulus(z) for z in self.zs])
+            tvec = sp.array([self.theory_.distance_modulus(z) for z in self.xx])
 
         delta = self.yy - tvec
         return -0.5*sp.dot(delta, sp.dot(self.icov, delta))
@@ -38,8 +40,8 @@ class SimpleLikelihood (BaseLikelihood):
 
 class StraightLine(SimpleLikelihood):
      def __init__(self):
-         SimpleLikelihood.__init__(self,"GenericData","simplemc/data/line_data.txt",
-            "simplemc/data/line_cov.txt")
+         SimpleLikelihood.__init__(self,"GenericData", cdir+"/data/line_data.txt",
+                                   cdir+"/data/line_cov.txt")
 
 
 class GenericLikelihood(SimpleLikelihood):

@@ -1,6 +1,7 @@
 from simplemc.likelihoods.BaseLikelihood import BaseLikelihood
 import scipy.linalg as la
 import scipy as sp
+from simplemc import cdir
 
 
 class Compressedfs8Likelihood(BaseLikelihood):
@@ -53,6 +54,6 @@ class fs8Diagram(Compressedfs8Likelihood):
         #                                  "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/annfs8_cov50_.dat")
 
 
-        Compressedfs8Likelihood.__init__(self,"fs8", "simplemc/data/fs8Diagram.txt",
-                                             "simplemc/data/fs8Diagram-cov.txt")
+        Compressedfs8Likelihood.__init__(self,"fs8", cdir+"/data/fs8Diagram.txt",
+                                              cdir+"/data/fs8Diagram-cov.txt")
 
