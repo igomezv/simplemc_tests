@@ -8,6 +8,14 @@ Whithin the simplemc directory (where is the setup.py file) you can install in y
      $ cd simplemc_tests
      $ pip3 install -e .
 
+then you can delete the cloned repo because you must have locally installed `simplemc`. 
+
+Other way to install `simplemc` is:
+
+     $ pip3 install -e git+https://github.com/igomezv/simplemc_tests
+
+
+In the `requirements.txt` file there are the basic libraries to run `simplemc`, but some functions such as plots or neural networks can be unavailable. For full requirements check `requirements_full.txt`.
 
 In the `docs` directory are all the files used by the `sphinx` library to build the website with the `SimpleMC` temporary documentation: https://igomezv.github.io/SimpleMC/ 
 
