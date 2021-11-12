@@ -825,8 +825,8 @@ class DriverMC:
         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
         self.outputpath = '{}_neuralike'.format(self.outputpath)
         if iniFile:
-            ndivsgrid = self.config.getint('neuralike', 'ndivsgrid', fallback=50)
-            epochs = self.config.getint('neuralike', 'epochs', fallback=500)
+            nrand = self.config.getint('neuralike', 'nrand', fallback=100)
+            epochs = self.config.getint('neuralike', 'epochs', fallback=100)
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
             psplit = self.config.getfloat('neuralike', 'psplit', fallback=0.8)
@@ -834,8 +834,8 @@ class DriverMC:
                                                                      fallback=[100, 100, 200]).split(',')]
             nproc = self.config.getint('neuralike', 'nproc', fallback=3)
         else:
-            ndivsgrid = kwargs.pop('ndivsgrid', 50)
-            epochs = kwargs.pop('epochs', 500)
+            nrand = kwargs.pop('nrand', 100)
+            epochs = kwargs.pop('epochs', 100)
             learning_rate = kwargs.pop('learning_rate', 5e-4)
             batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
@@ -847,6 +847,6 @@ class DriverMC:
         else:
             pool = None
 
-        return NeuralManager(self.logLike, self.bounds, self.root, ndivsgrid=ndivsgrid,
+        return NeuralManager(self.logLike, pars_info=self.pars_info, rootname=self.root, nrand=nrand,
                              epochs=epochs, hidden_layers_neurons=hidden_layers_neurons, psplit=psplit,
                              learning_rate=learning_rate, batch_size=batch_size, pool=pool)
