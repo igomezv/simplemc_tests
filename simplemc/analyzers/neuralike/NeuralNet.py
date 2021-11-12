@@ -3,6 +3,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from time import time
 
 try:
    import tensorflow as tf
@@ -72,14 +73,15 @@ class NeuralNet:
                                                       min_delta=0.0,
                                                       patience=100,
                                                       restore_best_weights=True)]
-
+        t0 = time()
         self.history = self.model.fit(self.X_train,
                                       self.Y_train,
                                       validation_data=(self.X_test,
                                                        self.Y_test),
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       verbose=1, callbacks=callbacks)
-        print("Training complete!")
+        tf = time() - t0
+        print("Training complete! Time training: {:.3f} min".format(tf/60.))
         return self.history
 
     def get_w_and_b(self, nlayer):
