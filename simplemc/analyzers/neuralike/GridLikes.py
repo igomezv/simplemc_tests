@@ -29,9 +29,11 @@ class GridLikes:
 
     def makegrid(self):
         if not self.filesChecker():
+            # tmp = [np.linspace(bound[0], bound[1], self.ndivs) for bound in self.pars_bounds]
             tmp = [np.linspace(bound[0], bound[1], self.ndivs) for bound in self.pars_bounds]
             tmp_grid = np.meshgrid(*tmp)
             grid = np.array([x.flatten() for x in tmp_grid]).T
+
             np.save('{}_grid.npy'.format(self.files_path), grid)
         else:
             print('Loading existing grid and likelihoods: {}'.format(self.files_path))
