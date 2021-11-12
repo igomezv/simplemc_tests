@@ -352,8 +352,6 @@ class DriverMC:
         #stored output files
         if self.analyzername is None: self.analyzername = 'nested'
         self.outputpath = '{}_{}_{}'.format(self.outputpath, self.analyzername, nestedType)
-        if neuralNetwork:
-            self.outputpath = "{}_ANN".format(self.outputpath)
         self.outputChecker()
 
         #paralel run
@@ -381,7 +379,7 @@ class DriverMC:
                         bound=nestedType, sample = 'unif', nlive = nlivepoints,
                         pool = pool, queue_size=nprocess, use_pool={'loglikelihood': False})
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
-                               addDerived=self.addDerived, simpleLike=self.L, dumper=dumper)
+                               addDerived=self.addDerived, simpleLike=self.L)
             M = sampler.results
 
         try:
