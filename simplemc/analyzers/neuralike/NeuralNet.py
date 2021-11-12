@@ -33,7 +33,7 @@ class NeuralNet:
         self.epochs = kwargs.pop('epochs', 50)
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
-        self.early_tol = kwargs.pop('early_tol', 100)
+        self.patience = kwargs.pop('patience', 100)
         psplit = kwargs.pop('psplit', 0.8)
 
         if load:
@@ -63,6 +63,7 @@ class NeuralNet:
                 model.add(K.layers.Dense(self.topology[i], activation='linear'))
         # Adam recommendations from arxiv:1412.6980
         optimizer = K.optimizers.Adam(learning_rate=self.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-3)
+        # optimizer = K.optimizers.RMSprop(learning_rate=self.learning_rate)
         model.compile(optimizer=optimizer, loss='mean_squared_error')
 
         return model
@@ -71,7 +72,7 @@ class NeuralNet:
         print("Training neural network...")
         callbacks = [tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='min',
                                                       min_delta=0.0,
-                                                      patience=100,
+                                                      patience=self.patience,
                                                       restore_best_weights=True)]
         t0 = time()
         self.history = self.model.fit(self.X_train,
@@ -80,8 +81,8 @@ class NeuralNet:
                                                        self.Y_test),
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       verbose=1, callbacks=callbacks)
-        tf = time() - t0
-        print("Training complete! Time training: {:.3f} min".format(tf/60.))
+        tt = time() - t0
+        print("Training complete! Time training: {:.3f} min".format(tt/60.))
         return self.history
 
     def get_w_and_b(self, nlayer):
