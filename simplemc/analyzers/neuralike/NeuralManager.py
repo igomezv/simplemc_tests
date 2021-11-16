@@ -4,6 +4,7 @@
 from .RandomSampling import RandomSampling
 from .NeuralNet import NeuralNet
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import numpy as np
 
 import os
 
@@ -102,9 +103,11 @@ class NeuralManager:
         # likes_scaler = MinMaxScaler(feature_range=(-1, 1))
         likes_scaler = StandardScaler()
         likes_scaler.fit(likes.reshape(-1, 1))
-        sc_likes = likes_scaler.transform(likes.reshape(-1, 1))
+        # sc_likes = likes_scaler.transform(likes.reshape(-1, 1))
         print("using neural net")
-        return likes_scaler.inverse_transform(self.neural_model.predict(params).reshape(-1,1))
+        likes = np.array(likes_scaler.inverse_transform(self.neural_model.predict(params.reshape(-1,1))))
+        likes = likes.reshape(len(likes), self.dims)
+        return likes
 
 
 

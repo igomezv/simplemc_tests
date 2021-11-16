@@ -22,7 +22,7 @@ class RandomSampling:
         self.dims = len(self.paramsList)
 
         # squared_errors = [((p.bounds[1] - p.bounds[0])*2)**2 for p in pars_info]
-        squared_errors = [min(np.abs(p.value - p.bounds[1]), np.abs(p.value - p.bounds[0]))**2 for p in pars_info]
+        squared_errors = [max(np.abs(p.value - p.bounds[1]), np.abs(p.value - p.bounds[0])) for p in pars_info]
         self.cov = np.diag(squared_errors)
 
         # self.bounds = [p.bounds for p in pars_info]
@@ -62,6 +62,10 @@ class RandomSampling:
             idx_nan = np.argwhere(np.isnan(likes))
             likes = np.delete(likes, idx_nan)
             samples = np.delete(samples, idx_nan, axis=0)
+            idx_complex = np.argwhere(np.iscomplex(likes))
+            likes = np.delete(likes, idx_complex)
+            likes = np.real(likes)
+            samples = np.delete(samples, idx_complex, axis=0)
             np.save('{}_random_samples.npy'.format(self.files_path), samples)
             np.save('{}_likes.npy'.format(self.files_path), likes)
         else:
