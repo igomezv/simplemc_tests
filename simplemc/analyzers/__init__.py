@@ -4,3 +4,4 @@ from .dynesty import DynamicNestedSampler, NestedSampler
 from .emcee import EnsembleSampler
 from .GA_deap import GA_deap
 from .MCEvidence import MCEvidence
+from .neuralike import NeuralManager
