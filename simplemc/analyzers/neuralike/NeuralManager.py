@@ -89,10 +89,10 @@ class NeuralManager:
         else:
             return False
 
-    def loglikelihood(self, params):
-        rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand,
-                                   files_path=self.grid_path)
-        samples, likes = rsampling.make_dataset()
+    def loglikelihood(self, params, samples, likes):
+        # rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand,
+        #                            files_path=self.grid_path)
+        # samples, likes = rsampling.make_dataset()
         # # samples_scaler = StandardScaler()
         # params_scaler = MinMaxScaler(feature_range=(-1, 1))
         # # fit scaler on data
