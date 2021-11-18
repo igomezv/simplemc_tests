@@ -1,7 +1,6 @@
 
 ## TODO: usar modelChecker once it is trained, and flag for overige
 
-from .RandomSampling import RandomSampling
 from .NeuralNet import NeuralNet
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
@@ -35,7 +34,7 @@ class NeuralManager:
         self.nrand = nrand
         self.epochs = epochs
         self.plot = plot
-        self.grid_path = 'simplemc/analyzers/neuralike/neural_models/{}'.format(rootname)
+        # self.grid_path = 'simplemc/analyzers/neuralike/neural_models/{}'.format(rootname)
         self.model_path = 'simplemc/analyzers/neuralike/neural_models/{}.h5'.format(rootname)
         self.fig_path = 'simplemc/analyzers/neuralike/neural_models/{}.png'.format(rootname)
 
@@ -50,9 +49,9 @@ class NeuralManager:
         self.neural_model = self.load()
 
 
-    def training(self):
-        rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand, files_path=self.grid_path)
-        samples, likes = rsampling.make_dataset()
+    def training(self, samples, likes):
+        # rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand, files_path=self.grid_path)
+        # samples, likes = rsampling.make_dataset()
         # # samples_scaler = StandardScaler()
         # samples_scaler = MinMaxScaler(feature_range=(-1, 1))
         # # fit scaler on data
