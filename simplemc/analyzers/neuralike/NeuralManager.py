@@ -2,6 +2,7 @@
 ## TODO: usar modelChecker once it is trained, and flag for overige
 
 from .NeuralNet import NeuralNet
+from .RandomSampling import RandomSampling
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 
@@ -22,13 +23,11 @@ class NeuralManager:
         plot
     """
 
-    def __init__(self, pars_info, rootname, samples, likes, nrand=500, hidden_layers_neurons=None,
+    def __init__(self, loglikelihood, pars_info, rootname, samples, likes, nrand=100, hidden_layers_neurons=None,
                  epochs=100, patience=None, plot=True, **kwargs):
         if hidden_layers_neurons is None:
             hidden_layers_neurons = [100, 100, 100]
-        # self.loglikelihood = loglikelihood
-        self.likes = likes
-        self.samples = samples
+        self.loglikelihood_fn = loglikelihood
 
         self.pars_info = pars_info
         self.dims = len([None for _ in pars_info])
@@ -39,6 +38,13 @@ class NeuralManager:
         # self.grid_path = 'simplemc/analyzers/neuralike/neural_models/{}'.format(rootname)
         self.model_path = 'simplemc/analyzers/neuralike/neural_models/{}.h5'.format(rootname)
         self.fig_path = 'simplemc/analyzers/neuralike/neural_models/{}.png'.format(rootname)
+
+        rsampling = RandomSampling(self.loglikelihood_fn, pars_info=self.pars_info, nrand=self.nrand,
+                                   files_path=self.model_path)
+        rsamples, rlikes = rsampling.make_dataset()
+
+        self.likes = np.append(rlikes, likes)
+        self.samples = np.append(rsamples, samples, axis=0)
 
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
@@ -52,7 +58,7 @@ class NeuralManager:
 
 
     def training(self):
-        # rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand, files_path=self.grid_path)
+        # rsampling = RandomSampling(self.loglikelihood_fn, pars_info=self.pars_info, nrand=self.nrand, files_path=self.grid_path)
         # samples, likes = rsampling.make_dataset()
         # # samples_scaler = StandardScaler()
         # samples_scaler = MinMaxScaler(feature_range=(-1, 1))
