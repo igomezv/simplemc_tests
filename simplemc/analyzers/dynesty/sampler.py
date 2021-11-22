@@ -155,6 +155,18 @@ class Sampler(object):
         self.saved_bounditer = []  # active bound at a specific iteration
         self.saved_scale = []  # scale factor at each iteration
 
+        # simplemc
+        self.neuralike = True
+        self.full_likes = np.zeros((self.nlive,))  # total evaluations of the likelihood
+        self.full_points = np.zeros((self.nlive, self.npdim))
+        uf, vf, loglf = live_points
+        for i, point in enumerate(vf):
+            # print("{},{}\n".format(loglf[i], point))
+            self.full_likes[i] = loglf[i]
+            self.full_points[i, :] = point
+        # print(self.full_points, np.shape(self.full_points))
+
+
     def __getstate__(self):
         """Get state information for pickling."""
 
@@ -369,6 +381,13 @@ class Sampler(object):
         u, v, logl, nc, blob = self.queue.pop(0)
         self.used += 1  # add to the total number of used points
         self.nqueue -= 1
+        # simplemc
+        self.full_likes = np.append(self.full_likes, logl)
+        vr = np.reshape(v, (1, len(v)))
+        self.full_points = np.append(self.full_points, vr, axis=0)
+        # print("SHAPES V, FULL_POINTS", np.shape(vr), np.shape(self.full_points))
+        # print("\nUSED POINTS:", self.used, v, logl)
+        # print("\n")
 
         return u, v, logl, nc, blob
 
@@ -787,6 +806,21 @@ class Sampler(object):
             self.ncall += nc
             self.since_update += nc
 
+            # simplemc
+            # self.full_evals = np.array(self.full_evals, dtype=object)
+            # full_likes = np.array(self.full_evals[:, 0])
+            # full_points = np.array(self.full_evals[:, 1]).flatten().tolist()
+            print("\nFULL EVALS\n", np.shape(self.full_likes), np.shape(self.full_points))
+
+            if ncall >= 500 and self.neuralike:
+                print("IN NEURAL!!!!!!\n")
+                from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
+                net = NeuralManager(pars_info=self.cpars, rootname=self.outputname, likes=self.full_likes,
+                                    samples=self.full_points)
+                self.loglikelihood = net.loglikelihood
+
+
+
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
             lzterm = (math.exp(loglstar - logz_new) * loglstar +
@@ -946,6 +980,7 @@ class Sampler(object):
                 logz = -np.inf
 
             # Print progress.
+            # simplemc
             if print_progress:
                 # Writing weights, likes and samples in a text file for simplemc output.
                 weights = np.exp(results[5])
@@ -1011,6 +1046,8 @@ class Sampler(object):
             f.close()
             self.it = it+1
 
+
+
     def add_final_live(self, print_progress=True):
         """
         **A wrapper that executes the loop adding the final live points.**
@@ -1045,7 +1082,7 @@ class Sampler(object):
                                                                        delta_logz, loglstar, vstar))
                 sys.stdout.flush()
 
-
+    # simplemc
     def getLikes(self):
         # This function is to extract the likelihoods for each observational dataset
         # used in simplemc and write them in the output text file
