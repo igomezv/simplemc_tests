@@ -22,11 +22,13 @@ class NeuralManager:
         plot
     """
 
-    def __init__(self, loglikelihood, pars_info, rootname, nrand=500, hidden_layers_neurons=None,
+    def __init__(self, pars_info, rootname, samples, likes, nrand=500, hidden_layers_neurons=None,
                  epochs=100, patience=None, plot=True, **kwargs):
         if hidden_layers_neurons is None:
             hidden_layers_neurons = [100, 100, 100]
-        self.loglikelihood = loglikelihood
+        # self.loglikelihood = loglikelihood
+        self.likes = likes
+        self.samples = samples
 
         self.pars_info = pars_info
         self.dims = len([None for _ in pars_info])
@@ -49,7 +51,7 @@ class NeuralManager:
         self.neural_model = self.load()
 
 
-    def training(self, samples, likes):
+    def training(self):
         # rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand, files_path=self.grid_path)
         # samples, likes = rsampling.make_dataset()
         # # samples_scaler = StandardScaler()
@@ -61,11 +63,11 @@ class NeuralManager:
         #
         # likes_scaler = MinMaxScaler(feature_range=(-1, 1))
         likes_scaler = StandardScaler()
-        likes_scaler.fit(likes.reshape(-1, 1))
-        sc_likes = likes_scaler.transform(likes.reshape(-1, 1))
+        likes_scaler.fit(self.likes.reshape(-1, 1))
+        sc_likes = likes_scaler.transform(self.likes.reshape(-1, 1))
         print("sc_likes\n", sc_likes)
 
-        neural_model = NeuralNet(X=samples, Y=sc_likes, topology=self.topology, epochs=self.epochs,
+        neural_model = NeuralNet(X=self.samples, Y=sc_likes, topology=self.topology, epochs=self.epochs,
                                  batch_size=self.batch_size, learrning_rate=self.learning_rate, patience=self.patience)
 
         neural_model.train()
@@ -89,7 +91,7 @@ class NeuralManager:
         else:
             return False
 
-    def loglikelihood(self, params, samples, likes):
+    def loglikelihood(self, params):
         # rsampling = RandomSampling(self.loglikelihood, pars_info=self.pars_info, nrand=self.nrand,
         #                            files_path=self.grid_path)
         # samples, likes = rsampling.make_dataset()
@@ -101,11 +103,13 @@ class NeuralManager:
         # sc_params = params_scaler.transform(samples.reshape(-1, 1))
         # likes_scaler = MinMaxScaler(feature_range=(-1, 1))
         likes_scaler = StandardScaler()
-        likes_scaler.fit(likes.reshape(-1, 1))
+        likes_scaler.fit(self.likes.reshape(-1, 1))
         # sc_likes = likes_scaler.transform(likes.reshape(-1, 1))
-        print("using neural net")
-        likes = np.array(likes_scaler.inverse_transform(self.neural_model.predict(params.reshape(-1,1))))
-        likes = likes.reshape(len(likes), self.dims)
+        print("\nUsing neural net")
+        print(np.shape(params))
+        likes = np.array(likes_scaler.inverse_transform(self.neural_model.predict(np.array(params).reshape(1,-1))))
+        print("neuralikes:", likes)
+        # likes = likes.reshape(len(likes), self.dims)
         return likes
 
 
