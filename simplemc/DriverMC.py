@@ -83,7 +83,7 @@ class DriverMC:
             self.datasets     = kwargs.pop('datasets','HD')
             self.analyzername = kwargs.pop('analyzername', None)
             self.addDerived   = kwargs.pop('addDerived', False)
-            self.useNeuralLike = kwargs.pop('useNeuralLike', False)
+            self.useNeuralike = kwargs.pop('useNeuralike', False)
             self.mcevidence = kwargs.pop('mcevidence', False)
             self.mcevidence_k = kwargs.pop('mcevidence_k', 4)
             self.overwrite = kwargs.pop('overwrite', True)
@@ -142,7 +142,7 @@ class DriverMC:
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
 
-        if self.useNeuralLike:
+        if self.useNeuralike:
             self.neural_options = self.neuralike_dict(iniFile=self.iniFile)
 
 
@@ -193,7 +193,7 @@ class DriverMC:
         self.analyzername = self.config.get(        'custom', 'analyzername', fallback=None)
         self.varys8       = self.config.getboolean( 'custom', 'varys8',       fallback=False)
         self.addDerived   = self.config.getboolean( 'custom', 'addDerived',   fallback=False)
-        self.useNeuralLike = self.config.getboolean('custom', 'useNeuralLike', fallback=False)
+        self.useNeuralike = self.config.getboolean('custom', 'useNeuralike', fallback=False)
         self.mcevidence = self.config.getboolean('custom', 'mcevidence', fallback=False)
         self.mcevidence_k = self.config.getint('custom', 'mcevidence_k', fallback=4)
         self.overwrite = self.config.getboolean('custom', 'overwrite', fallback=True)
