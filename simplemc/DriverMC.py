@@ -73,6 +73,7 @@ class DriverMC:
 
         self.dict_resulẗ́ = {}
         self.iniFile = iniFile
+        self.trained_net = False
         if self.iniFile:    self.iniReader(iniFile)
         else:
             self.chainsdir    = kwargs.pop('chainsdir', 'simplemc/chains')
@@ -140,10 +141,9 @@ class DriverMC:
                                     self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
-        if self.useNeuralLike:
-            neural_model = self.neuralLike(iniFile=self.iniFile)
-            self.logLike = neural_model.loglikelihood
 
+        if self.useNeuralLike:
+            self.neural_options = self.neuralike_dict(iniFile=self.iniFile)
 
 
     def executer(self, **kwargs):
@@ -614,6 +614,7 @@ class DriverMC:
             loglike=cloglikes.sum()
         else:
             loglike = self.L.loglike_wprior()
+
         return loglike
 
 
@@ -817,7 +818,7 @@ class DriverMC:
 
         return pool, nprocess
 
-    def neuralLike(self, iniFile=None, **kwargs):
+    def neuralike_dict(self, iniFile=None, **kwargs):
         """
         Under construction.
         This method trains a neural network in order to learn the likelihood function.
@@ -847,6 +848,6 @@ class DriverMC:
         else:
             pool = None
 
-        return NeuralManager(self.logLike, pars_info=self.pars_info, rootname=self.root, nrand=nrand,
-                             epochs=epochs, hidden_layers_neurons=hidden_layers_neurons, psplit=psplit,
-                             learning_rate=learning_rate, batch_size=batch_size, pool=pool)
+        return {'loglike': self.logLike, 'rootname': self.root, 'nrand': nrand,
+                'epochs': epochs, 'hidden_layers_neurons': hidden_layers_neurons, 'psplit': psplit,
+                'learning_rate': learning_rate, 'batch_size': batch_size, 'pool': pool}

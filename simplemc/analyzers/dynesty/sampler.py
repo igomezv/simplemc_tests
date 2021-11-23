@@ -83,7 +83,7 @@ class Sampler(object):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  update_interval, first_update, rstate,
-                 queue_size, pool, use_pool):
+                 queue_size, pool, use_pool, neuralike=True, neural_options=None):
         self.print_txt = "\rit: {} | ncall: {} | eff: {:.3f} | logz: {:.4f} | " \
                          "dlogz: {:.4f} | loglstar: {:.4f} | point {}"
 
@@ -156,7 +156,8 @@ class Sampler(object):
         self.saved_scale = []  # scale factor at each iteration
 
         # simplemc
-        self.neuralike = True
+        self.neuralike = neuralike
+        self.neural_options = neural_options
         self.full_likes = np.zeros((self.nlive,))  # total evaluations of the likelihood
         self.full_points = np.zeros((self.nlive, self.npdim))
         uf, vf, loglf = live_points
@@ -194,7 +195,7 @@ class Sampler(object):
             # Compute the prior transform using the default `map` function.
             self.live_v = np.array(list(map(self.prior_transform,
                                             np.array(self.live_u))))
-        if self.use_pool_logl:
+        if self.use_pool_logl and self.neuralike is False:
             # Use the pool to compute the log-likelihoods.
             self.live_logl = np.array(list(self.M(self.loglikelihood,
                                                   np.array(self.live_v))))
@@ -362,7 +363,7 @@ class Sampler(object):
         args = zip(point_queue, loglstars, axes_queue,
                    scales, ptforms, logls, kwargs)
 
-        if self.use_pool_evolve:
+        if self.use_pool_evolve and self.neuralike is False:
             # Use the pool to propose ("evolve") a new live point.
             self.queue = list(self.M(evolve_point, args))
         else:
@@ -810,14 +811,16 @@ class Sampler(object):
             # self.full_evals = np.array(self.full_evals, dtype=object)
             # full_likes = np.array(self.full_evals[:, 0])
             # full_points = np.array(self.full_evals[:, 1]).flatten().tolist()
-            print("\nFULL EVALS\n", np.shape(self.full_likes), np.shape(self.full_points))
+            # print("\nFULL EVALS\n", np.shape(self.full_likes), np.shape(self.full_points))
 
-            if ncall >= 500 and self.neuralike:
+            if ncall > 1000 and it % 200 == 0 and self.neuralike:
                 print("IN NEURAL!!!!!!\n")
                 from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-                net = NeuralManager(pars_info=self.cpars, rootname=self.outputname, likes=self.full_likes,
-                                    samples=self.full_points)
+                net = NeuralManager(loglikelihood=self.loglikelihood_control, rootname=self.outputname,
+                                    likes=self.full_likes, samples=self.full_points)
                 self.loglikelihood = net.loglikelihood
+                # self.full_likes = self.full_likes[:-100]
+                # self.full_points = self.full_points[:-100, :]
 
 
 

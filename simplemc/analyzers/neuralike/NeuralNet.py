@@ -5,14 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time import time
 
-try:
-   import tensorflow as tf
-   import tensorflow.keras as K
-except:
-    import warnings
-    warnings.warn("Please install tensorflow library if you want to use neural networks")
-
-
 class NeuralNet:
 
     def __init__(self, load=False, model_path=None, X=None, Y=None, topology=None, **kwargs):
@@ -50,6 +42,12 @@ class NeuralNet:
             self.model = self.model()
 
     def model(self):
+        try:
+            import tensorflow as tf
+            import tensorflow.keras as K
+        except:
+            import warnings
+            warnings.warn("Please install tensorflow library if you want to use neural networks")
         # Red neuronal
         model = K.models.Sequential()
         # Hidden layers
@@ -69,6 +67,13 @@ class NeuralNet:
         return model
 
     def train(self):
+        try:
+            import tensorflow as tf
+            import tensorflow.keras as K
+        except:
+            import warnings
+            warnings.warn("Please install tensorflow library if you want to use neural networks")
+
         print("Training neural network...")
         callbacks = [tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='min',
                                                       min_delta=0.0,
@@ -94,6 +99,12 @@ class NeuralNet:
         print('Neural net model {} saved!'.format(filename))
 
     def load_model(self):
+        try:
+            import tensorflow as tf
+            import tensorflow.keras as K
+        except:
+            import warnings
+            warnings.warn("Please install tensorflow library if you want to use neural networks")
         neural_model = tf.keras.models.load_model('{}'.format(self.model_path))
         return neural_model
 
