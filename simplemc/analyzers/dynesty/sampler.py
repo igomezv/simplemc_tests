@@ -158,7 +158,8 @@ class Sampler(object):
         # simplemc
         self.neuralike = neuralike
         self.neural_options = neural_options
-        self.full_likes = np.zeros((self.nlive,))  # total evaluations of the likelihood
+        # total evaluations of the likelihood, accepted + rejected proposals
+        self.full_likes = np.zeros((self.nlive,))
         self.full_points = np.zeros((self.nlive, self.npdim))
         uf, vf, loglf = live_points
         for i, point in enumerate(vf):
@@ -166,6 +167,18 @@ class Sampler(object):
             self.full_likes[i] = loglf[i]
             self.full_points[i, :] = point
         # print(self.full_points, np.shape(self.full_points))
+        # difference between loglike i and loglike (i-1)
+        self.delta_loglikes_goal = 10
+        # difference between loglike i and loglike (i-1)
+        self.delta_loglikes = np.inf
+        # counter of samples whitin the delta
+        self.indelta_counter = 0
+        # cumulative counts to start the neural net training
+        self.expected_counts = 10
+        # ncalls_to_net
+        self.ncalls_to_net = 100
+        # True if neural network is already trained
+        self.trained_net = False
 
 
     def __getstate__(self):
@@ -808,19 +821,29 @@ class Sampler(object):
             self.since_update += nc
 
             # simplemc
-            # self.full_evals = np.array(self.full_evals, dtype=object)
-            # full_likes = np.array(self.full_evals[:, 0])
-            # full_points = np.array(self.full_evals[:, 1]).flatten().tolist()
-            # print("\nFULL EVALS\n", np.shape(self.full_likes), np.shape(self.full_points))
+            if ncall > 100 and self.neuralike:
+                self.delta_loglikes = np.abs(self.saved_logl[-1] - self.saved_logl[-2])
+                if self.delta_loglikes < self.delta_loglikes_goal:
+                    self.indelta_counter += 1
+                    if self.indelta_counter % self.expected_counts == 0 and self.trained_net is False:
+                        from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
 
-            if ncall > 1000 and it % 200 == 0 and self.neuralike:
+                        net = NeuralManager(loglikelihood=self.loglikelihood_control,
+                                            rootname=self.outputname,
+                                            likes=self.full_likes,
+                                            samples=self.full_points)
+                        self.loglikelihood = net.loglikelihood
+                        self.trained_net = True
+                        # self.full_likes = self.full_likes[:-100]
+                        # self.full_points = self.full_points[:-100, :]
+                else:
+                    self.indelta_counter = 0
+                    self.loglikelihood = self.loglikelihood_control
+                    self.trained_net = False
+
+                print("\nDELTA likes\n", self.delta_loglikes)
                 print("IN NEURAL!!!!!!\n")
-                from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-                net = NeuralManager(loglikelihood=self.loglikelihood_control, rootname=self.outputname,
-                                    likes=self.full_likes, samples=self.full_points)
-                self.loglikelihood = net.loglikelihood
-                # self.full_likes = self.full_likes[:-100]
-                # self.full_points = self.full_points[:-100, :]
+
 
 
 

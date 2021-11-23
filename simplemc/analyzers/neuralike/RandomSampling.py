@@ -4,7 +4,7 @@ import time
 
 
 class RandomSampling:
-    def __init__(self, like, means, errors, nrand=100, pool=None, files_path='randomsampling'):
+    def __init__(self, like, means, cov, nrand=100, pool=None, files_path='randomsampling'):
         """
         Create a random samples in the parameter space and evaluate the likelihood in them.
         This is used to generate the training set for a neural network.
@@ -24,7 +24,7 @@ class RandomSampling:
 
         # squared_errors = [((p.bounds[1] - p.bounds[0])*2)**2 for p in pars_info]
         # errors = [p.error for p in pars_info]
-        self.cov = np.diag(0.5*errors)
+        self.cov = cov
 
         # self.bounds = [p.bounds for p in pars_info]
 
@@ -39,7 +39,7 @@ class RandomSampling:
 
     def make_sample(self):
         # if not self.filesChecker():
-        samples = np.random.multivariate_normal(self.means, self.cov, size=(self.nrand, ))
+        samples = np.random.multivariate_normal(np.diag(self.cov), self.cov, size=(self.nrand, ))
         # else:
         #     print('Loading existing random_samples and likelihoods: {}'.format(self.files_path))
         #     samples = np.load('{}_random_samples.npy'.format(self.files_path))

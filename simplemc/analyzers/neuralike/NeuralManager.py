@@ -23,8 +23,9 @@ class NeuralManager:
         plot
     """
 
-    def __init__(self, loglikelihood, rootname, samples, likes, nrand=200, hidden_layers_neurons=None,
-                 epochs=100, patience=None, plot=True, **kwargs):
+    def __init__(self, loglikelihood, rootname, samples, likes,
+                 nrand=200, hidden_layers_neurons=None,
+                 epochs=100, plot=True, **kwargs):
         if hidden_layers_neurons is None:
             hidden_layers_neurons = [100, 100, 100]
         self.loglikelihood_fn = loglikelihood
@@ -33,28 +34,29 @@ class NeuralManager:
         _, self.dims = np.shape(samples)
         ml_idx = np.argmax(likes)
         means = samples[ml_idx, :]
-        errors = np.ones(self.dims)
-        errors *= np.std(samples)
 
-        self.nrand = nrand
+        # self.nrand = nrand
         self.epochs = epochs
         self.plot = plot
         # self.grid_path = 'simplemc/analyzers/neuralike/neural_models/{}'.format(rootname)
         # self.model_path = 'simplemc/analyzers/neuralike/neural_models/{}.h5'.format(rootname)
         self.fig_path = '{}.png'.format(rootname)
 
-        rsampling = RandomSampling(self.loglikelihood_fn, means=means, errors=errors, nrand=self.nrand)
-                                   # files_path=self.model_path)
-        rsamples, rlikes = rsampling.make_dataset()
-
-        self.likes = np.append(rlikes, likes)
-        self.samples = np.append(rsamples, samples, axis=0)
-        self.maxlike = np.max(self.likes)
-        self.minlike = np.min(self.likes)
+        # rsampling = RandomSampling(self.loglikelihood_fn, means=means,
+        #                            cov=cov, nrand=self.nrand)
+        #                            # files_path=self.model_path)
+        # rsamples, rlikes = rsampling.make_dataset()
+        #
+        # self.likes = np.append(rlikes, likes)
+        # self.samples = np.append(rsamples, samples, axis=0)
+        # self.maxlike = np.max(self.likes)
+        # self.minlike = np.min(self.likes)
+        self.likes = likes
+        self.samples = samples
 
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
-        self.patience = kwargs.pop('patience', epochs)
+        self.patience = kwargs.pop('patience', epochs//2)
         self.psplit = kwargs.pop('psplit', 0.8)
         self.topology = [self.dims] + hidden_layers_neurons + [1]
 
@@ -79,8 +81,10 @@ class NeuralManager:
         sc_likes = likes_scaler.transform(self.likes.reshape(-1, 1))
         print("sc_likes\n", sc_likes)
 
-        self.neural_model = NeuralNet(X=self.samples, Y=sc_likes, topology=self.topology, epochs=self.epochs,
-                                 batch_size=self.batch_size, learrning_rate=self.learning_rate, patience=self.patience)
+        self.neural_model = NeuralNet(X=self.samples, Y=sc_likes, topology=self.topology,
+                                      epochs=self.epochs, batch_size=self.batch_size,
+                                      learrning_rate=self.learning_rate,
+                                      patience=self.patience)
 
         self.neural_model.train()
         # neural_model.save_model('{}'.format(self.model_path))
@@ -121,8 +125,8 @@ class NeuralManager:
         # print(np.shape(params))
         likes = np.array(likes_scaler.inverse_transform(self.neural_model.predict(np.array(params).reshape(1,-1))))
         # mask
-        mask = (likes < self.minlike) | (likes > 1.5*self.maxlike)
-        likes[mask] = self.maxlike
+        # mask = (likes < self.minlike) | (likes > 1.5*self.maxlike)
+        # likes[mask] = self.maxlike
         # np.array([map(self.loglikelihood_fn, params)])[mask]
         # print("neuralikes:", likes)
         # likes = likes.reshape(len(likes), self.dims)
