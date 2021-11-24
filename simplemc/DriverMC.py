@@ -824,10 +824,10 @@ class DriverMC:
         Under construction.
         This method trains a neural network in order to learn the likelihood function.
         """
-        from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-        self.outputpath = '{}_neuralike'.format(self.outputpath)
-        if iniFile:
+        if self.useNeuralike:
+            self.outputpath = '{}_neuralike'.format(self.outputpath)
 
+        if iniFile:
             epochs = self.config.getint('neuralike', 'epochs', fallback=100)
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
