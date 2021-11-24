@@ -832,7 +832,7 @@ class Sampler(object):
             self.since_update += nc
 
             # simplemc
-            if ncall > 100 and self.neuralike:
+            if ncall > self.ncalls_to_net and self.neuralike:
                 self.delta_loglikes = np.abs(self.saved_logl[-1] - self.saved_logl[-2])
                 if self.delta_loglikes < self.delta_loglikes_goal:
                     self.indelta_counter += 1
@@ -853,7 +853,7 @@ class Sampler(object):
                     self.loglikelihood = self.loglikelihood_control
                     self.trained_net = False
                 if self.trained_net: self.neural_counter += 1
-                print("neural calls: {} | "
+                print("\nneural calls: {} | "
                       "neural models: {}".format(self.neural_counter,
                                                  self.neural_models_c))
 
