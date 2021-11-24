@@ -844,14 +844,14 @@ class Sampler(object):
                         self.loglikelihood = net.loglikelihood
                         self.trained_net = True
                         # self.full_likes = self.full_likes[:-100]
+                    self.neural_counter += 1
+                    print("neural calls: {}".format(self.neural_counter))
                         # self.full_points = self.full_points[:-100, :]
                 else:
                     self.indelta_counter = 0
                     self.loglikelihood = self.loglikelihood_control
                     self.trained_net = False
 
-                print("\nDELTA likes\n", self.delta_loglikes)
-                print("IN NEURAL!!!!!!\n")
 
 
 
