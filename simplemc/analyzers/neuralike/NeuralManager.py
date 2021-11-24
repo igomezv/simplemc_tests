@@ -35,7 +35,7 @@ class NeuralManager:
         # self.nrand = nrand
         # self.epochs = epochs
         # self.plot = plot
-        # self.model_path = 'simplemc/analyzers/neuralike/neural_models/{}.h5'.format(rootname)
+        self.model_path = '{}.h5'.format(rootname)
         self.fig_path = '{}.png'.format(rootname)
 
         # rsampling = RandomSampling(self.loglikelihood_fn, means=means,

@@ -838,8 +838,7 @@ class Sampler(object):
                     if self.indelta_counter % self.expected_counts == 0 and self.trained_net is False:
                         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
 
-                        net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                            rootname=self.outputname,
+                        net = NeuralManager(rootname=self.outputname,
                                             likes=self.full_likes,
                                             samples=self.full_points)
                         self.loglikelihood = net.loglikelihood
