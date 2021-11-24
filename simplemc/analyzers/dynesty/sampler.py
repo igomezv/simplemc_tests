@@ -168,17 +168,27 @@ class Sampler(object):
             self.full_points[i, :] = point
         # print(self.full_points, np.shape(self.full_points))
         # difference between loglike i and loglike (i-1)
-        self.delta_loglikes_goal = 10
+        if neural_options:
+            self.delta_loglikes_goal = neural_options['delta_loglikes_goal']
+            # difference between loglike i and loglike (i-1)
+            self.expected_counts = neural_options['expected_counts']
+            # ncalls_to_net
+            self.ncalls_to_net = neural_options['ncalls_to_net']
+        else:
+            self.delta_loglikes_goal = 10
+            # cumulative counts to start the neural net training
+            self.expected_counts = 10
+            # ncalls_to_net
+            self.ncalls_to_net = 100
+
         # difference between loglike i and loglike (i-1)
         self.delta_loglikes = np.inf
         # counter of samples whitin the delta
         self.indelta_counter = 0
-        # cumulative counts to start the neural net training
-        self.expected_counts = 10
-        # ncalls_to_net
-        self.ncalls_to_net = 100
         # True if neural network is already trained
         self.trained_net = False
+        # Counter of neuralikes
+        self.neural_counter = 0
 
 
     def __getstate__(self):

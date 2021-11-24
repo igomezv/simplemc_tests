@@ -105,7 +105,8 @@ class UnitCubeSampler(Sampler):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  method, update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, kwargs={}):
+                 queue_size, pool, use_pool, neuralike=True, neural_options=None,
+                 kwargs={}):
 
         # Initialize method to propose a new starting point.
         self._PROPOSE = {'unif': self.propose_unif,
@@ -155,7 +156,8 @@ class UnitCubeSampler(Sampler):
         super(UnitCubeSampler,
               self).__init__(loglikelihood, prior_transform, npdim,
                              live_points, update_interval, first_update,
-                             rstate, queue_size, pool, use_pool)
+                             rstate, queue_size, pool, use_pool,
+                             neuralike=neuralike, neural_options=neural_options)
         self.unitcube = UnitCube(self.npdim)
         self.bounding = 'none'
         self.method = method
@@ -298,7 +300,8 @@ class SingleEllipsoidSampler(Sampler):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  method, update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, kwargs={}):
+                 queue_size, pool, use_pool,
+                 neuralike=True, neural_options=None, kwargs={}):
 
         # Initialize method to propose a new starting point.
         self._PROPOSE = {'unif': self.propose_unif,
@@ -349,7 +352,8 @@ class SingleEllipsoidSampler(Sampler):
         super(SingleEllipsoidSampler,
               self).__init__(loglikelihood, prior_transform, npdim,
                              live_points, update_interval, first_update,
-                             rstate, queue_size, pool, use_pool)
+                             rstate, queue_size, pool, use_pool,
+                             neuralike=neuralike, neural_options=neural_options)
         self.ell = Ellipsoid(np.zeros(self.npdim), np.identity(self.npdim))
         self.bounding = 'single'
         self.method = method
@@ -517,7 +521,8 @@ class MultiEllipsoidSampler(Sampler):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  method, update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, kwargs={}):
+                 queue_size, pool, use_pool,
+                 neuralike=True, neural_options=None, kwargs={}):
 
         # Initialize method to propose a new starting point.
         self._PROPOSE = {'unif': self.propose_unif,
@@ -570,7 +575,8 @@ class MultiEllipsoidSampler(Sampler):
         super(MultiEllipsoidSampler,
               self).__init__(loglikelihood, prior_transform, npdim,
                              live_points, update_interval, first_update,
-                             rstate, queue_size, pool, use_pool)
+                             rstate, queue_size, pool, use_pool,
+                             neuralike=neuralike, neural_options=neural_options)
         self.mell = MultiEllipsoid(ctrs=[np.zeros(self.npdim)],
                                    covs=[np.identity(self.npdim)])
         self.bounding = 'multi'
@@ -775,7 +781,9 @@ class RadFriendsSampler(Sampler):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  method, update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, kwargs={}):
+                 queue_size, pool, use_pool,
+                 neuralike=True, neural_options=None,
+                 kwargs={}):
 
         # Initialize method to propose a new starting point.
         self._PROPOSE = {'unif': self.propose_unif,
@@ -825,7 +833,8 @@ class RadFriendsSampler(Sampler):
         super(RadFriendsSampler,
               self).__init__(loglikelihood, prior_transform, npdim,
                              live_points, update_interval, first_update,
-                             rstate, queue_size, pool, use_pool)
+                             rstate, queue_size, pool, use_pool,
+                             neuralike=neuralike, neural_options=neural_options)
         self.radfriends = RadFriends(self.npdim)
         self.bounding = 'balls'
         self.method = method
@@ -995,7 +1004,8 @@ class SupFriendsSampler(Sampler):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  method, update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, kwargs={}):
+                 queue_size, pool, use_pool,
+                 neuralike=True, neural_options=None, kwargs={}):
 
         # Initialize method to propose a new starting point.
         self._PROPOSE = {'unif': self.propose_unif,
@@ -1045,7 +1055,8 @@ class SupFriendsSampler(Sampler):
         super(SupFriendsSampler,
               self).__init__(loglikelihood, prior_transform, npdim,
                              live_points, update_interval, first_update,
-                             rstate, queue_size, pool, use_pool)
+                             rstate, queue_size, pool, use_pool,
+                             neuralike=neuralike, neural_options=neural_options)
         self.supfriends = SupFriends(self.npdim)
         self.bounding = 'cubes'
         self.method = method

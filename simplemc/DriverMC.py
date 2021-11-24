@@ -141,9 +141,7 @@ class DriverMC:
                                     self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
-
-        if self.useNeuralike:
-            self.neural_options = self.neuralike_dict(iniFile=self.iniFile)
+        self.neural_options = self.neuralike_dict(iniFile=self.iniFile)
 
 
     def executer(self, **kwargs):
@@ -377,7 +375,9 @@ class DriverMC:
         else:
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
                         bound=nestedType, sample = 'unif', nlive = nlivepoints,
-                        pool = pool, queue_size=nprocess, use_pool={'loglikelihood': False})
+                        pool = pool, queue_size=nprocess,
+                        use_pool={'loglikelihood': False},
+                        neuralike=self.useNeuralike, neural_options=self.neural_options)
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
                                addDerived=self.addDerived, simpleLike=self.L)
             M = sampler.results
@@ -826,28 +826,38 @@ class DriverMC:
         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
         self.outputpath = '{}_neuralike'.format(self.outputpath)
         if iniFile:
-            nrand = self.config.getint('neuralike', 'nrand', fallback=100)
+
             epochs = self.config.getint('neuralike', 'epochs', fallback=100)
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
             psplit = self.config.getfloat('neuralike', 'psplit', fallback=0.8)
             hidden_layers_neurons = [int(x) for x in self.config.get('neuralike', 'hidden_layers_neurons',
                                                                      fallback=[100, 100, 200]).split(',')]
-            nproc = self.config.getint('neuralike', 'nproc', fallback=3)
+            plot = self.config.getboolean('neuralike', 'plot', fallback=True)
+            patience = self.config.getfloat('neuralike', 'patience', fallback=10)
+            delta_loglikes_goal = self.config.getfloat('neuralike', 'delta_loglikes_goal', fallback=5)
+            expected_counts = self.config.getint('neuralike', 'expected_counts', fallback=50)
+            # ncalls_to_net
+            ncalls_to_net = self.config.getfloat('neuralike', 'ncalls_to_net', fallback=1000)
         else:
-            nrand = kwargs.pop('nrand', 100)
             epochs = kwargs.pop('epochs', 100)
             learning_rate = kwargs.pop('learning_rate', 5e-4)
             batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
             hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
-            nproc = kwargs.pop('nproc', 3)
-        if nproc > 1:
-            import multiprocessing as mp
-            pool = mp.Pool(processes=nproc)
-        else:
-            pool = None
+            plot = kwargs.pop('plot', True)
+            patience = kwargs.pop('patience', 10)
+            delta_loglikes_goal = kwargs.pop('delta_loglikes_goal', 5)
+            expected_counts = kwargs.pop('expected_counts', 50)
+            # ncalls_to_net
+            ncalls_to_net = kwargs.pop('ncalls_to_net', 1000)
 
-        return {'loglike': self.logLike, 'rootname': self.root, 'nrand': nrand,
-                'epochs': epochs, 'hidden_layers_neurons': hidden_layers_neurons, 'psplit': psplit,
-                'learning_rate': learning_rate, 'batch_size': batch_size, 'pool': pool}
+        return {'loglike': self.logLike, 'rootname': self.root,
+                'hidden_layers_neurons': hidden_layers_neurons,
+                'epochs': epochs, 'psplit': psplit,
+                'learning_rate': learning_rate, 'batch_size': batch_size,
+                'plot':plot, 'patience':patience,
+                'delta_loglikes_goal': delta_loglikes_goal,
+                'expected_counts': expected_counts,
+                'ncalls_to_net': ncalls_to_net}
+
