@@ -189,6 +189,7 @@ class Sampler(object):
         self.trained_net = False
         # Counter of neuralikes
         self.neural_counter = 0
+        self.neural_models_c = 0
 
 
     def __getstate__(self):
@@ -840,21 +841,21 @@ class Sampler(object):
 
                         net = NeuralManager(rootname=self.outputname,
                                             likes=self.full_likes,
-                                            samples=self.full_points)
+                                            samples=self.full_points,
+                                            neural_options=self.neural_options)
                         self.loglikelihood = net.loglikelihood
                         self.trained_net = True
+                        self.neural_models_c += 1
                         # self.full_likes = self.full_likes[:-100]
-                    self.neural_counter += 1
-                    print("neural calls: {}".format(self.neural_counter))
                         # self.full_points = self.full_points[:-100, :]
                 else:
                     self.indelta_counter = 0
                     self.loglikelihood = self.loglikelihood_control
                     self.trained_net = False
-
-
-
-
+                if self.trained_net: self.neural_counter += 1
+                print("neural calls: {} | "
+                      "neural models: {}".format(self.neural_counter,
+                                                 self.neural_models_c))
 
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
