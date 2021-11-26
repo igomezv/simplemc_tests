@@ -2,7 +2,7 @@
 ## TODO: usar modelChecker once it is trained, and flag for overige
 
 from .NeuralNet import NeuralNet
-# from .RandomSampling import RandomSampling
+from .RandomSampling import RandomSampling
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 
@@ -23,9 +23,10 @@ class NeuralManager:
         plot
     """
 
-    def __init__(self, samples, likes, rootname='neural', neural_options=None):
+    def __init__(self, loglikelihood, samples, likes,
+                 nrand=100, rootname='neural', neural_options=None):
 
-        # self.loglikelihood_fn = loglikelihood
+        self.loglikelihood_fn = loglikelihood
 
         # self.pars_info = pars_info
         _, self.dims = np.shape(samples)
@@ -37,14 +38,16 @@ class NeuralManager:
         # self.plot = plot
         self.model_path = '{}.h5'.format(rootname)
         self.fig_path = '{}.png'.format(rootname)
+        self.nrand = nrand
 
-        # rsampling = RandomSampling(self.loglikelihood_fn, means=means,
-        #                            cov=cov, nrand=self.nrand)
-        #                            # files_path=self.model_path)
-        # rsamples, rlikes = rsampling.make_dataset()
-        #
-        # self.likes = np.append(rlikes, likes)
-        # self.samples = np.append(rsamples, samples, axis=0)
+        rsampling = RandomSampling(self.loglikelihood_fn, means=means,
+                                   cov=np.diag(np.ones(len(means)))*1e-6,
+                                   nrand=self.nrand)
+                                   # files_path=self.model_path)
+        rsamples, rlikes = rsampling.make_dataset()
+
+        self.likes = np.append(rlikes, likes)
+        self.samples = np.append(rsamples, samples, axis=0)
 
         self.likes = likes
         self.samples = samples
