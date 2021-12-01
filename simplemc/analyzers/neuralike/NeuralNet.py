@@ -1,6 +1,5 @@
 
 
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from time import time
@@ -84,8 +83,11 @@ class NeuralNet:
                                       self.Y_train,
                                       validation_data=(self.X_test,
                                                        self.Y_test),
-                                      epochs=self.epochs, batch_size=self.batch_size,
-                                      verbose=1, callbacks=callbacks)
+                                      epochs=self.epochs,
+                                      batch_size=self.batch_size,
+                                      shuffle=True,
+                                      verbose=1,
+                                      callbacks=callbacks)
         tt = time() - t0
         print("Training complete! Time training: {:.3f} min".format(tt/60.))
         return self.history
