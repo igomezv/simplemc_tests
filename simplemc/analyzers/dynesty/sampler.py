@@ -174,14 +174,14 @@ class Sampler(object):
             self.expected_counts = neural_options['expected_counts']
             # ncalls_to_net
             self.ncalls_to_net = neural_options['ncalls_to_net']
-            self.ncalls_to_net_tol = 100
+            self.ncalls_to_net_tol = 20
         else:
-            self.delta_loglikes_goal = 10
+            self.delta_loglikes_goal = 0.5
             # cumulative counts to start the neural net training
             self.expected_counts = 10
             # ncalls_to_net
-            self.ncalls_to_net = 100
-            self.ncalls_to_net_tol = 100
+            self.ncalls_to_net = 2000
+            self.ncalls_to_net_tol = 20
 
         # difference between loglike i and loglike (i-1)
         self.delta_loglikes = np.inf
@@ -192,6 +192,7 @@ class Sampler(object):
         # Counter of neuralikes
         self.neural_counter = 0
         self.neural_models_c = 0
+        self.counts_after_net = 0
 
 
     def __getstate__(self):
@@ -840,9 +841,11 @@ class Sampler(object):
                 if self.delta_loglikes < self.delta_loglikes_goal:
                     self.indelta_counter += 1
                     flag_count = (self.indelta_counter % self.expected_counts == 0)
-                    flag_trained = (self.trained_net is False)
+                    flag_trained = (self.trained_net is True)
                     flag_delta = (delta_ncalls > self.ncalls_to_net_tol)
-                    if (flag_count and flag_trained) or flag_delta:
+                    flag_without_net = (self.counts_after_net % 100 == 0)
+                    if flag_without_net and ((flag_count and not flag_trained) or
+                                             (flag_delta and flag_trained)):
                         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
                         net = NeuralManager(loglikelihood=self.loglikelihood_control,
                                             rootname=self.outputname,
@@ -852,12 +855,14 @@ class Sampler(object):
                         self.loglikelihood = net.loglikelihood
                         self.trained_net = True
                         self.neural_models_c += 1
-                        # self.full_likes = self.full_likes[:-self.ncalls_to_net]
-                        # self.full_points = self.full_points[:-self.ncalls_to_net, :]
+                        self.counts_after_net = 0
+                        self.full_likes = self.full_likes[self.expected_counts:]
+                        self.full_points = self.full_points[self.expected_counts:, :]
                 else:
                     self.indelta_counter = 0
                     self.loglikelihood = self.loglikelihood_control
                     self.trained_net = False
+                    self.counts_after_net += 1
                 if self.trained_net: self.neural_counter += 1
                 print("\nneural calls: {} | "
                       "neural models: {}".format(self.neural_counter,

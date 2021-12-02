@@ -24,7 +24,7 @@ class NeuralManager:
     """
 
     def __init__(self, loglikelihood, samples, likes,
-                 nrand=100, rootname='neural', neural_options=None):
+                 nrand=5, rootname='neural', neural_options=None):
 
         self.loglikelihood_fn = loglikelihood
 
