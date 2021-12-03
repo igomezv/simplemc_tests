@@ -24,7 +24,7 @@ class NeuralManager:
     """
 
     def __init__(self, loglikelihood, samples, likes,
-                 nrand=5, rootname='neural', neural_options=None):
+                 nrand=10, rootname='neural', neural_options=None):
 
         self.loglikelihood_fn = loglikelihood
 
@@ -49,8 +49,8 @@ class NeuralManager:
         self.likes = np.append(rlikes, likes)
         self.samples = np.append(rsamples, samples, axis=0)
 
-        self.likes = likes
-        self.samples = samples
+        # self.likes = likes
+        # self.samples = samples
 
         if neural_options:
             self.learning_rate = neural_options['learning_rate']
@@ -91,8 +91,10 @@ class NeuralManager:
         # neural_model.save_model('{}'.format(self.model_path))
         if self.plot:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
-
-        return True
+        if self.neural_model.mse_val < 0.5 and self.neural_model.mse_train < 0.5:
+            return True
+        else:
+            return False
 
     def load(self):
         neural_model = NeuralNet(load=True, model_path=self.model_path)
