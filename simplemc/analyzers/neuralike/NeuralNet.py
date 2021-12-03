@@ -40,6 +40,8 @@ class NeuralNet:
             self.Y_train, self.Y_test = np.split(Y, indx)
             self.model = self.model()
 
+        # self.mse = np.min(self.history.history['val_loss'])
+
     def model(self):
         try:
             import tensorflow as tf
@@ -89,6 +91,8 @@ class NeuralNet:
                                       verbose=1,
                                       callbacks=callbacks)
         tt = time() - t0
+        self.mse_val = np.min(self.history.history['val_loss'])
+        self.mse_train = np.min(self.history.history['loss'])
         print("Training complete! Time training: {:.3f} min".format(tt/60.))
         return self.history
 
@@ -108,6 +112,7 @@ class NeuralNet:
             import warnings
             warnings.warn("Please install tensorflow library if you want to use neural networks")
         neural_model = tf.keras.models.load_model('{}'.format(self.model_path))
+        self.history = neural_model.history
         return neural_model
 
     def predict(self, x):
@@ -125,8 +130,7 @@ class NeuralNet:
         plt.plot(self.history.history['val_loss'], label='validation set')
         if ylogscale:
             plt.yscale('log')
-        mse = np.min(self.history.history['val_loss'])
-        plt.title('MSE: {} Uncertainty: {}'.format(mse, np.sqrt(mse)))
+        plt.title('MSE: {:.4f} Uncertainty: {:.4f}'.format(self.mse_val, np.sqrt(self.mse_val)))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
@@ -134,3 +138,4 @@ class NeuralNet:
             plt.savefig(figname)
         if show:
             plt.show()
+
