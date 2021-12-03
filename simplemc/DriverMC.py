@@ -836,7 +836,7 @@ class DriverMC:
                                                                      fallback=[100, 100, 200]).split(',')]
             plot = self.config.getboolean('neuralike', 'plot', fallback=True)
             patience = self.config.getfloat('neuralike', 'patience', fallback=10)
-            delta_loglikes_goal = self.config.getfloat('neuralike', 'delta_loglikes_goal', fallback=5)
+            likes_window = self.config.getfloat('neuralike', 'likes_window', fallback=5)
             expected_counts = self.config.getint('neuralike', 'expected_counts', fallback=50)
             # ncalls_to_net
             ncalls_to_net = self.config.getfloat('neuralike', 'ncalls_to_net', fallback=1000)
@@ -848,7 +848,7 @@ class DriverMC:
             hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
             plot = kwargs.pop('plot', True)
             patience = kwargs.pop('patience', 10)
-            delta_loglikes_goal = kwargs.pop('delta_loglikes_goal', 5)
+            likes_window = kwargs.pop('likes_window', 5)
             expected_counts = kwargs.pop('expected_counts', 50)
             # ncalls_to_net
             ncalls_to_net = kwargs.pop('ncalls_to_net', 1000)
@@ -858,7 +858,7 @@ class DriverMC:
                 'epochs': epochs, 'psplit': psplit,
                 'learning_rate': learning_rate, 'batch_size': batch_size,
                 'plot':plot, 'patience':patience,
-                'delta_loglikes_goal': delta_loglikes_goal,
+                'likes_window': likes_window,
                 'expected_counts': expected_counts,
                 'ncalls_to_net': ncalls_to_net}
 
