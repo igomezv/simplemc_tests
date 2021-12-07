@@ -855,12 +855,12 @@ class Sampler(object):
                     if self.trained_net is False:
                         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
                         l = self.ncall//2
-                        self.full_likes = self.full_likes[:-l]
-                        self.full_points = self.full_points[:-l, :]
+                        # self.full_likes = self.full_likes[:-l]
+                        # self.full_points = self.full_points[:-l, :]
                         net = NeuralManager(loglikelihood=self.loglikelihood_control,
                                             rootname=self.outputname,
-                                            likes=self.full_likes,
-                                            samples=self.full_points,
+                                            likes=self.full_likes[:-l],
+                                            samples=self.full_points[:-l, :],
                                             neural_options=self.neural_options)
                         if net.valid:
                             self.loglikelihood = net.loglikelihood
@@ -878,7 +878,7 @@ class Sampler(object):
                     # self.tol_counter += 1
                     # if self.tol_counter > 5:
                     print("\nUsing original loglike function")
-                    # self.loglikelihood = self.loglikelihood_control
+                    self.loglikelihood = self.loglikelihood_control
                     if self.neural_counter > 1:
                         self.original_after_counter += 1
                     # self.tol_counter = 0
