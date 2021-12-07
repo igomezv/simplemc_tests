@@ -862,7 +862,7 @@ class Sampler(object):
                                             likes=self.full_likes,
                                             samples=self.full_points,
                                             neural_options=self.neural_options)
-                        if net:
+                        if net.valid:
                             self.loglikelihood = net.loglikelihood
                             self.trained_net = True
                             self.neural_models_c += 1
@@ -871,7 +871,6 @@ class Sampler(object):
                             print("\nNet not accepted!")
                             self.loglikelihood = self.loglikelihood_control
                             self.trained_net = False
-
                 if self.trained_net:
                     self.neural_counter += 1
                     # self.loglikelihood = net.loglikelihood
@@ -879,7 +878,7 @@ class Sampler(object):
                     # self.tol_counter += 1
                     # if self.tol_counter > 5:
                     print("\nUsing original loglike function")
-                    self.loglikelihood = self.loglikelihood_control
+                    # self.loglikelihood = self.loglikelihood_control
                     if self.neural_counter > 1:
                         self.original_after_counter += 1
                     # self.tol_counter = 0

@@ -1,5 +1,7 @@
-
-## TODO: usar modelChecker once it is trained, and flag for overige
+"""neuralike management object.
+Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
+Date: Dec 2021
+"""
 
 from .NeuralNet import NeuralNet
 from .RandomSampling import RandomSampling
@@ -38,19 +40,19 @@ class NeuralManager:
         # self.plot = plot
         self.model_path = '{}.h5'.format(rootname)
         self.fig_path = '{}.png'.format(rootname)
-        self.nrand = nrand
-
-        rsampling = RandomSampling(self.loglikelihood_fn, means=means,
-                                   cov=np.diag(np.ones(len(means)))*1e-6,
-                                   nrand=self.nrand)
-                                   # files_path=self.model_path)
-        rsamples, rlikes = rsampling.make_dataset()
-
-        self.likes = np.append(rlikes, likes)
-        self.samples = np.append(rsamples, samples, axis=0)
-
-        # self.likes = likes
-        # self.samples = samples
+        # self.nrand = nrand
+        #
+        # rsampling = RandomSampling(self.loglikelihood_fn, means=means,
+        #                            cov=np.diag(np.ones(len(means)))*1e-6,
+        #                            nrand=self.nrand)
+        #                            # files_path=self.model_path)
+        # rsamples, rlikes = rsampling.make_dataset()
+        #
+        # self.likes = np.append(rlikes, likes)
+        # self.samples = np.append(rsamples, samples, axis=0)
+        self.valid = False
+        self.likes = likes
+        self.samples = samples
 
         if neural_options:
             self.learning_rate = neural_options['learning_rate']
@@ -92,9 +94,9 @@ class NeuralManager:
         if self.plot:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
         if self.neural_model.mse_val < 0.5 and self.neural_model.mse_train < 0.5:
-            return True
+            self.valid = True
         else:
-            return False
+            self.valid = False
 
     def load(self):
         neural_model = NeuralNet(load=True, model_path=self.model_path)
