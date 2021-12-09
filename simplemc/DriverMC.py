@@ -141,7 +141,7 @@ class DriverMC:
                                     self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
-        self.neural_options = self.neuralike_dict(iniFile=self.iniFile)
+        self.neuralike_settings = self.neuralike_dict(iniFile=self.iniFile)
 
 
     def executer(self, **kwargs):
@@ -368,7 +368,8 @@ class DriverMC:
 
             sampler.run_nested(nlive_init=nlivepoints, dlogz_init=0.05, nlive_batch=100,
                             maxiter_init=10000, maxiter_batch=1000, maxbatch=10,
-                            outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L)
+                            outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L,
+                            neuralike_settings=self.neuralike_settings)
             M = sampler.results
 
 
@@ -376,11 +377,10 @@ class DriverMC:
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
                         bound=nestedType, sample = 'unif', nlive = nlivepoints,
                         pool = pool, queue_size=nprocess,
-                        use_pool={'loglikelihood': False},
-                        neuralike=self.useNeuralike,
-                        neural_options=self.neural_options)
+                        neuralike=self.useNeuralike)
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
-                               addDerived=self.addDerived, simpleLike=self.L)
+                               addDerived=self.addDerived, simpleLike=self.L,
+                               neuralike_settings=self.neuralike_settings)
             M = sampler.results
 
         try:
@@ -800,7 +800,6 @@ class DriverMC:
 
         """
         import multiprocessing as mp
-        from multiprocessing.pool import ThreadPool
         if nproc <= 0:
             ncores = mp.cpu_count()
             nprocess = ncores//2
@@ -836,10 +835,12 @@ class DriverMC:
                                                                      fallback=[100, 100, 200]).split(',')]
             plot = self.config.getboolean('neuralike', 'plot', fallback=True)
             patience = self.config.getfloat('neuralike', 'patience', fallback=10)
-            likes_window = self.config.getfloat('neuralike', 'likes_window', fallback=5)
-            expected_counts = self.config.getint('neuralike', 'expected_counts', fallback=50)
-            # ncalls_to_net
-            ncalls_to_net = self.config.getfloat('neuralike', 'ncalls_to_net', fallback=1000)
+            nrand = self.config.getint('neuralike', 'nrand', fallback=5)
+            nstart_samples = self.config.getint('neuralike', 'nstart_samples', fallback=500)
+            nstart_stop_criterion = self.config.getfloat('neuralike', 'nstart_stop_criterion', fallback=1.0)
+            updInt = self.config.getint('neuralike', 'updInt', fallback=100)
+            ncalls_excess = self.config.getint('neuralike', 'ncalls_excess', fallback=40)
+            valid_delta_mse = self.config.getfloat('neuralike', 'valid_delta_mse', fallback=40)
         else:
             epochs = kwargs.pop('epochs', 100)
             learning_rate = kwargs.pop('learning_rate', 5e-4)
@@ -848,17 +849,21 @@ class DriverMC:
             hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
             plot = kwargs.pop('plot', True)
             patience = kwargs.pop('patience', 10)
-            likes_window = kwargs.pop('likes_window', 5)
-            expected_counts = kwargs.pop('expected_counts', 50)
-            # ncalls_to_net
-            ncalls_to_net = kwargs.pop('ncalls_to_net', 1000)
+            nrand = kwargs.pop('nrand', 5)
+            nstart_samples = kwargs.pop('nstart_samples', 500)
+            nstart_stop_criterion = kwargs.pop('nstart_stop_criterion', 1.0)
+            updInt = kwargs.pop('updInt', 100)
+            ncalls_excess = kwargs.pop('ncalls_excess', 40)
+            valid_delta_mse = kwargs.pop('valid_delta_mse', 0.01)
 
         return {'loglike': self.logLike, 'rootname': self.root,
                 'hidden_layers_neurons': hidden_layers_neurons,
                 'epochs': epochs, 'psplit': psplit,
                 'learning_rate': learning_rate, 'batch_size': batch_size,
                 'plot':plot, 'patience':patience,
-                'likes_window': likes_window,
-                'expected_counts': expected_counts,
-                'ncalls_to_net': ncalls_to_net}
+                'valid_delta_mse': valid_delta_mse,
+                'nstart_samples': nstart_samples,
+                'nstart_stop_criterion': nstart_stop_criterion,
+                'updInt': updInt, 'nrand': nrand,
+                'ncalls_excess': ncalls_excess}
 
