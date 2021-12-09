@@ -1,8 +1,12 @@
-
+"""neural networks to neuralike.
+Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
+Date: Dec 2021
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
 from time import time
+
 
 class NeuralNet:
 
@@ -91,8 +95,8 @@ class NeuralNet:
                                       verbose=1,
                                       callbacks=callbacks)
         tt = time() - t0
-        self.mse_val = np.min(self.history.history['val_loss'])
-        self.mse_train = np.min(self.history.history['loss'])
+        self.mse_val = np.array(self.history.history['val_loss'][-int(self.patience):])
+        self.mse_train = np.array(self.history.history['loss'][-int(self.patience):])
         print("Training complete! Time training: {:.3f} min".format(tt/60.))
         return self.history
 
@@ -130,7 +134,7 @@ class NeuralNet:
         plt.plot(self.history.history['val_loss'], label='validation set')
         if ylogscale:
             plt.yscale('log')
-        plt.title('MSE: {:.4f} Uncertainty: {:.4f}'.format(self.mse_val, np.sqrt(self.mse_val)))
+        plt.title('MSE: {:.4f}'.format(np.min(self.mse_val)))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')

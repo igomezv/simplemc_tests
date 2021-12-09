@@ -172,13 +172,13 @@ class Sampler(object):
             # difference between loglike i and loglike (i-1)
             self.likes_window = neural_options['likes_window']
             # expected loglikes within delta
-            self.delta_within = 20
+            self.delta_within = 5
             self.ncalls_excess = 10
         else:
             # expected difference between two consecutives loglikes
             self.likes_window = 1
             # expected loglikes within delta
-            self.delta_within = 100
+            self.delta_within = 5
             # ncalls_to_net
             self.ncalls_excess = 10
 
@@ -189,10 +189,13 @@ class Sampler(object):
         # True if neural network is already trained
         self.trained_net = False
         # Counter of neuralikes
-        self.neural_counter = 0
+        self.n_neuralikes = 0
+        self.ncalls_neural = 0
         self.neural_models_c = 0
-        self.original_after_counter = 0
         self.tol_counter = 0
+        self.fail_tol = 5
+        self.nstart_nsamples = 200
+        self.updInt = 50
 
     def __getstate__(self):
         """Get state information for pickling."""
@@ -829,62 +832,47 @@ class Sampler(object):
             # method from our sampler.
             u, v, logl, nc = self._new_point(loglstar_new, logvol)
 
-            prev_ncall = self.ncall
+            # prev_ncall = self.ncall
             ncall += nc
             self.ncall += nc
             self.since_update += nc
             # simplemc
             # starts neuralike
-            if self.neuralike and len(self.saved_logl) > 2:
-                # Evaluate if the difference between the last two
-                # loglikes is within the likes_window
-                self.delta_loglikes = np.abs(self.saved_logl[-1] - self.saved_logl[-2])
-                if self.delta_loglikes < self.likes_window:
-                    self.indelta_counter += 1
-                else:
-                    # restart indelta counter
-                    self.indelta_counter = 0
-                # Monitoring the number of calls to generate one sample
-                delta_ncalls = self.ncall - prev_ncall
-                # if delta_ncalls is large we return to the original loglike
-                if delta_ncalls >= self.ncalls_excess:
+            nsamples = len(self.saved_logl)
+            if self.neuralike and nsamples >= self.nstart_nsamples:
+                print("\nneural calls: {} | neuralikes: {} |"
+                      "neural models: {}".format(self.ncalls_neural,
+                                                 self.n_neuralikes,
+                                                 self.neural_models_c))
+                if nc >= self.ncalls_excess:
                     self.trained_net = False
                     self.loglikelihood = self.loglikelihood_control
-                    self.indelta_counter = 0
-                if (self.indelta_counter >= self.delta_within) and (self.original_after_counter%50==0):
-                    if self.trained_net is False:
-                        from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-                        train_samples = self.ncall//2
-                        net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                            rootname=self.outputname,
-                                            likes=self.full_likes[:-train_samples],
-                                            samples=self.full_points[:-train_samples, :],
-                                            neural_options=self.neural_options)
-                        if net.valid:
-                            self.loglikelihood = net.loglikelihood
-                            self.trained_net = True
-                            self.neural_models_c += 1
-                            self.original_after_counter = 1
-                        else:
-                            print("\nNet not accepted!")
-                            self.loglikelihood = self.loglikelihood_control
-                            self.trained_net = False
+                # if self.indelta_counter >= self.delta_within and \
+                if self.trained_net is False and nsamples % self.updInt == 0:
+                    from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
+                    # train_samples = self.ncall
+                    net = NeuralManager(loglikelihood=self.loglikelihood_control,
+                                        rootname=self.outputname,
+                                        likes=self.full_likes,
+                                        samples=self.full_points,
+                                        # likes=self.full_likes[:-train_samples],
+                                        # samples=self.full_points[:-train_samples, :],
+                                        neural_options=self.neural_options)
+                    if net.valid:
+                        self.loglikelihood = net.loglikelihood
+                        self.trained_net = True
+                        self.neural_models_c += 1
+                    else:
+                        self.loglikelihood = self.loglikelihood_control
+                        self.trained_net = False
                 if self.trained_net:
-                    self.neural_counter += 1
-                    # self.loglikelihood = net.loglikelihood
+                    self.n_neuralikes += 1
+                    print("\nUsing neuralike function")
+                    self.loglikelihood = net.loglikelihood
+                    self.ncalls_neural += nc
                 else:
-                    # self.tol_counter += 1
-                    # if self.tol_counter > 5:
                     print("\nUsing original loglike function")
                     self.loglikelihood = self.loglikelihood_control
-                    if self.neural_counter > 1:
-                        self.original_after_counter += 1
-                    # self.tol_counter = 0
-
-
-                print("\nneural calls: {} | "
-                      "neural models: {}".format(self.neural_counter,
-                                                 self.neural_models_c))
 
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
