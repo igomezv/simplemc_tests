@@ -28,8 +28,9 @@ class NeuralNet:
         self.epochs = kwargs.pop('epochs', 50)
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
-        self.patience = kwargs.pop('patience', 100)
+        self.patience = kwargs.pop('patience', 5)
         psplit = kwargs.pop('psplit', 0.8)
+        # self.valid_delta_mse = kwargs.pop('valid_delta_ms', 0.1)
 
         if load:
             self.model = self.load_model()
@@ -93,10 +94,12 @@ class NeuralNet:
                                       batch_size=self.batch_size,
                                       shuffle=True,
                                       verbose=1,
-                                      callbacks=callbacks)
+                                      callbacks=callbacks,
+                                      use_multiprocessing=True)
         tt = time() - t0
-        self.mse_val = np.array(self.history.history['val_loss'][-int(self.patience):])
-        self.mse_train = np.array(self.history.history['loss'][-int(self.patience):])
+        nepochs = len(self.history.history['val_loss'])
+        self.mse_val = np.array(self.history.history['val_loss'][-nepochs//5:])
+        self.mse_train = np.array(self.history.history['loss'][-nepochs//5:])
         print("Training complete! Time training: {:.3f} min".format(tt/60.))
         return self.history
 
@@ -122,12 +125,18 @@ class NeuralNet:
     def predict(self, x):
         if type(x) == type([1]):
             x = np.array(x)
-        if type(x) == type(1):
+        elif type(x) == type(1):
             x = np.array([x])
-
         prediction = self.model.predict(x)
-
         return prediction
+
+    def delta_mse(self):
+        delta_mse = np.abs(self.mse_val - self.mse_train)
+        return np.mean(delta_mse)
+        # if np.all(delta_mse <= self.valid_delta_mse):
+        #     return True
+        # else:
+        #     return False
 
     def plot(self, save=False, figname=False, ylogscale=False, show=False):
         plt.plot(self.history.history['loss'], label='training set')
@@ -142,4 +151,3 @@ class NeuralNet:
             plt.savefig(figname)
         if show:
             plt.show()
-

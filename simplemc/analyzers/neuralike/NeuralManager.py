@@ -7,6 +7,7 @@ from .NeuralNet import NeuralNet
 from .RandomSampling import RandomSampling
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
+import multiprocessing as mp
 
 import os
 
@@ -26,44 +27,18 @@ class NeuralManager:
     """
 
     def __init__(self, loglikelihood, samples, likes,
-                 nrand=5, rootname='neural', neural_options=None):
+                 rootname='neural', neuralike_settings=None):
 
-        self.loglikelihood_fn = loglikelihood
-
-        # self.pars_info = pars_info
-        _, self.dims = np.shape(samples)
-        ml_idx = np.argmax(likes)
-        means = samples[ml_idx, :]
-
-        self.nrand = nrand
-        # self.epochs = epochs
-        # self.plot = plot
-        self.model_path = '{}.h5'.format(rootname)
-        self.fig_path = '{}.png'.format(rootname)
-        # self.nrand = nrand
-        #
-        rsampling = RandomSampling(self.loglikelihood_fn, means=means,
-                                   cov=np.diag(np.ones(len(means)))*1e-6,
-                                   nrand=self.nrand)
-                                   # files_path=self.model_path)
-        rsamples, rlikes = rsampling.make_dataset()
-
-        self.likes = np.append(rlikes, likes)
-        self.samples = np.append(rsamples, samples, axis=0)
-        self.valid = False
-        self.original_likes = likes
-        # self.likes = likes
-        # self.samples = samples
-
-        if neural_options:
-            self.learning_rate = neural_options['learning_rate']
-            self.batch_size = neural_options['batch_size']
-            self.epochs = neural_options['epochs']
-            self.patience = neural_options['patience']
-            self.psplit = neural_options['psplit']
-            hidden_layers_neurons = neural_options['hidden_layers_neurons']
-            self.plot = neural_options['plot']
-            self.valid_delta_mse = 0.01
+        if neuralike_settings:
+            self.learning_rate = neuralike_settings['learning_rate']
+            self.batch_size = neuralike_settings['batch_size']
+            self.epochs = neuralike_settings['epochs']
+            self.patience = neuralike_settings['patience']
+            self.psplit = neuralike_settings['psplit']
+            hidden_layers_neurons = neuralike_settings['hidden_layers_neurons']
+            self.plot = neuralike_settings['plot']
+            self.valid_delta_mse = neuralike_settings['valid_delta_mse']
+            self.nrand = neuralike_settings['nrand']
         else:
             self.learning_rate = 5e-4
             self.batch_size = 32
@@ -72,7 +47,34 @@ class NeuralManager:
             self.psplit = 0.8
             hidden_layers_neurons = [100, 100, 100]
             self.plot = True
-            self.valid_delta_mse = 0.01
+            self.valid_delta_mse = 0.05
+            self.nrand = 5
+
+        self.loglikelihood_fn = loglikelihood
+        _, self.dims = np.shape(samples)
+        ml_idx = np.argmax(likes)
+        means = samples[ml_idx, :]
+
+        self.model_path = '{}.h5'.format(rootname)
+        self.fig_path = '{}.png'.format(rootname)
+
+        rsampling = RandomSampling(self.loglikelihood_fn, means=means,
+                                   cov=np.cov(samples.T),
+                                   nrand=self.nrand)
+                                   # files_path=self.model_path)
+        rsamples, rlikes = rsampling.make_dataset()
+
+        self.original_likes = likes
+        self.likes = np.append(rlikes, likes)
+        self.samples = np.append(rsamples, samples, axis=0)
+        self.valid = False
+        # self.likes = likes
+        # self.samples = samples
+        self.maxl = np.max(self.original_likes)
+        self.minl = np.min(self.original_likes)
+        self.dev = np.std(self.original_likes[-len(self.original_likes)//10:])
+
+
 
         self.topology = [self.dims] + hidden_layers_neurons + [1]
 
@@ -80,7 +82,6 @@ class NeuralManager:
             self.training()
         else:
             self.neural_model = self.load()
-
 
     def training(self):
         # create scaler
@@ -96,7 +97,8 @@ class NeuralManager:
         self.neural_model = NeuralNet(X=self.samples, Y=sc_likes, topology=self.topology,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
-                                      patience=self.patience)
+                                      patience=self.patience,
+                                      valid_delta_mse=self.valid_delta_mse)
 
         self.neural_model.train()
         # neural_model.save_model('{}'.format(self.model_path))
@@ -104,7 +106,7 @@ class NeuralManager:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
 
         delta_mse = np.abs(self.neural_model.mse_val - self.neural_model.mse_train)
-        if np.all(delta_mse <= self.valid_delta_mse):
+        if self.neural_model.delta_mse() < self.valid_delta_mse:
             self.valid = True
             print("\nValid Neural net: mse_val={}, "
                   "mse_train={}".format(np.min(self.neural_model.mse_val),
@@ -131,8 +133,10 @@ class NeuralManager:
     def loglikelihood(self, params):
         likes_scaler = StandardScaler()
         likes_scaler.fit(self.likes.reshape(-1, 1))
-        likes = np.array(likes_scaler.inverse_transform(self.neural_model.predict(np.array(params).reshape(1,-1))))
-        # likes = np.array(self.neural_model.predict(np.array(params).reshape(1, -1)))
+        pred = self.neural_model.predict(np.array(params).reshape(1, -1))
+
+        likes = likes_scaler.inverse_transform(pred)
+        likes = np.array(likes)
         if self.like_valid(likes):
             return likes
         else:
@@ -140,13 +144,9 @@ class NeuralManager:
             self.valid = False
             return self.loglikelihood_fn(params)
 
-    def like_valid(self, like):
-        maxl = np.max(self.original_likes)
-        minl = np.min(self.original_likes)
-        dev = np.std(self.original_likes[-10:])
-        first_cond = (like < (maxl + dev))
-        second_cond = (like > (minl - dev))
-        # print("like: {}, maxl: {}, minl:{}".format(like, maxl, minl))
+    def like_valid(self, loglike):
+        first_cond = (loglike < (self.maxl + self.neural_model.delta_mse()))
+        second_cond = (loglike > (self.minl - self.neural_model.delta_mse()))
         if first_cond and second_cond:
             return True
         else:
