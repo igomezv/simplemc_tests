@@ -63,7 +63,7 @@ class NeuralManager:
             self.psplit = neural_options['psplit']
             hidden_layers_neurons = neural_options['hidden_layers_neurons']
             self.plot = neural_options['plot']
-            self.valid_delta_mse = 0.1
+            self.valid_delta_mse = 0.01
         else:
             self.learning_rate = 5e-4
             self.batch_size = 32
@@ -72,7 +72,7 @@ class NeuralManager:
             self.psplit = 0.8
             hidden_layers_neurons = [100, 100, 100]
             self.plot = True
-            self.valid_delta_mse = 0.1
+            self.valid_delta_mse = 0.01
 
         self.topology = [self.dims] + hidden_layers_neurons + [1]
 
@@ -104,7 +104,7 @@ class NeuralManager:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
 
         delta_mse = np.abs(self.neural_model.mse_val - self.neural_model.mse_train)
-        if np.all(delta_mse < self.valid_delta_mse):
+        if np.all(delta_mse <= self.valid_delta_mse):
             self.valid = True
             print("\nValid Neural net: mse_val={}, "
                   "mse_train={}".format(np.min(self.neural_model.mse_val),
@@ -143,7 +143,7 @@ class NeuralManager:
     def like_valid(self, like):
         maxl = np.max(self.original_likes)
         minl = np.min(self.original_likes)
-        dev = np.std(self.original_likes[-100:])
+        dev = np.std(self.original_likes[-10:])
         first_cond = (like < (maxl + dev))
         second_cond = (like > (minl - dev))
         # print("like: {}, maxl: {}, minl:{}".format(like, maxl, minl))
