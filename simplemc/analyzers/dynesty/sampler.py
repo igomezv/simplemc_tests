@@ -839,10 +839,10 @@ class Sampler(object):
                             train_samples = self.ncall//2
                             net = NeuralManager(loglikelihood=self.loglikelihood_control,
                                                 rootname=self.outputname,
-                                                # likes=np.array(self.saved_logl),
-                                                # samples=np.array(self.saved_v),
-                                                likes=self.full_likes[-train_samples:],
-                                                samples=self.full_points[-train_samples:, :],
+                                                likes=np.array(self.saved_logl),
+                                                samples=np.array(self.saved_v),
+                                                # likes=self.full_likes[-train_samples:],
+                                                # samples=self.full_points[-train_samples:, :],
                                                 neuralike_settings=self.neuralike_settings)
                             if train_counter == 0:
                                 flag_start_neural_it = self.it
