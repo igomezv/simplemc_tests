@@ -108,9 +108,7 @@ class NeuralManager:
         delta_mse = np.abs(self.neural_model.mse_val - self.neural_model.mse_train)
         if self.neural_model.delta_mse() < self.valid_delta_mse:
             self.valid = True
-            print("\nValid Neural net: mse_val={}, "
-                  "mse_train={}".format(np.min(self.neural_model.mse_val),
-                                        np.min(self.neural_model.mse_train)))
+            print("\nValid Neural net: delta_mse={}".format(self.neural_model.delta_mse()))
         else:
             self.valid = False
             print("\nNOT valid neural net. Delta_mse: {}".format(delta_mse))
@@ -145,8 +143,8 @@ class NeuralManager:
             return self.loglikelihood_fn(params)
 
     def like_valid(self, loglike):
-        first_cond = (loglike < (self.maxl + self.neural_model.delta_mse()))
-        second_cond = (loglike > (self.minl - self.neural_model.delta_mse()))
+        first_cond = (loglike < (self.maxl + 1.5*self.neural_model.delta_mse()))
+        second_cond = (loglike > (self.minl - 0.5*self.neural_model.delta_mse()))
         if first_cond and second_cond:
             return True
         else:
