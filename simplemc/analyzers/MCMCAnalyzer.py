@@ -172,6 +172,7 @@ class MCMCAnalyzer:
                 recvmsg = comm.bcast(condition, root=0)
                 if recvmsg ==1:
                     print('\n---- Gelman-Rubin achived ---- ')
+                    self.closeFiles()
                     return True
 
 
@@ -257,6 +258,7 @@ class MCMCAnalyzer:
         chain = loadtxt(self.cfname)
         self.weights = chain[:, 0]
         self.samples = chain[:, 2:self.N+2]
+        self.loglikes = chain[:, 1]
         self.mlfout.close()
 
 
@@ -372,4 +374,5 @@ class MCMCAnalyzer:
             self.cloglikes = ploglikes
 
     def get_results(self):
-        return self.samples, self.weights, self.gr
+        return {'samples': self.samples, 'weights': self.weights, 'loglikes': self.loglikes,
+                'gr_diagnostic': self.gr}

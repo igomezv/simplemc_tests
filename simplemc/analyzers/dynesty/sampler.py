@@ -83,7 +83,7 @@ class Sampler(object):
 
     def __init__(self, loglikelihood, prior_transform, npdim, live_points,
                  update_interval, first_update, rstate,
-                 queue_size, pool, use_pool, neuralike=True):
+                 queue_size, pool, use_pool):
         self.print_txt = "\rit: {} | ncall: {} | eff: {:.3f} | logz: {:.4f} | " \
                          "dlogz: {:.4f} | loglstar: {:.4f} | point {}"
 
@@ -155,20 +155,6 @@ class Sampler(object):
         self.saved_bounditer = []  # active bound at a specific iteration
         self.saved_scale = []  # scale factor at each iteration
 
-        # simplemc
-        self.neuralike = neuralike
-        # total evaluations of the likelihood, accepted + rejected proposals
-        self.full_likes = np.zeros((self.nlive))
-        self.full_points = np.zeros((self.nlive, self.npdim))
-        uf, vf, loglf = live_points
-        for i, point in enumerate(vf):
-            # print("{},{}\n".format(loglf[i], point))
-            self.full_likes[i] = loglf[i]
-            self.full_points[i, :] = point
-
-        # True if neural network is already trained
-        self.trained_net = False
-
     def __getstate__(self):
         """Get state information for pickling."""
 
@@ -198,7 +184,6 @@ class Sampler(object):
                                             np.array(self.live_u))))
         if self.use_pool_logl:
             # Use the pool to compute the log-likelihoods.
-            # neuralike works with it
             self.live_logl = np.array(list(self.M(self.loglikelihood,
                                                   np.array(self.live_v))))
         else:
@@ -338,7 +323,7 @@ class Sampler(object):
                 self.nqueue = 0
                 break
 
-    def _fill_queue(self, loglstar, neuralike=False):
+    def _fill_queue(self, loglstar):
         """Sequentially add new live point proposals to the queue."""
 
         # Add/zip arguments to submit to the queue.
@@ -365,12 +350,9 @@ class Sampler(object):
         args = zip(point_queue, loglstars, axes_queue,
                    scales, ptforms, logls, kwargs)
 
-        if self.use_pool_evolve and neuralike is False:
+        if self.use_pool_evolve:
             # Use the pool to propose ("evolve") a new live point.
             self.queue = list(self.M(evolve_point, args))
-        # elif self.use_pool_evolve and neuralike:
-        #  It is worth to find a nice alternative to it.
-        #     self.queue = list(self.pool.apply_async(evolve_point, (args,)).get(timeout=2))
         else:
             # Propose ("evolve") a new live point using the default `map`
             # function.
@@ -381,19 +363,12 @@ class Sampler(object):
 
         # If the queue is empty, refill it.
         if self.nqueue <= 0:
-            self._fill_queue(loglstar, neuralike=self.trained_net)
+            self._fill_queue(loglstar)
 
         # Grab the earliest entry.
         u, v, logl, nc, blob = self.queue.pop(0)
         self.used += 1  # add to the total number of used points
         self.nqueue -= 1
-        # simplemc
-        self.full_likes = np.append(self.full_likes, logl)
-        vr = np.reshape(v, (1, len(v)))
-        self.full_points = np.append(self.full_points, vr, axis=0)
-        # print("SHAPES V, FULL_POINTS", np.shape(vr), np.shape(self.full_points))
-        # print("\nUSED POINTS:", self.used, v, logl)
-        # print("\n")
 
         return u, v, logl, nc, blob
 
@@ -658,6 +633,7 @@ class Sampler(object):
             current evidence.
 
         """
+
         # Initialize quantities.
         if maxcall is None:
             maxcall = sys.maxsize
@@ -666,14 +642,6 @@ class Sampler(object):
         self.save_samples = save_samples
         self.save_bounds = save_bounds
         ncall = 0
-        # simplemc: neuralike
-        niter_after_net = 0
-        # Counter of neuralikes
-        n_neuralikes = 0
-        ncalls_neural = 0
-        neural_models_c = 0
-        train_counter = 0
-        flag_start_neural_it = 0
 
         # Check whether we're starting fresh or continuing a previous run.
         if self.it == 1:
@@ -815,52 +783,9 @@ class Sampler(object):
             # method from our sampler.
             u, v, logl, nc = self._new_point(loglstar_new, logvol)
 
-            # prev_ncall = self.ncall
             ncall += nc
             self.ncall += nc
             self.since_update += nc
-            # simplemc
-            # starts neuralike
-            if self.neuralike:
-                if (self.it >= self.nstart_samples) or (delta_logz <= self.nstart_stop_criterion):
-                    print("\nneural calls: {} | neuralikes: {} |"   
-                          "neural models: {}| neural trains: {}".format(ncalls_neural,
-                                                                        n_neuralikes,
-                                                                        neural_models_c,
-                                                                        train_counter))
-                    if nc >= self.ncalls_excess and self.trained_net:
-                      warnings.warn("Seems that the neural network has several difficulties. "
-                                    "Please set a larger number of nstart_samples, "
-                                    "smaller delta_mse, etc.")
-                      self.trained_net = False
-                    elif self.trained_net is False:
-                        if ((self.it-flag_start_neural_it) % self.updInt == 0) or (train_counter==0):
-                            from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-                            train_samples = self.ncall//2
-                            net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                                rootname=self.outputname,
-                                                likes=np.array(self.saved_logl),
-                                                samples=np.array(self.saved_v),
-                                                # likes=self.full_likes[-train_samples:],
-                                                # samples=self.full_points[-train_samples:, :],
-                                                neuralike_settings=self.neuralike_settings)
-                            if train_counter == 0:
-                                flag_start_neural_it = self.it
-                            train_counter += 1
-                            if net.valid:
-                                self.loglikelihood = net.loglikelihood
-                                self.trained_net = True
-                                neural_models_c += 1
-                            else:
-                                self.trained_net = False
-
-                    if self.trained_net:
-                        n_neuralikes += 1
-                        print("\nUsing neuralike function")
-                        ncalls_neural += nc
-                    else:
-                        self.loglikelihood = self.loglikelihood_control
-                        print("\nUsing original loglike function")
 
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
@@ -921,8 +846,8 @@ class Sampler(object):
                    add_live=True, print_progress=True,
                    save_bounds=True,
                    addDerived=False,
-                   outputname="outputDynesty", simpleLike=None,
-                   neuralike_settings=None):
+                   outputname="outputDynesty",
+                   simpleLike=None):
         """
         **A wrapper that executes the main nested sampling loop.**
         Iteratively replace the worst live point with a sample drawn
@@ -980,7 +905,6 @@ class Sampler(object):
         # Set parameters for the simplemc output text file
         self.like = simpleLike
         self.outputname = outputname
-        self.neuralike_settings = neuralike_settings
         if self.like is not None:
             self.derived = addDerived
             self.cpars = self.like.freeParameters()
@@ -991,12 +915,6 @@ class Sampler(object):
                 self.composite = False
         else:
             self.composite = False
-
-        # simplemc: reading neuralike settings
-        self.nstart_samples = self.neuralike_settings['nstart_samples']
-        self.nstart_stop_criterion = self.neuralike_settings['nstart_stop_criterion']
-        self.ncalls_excess = self.neuralike_settings['ncalls_excess']
-        self.updInt = self.neuralike_settings['updInt']
 
         # Define our stopping criteria.
         if dlogz is None:
@@ -1029,7 +947,6 @@ class Sampler(object):
                 logz = -np.inf
 
             # Print progress.
-            # simplemc
             if print_progress:
                 # Writing weights, likes and samples in a text file for simplemc output.
                 weights = np.exp(results[5])
@@ -1095,8 +1012,6 @@ class Sampler(object):
             f.close()
             self.it = it+1
 
-
-
     def add_final_live(self, print_progress=True):
         """
         **A wrapper that executes the loop adding the final live points.**
@@ -1131,7 +1046,7 @@ class Sampler(object):
                                                                        delta_logz, loglstar, vstar))
                 sys.stdout.flush()
 
-    # simplemc
+
     def getLikes(self):
         # This function is to extract the likelihoods for each observational dataset
         # used in simplemc and write them in the output text file

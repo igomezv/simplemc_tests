@@ -7,19 +7,20 @@ from simplemc import cdir
 
 
 class CompressedSNLikelihood(BaseLikelihood):
+    """
+            This module calculates likelihood for the compressed SN.
+
+            Parameters
+            ----------
+            name : str
+                Name of the dataset
+            values_filename : str
+                File text with the observational data.
+            cov_filename : str
+                File text with the covariance matrix of the observational data.
+    """
+
     def __init__(self, name, values_filename, cov_filename):
-        """
-        This module calculates likelihood for the compressed SN.
-        Parameters
-        ----------
-        name
-        values_filename
-        cov_filename
-
-        Returns
-        -------
-
-        """
         BaseLikelihood.__init__(self, name)
         print("Loading ", values_filename)
         da = sp.loadtxt(values_filename)
@@ -41,38 +42,33 @@ class CompressedSNLikelihood(BaseLikelihood):
         tvec = sp.array([self.theory_.distance_modulus(z) for z in self.zs])
         # This is the factor that we need to correct
         # note that in principle this shouldn't matter too much, we will marginalise over this
-        # Graficar
         tvec += 43
         delta = tvec-self.mus
-        # |delta|
         return -sp.dot(delta, sp.dot(self.icov, delta))/2.0
 
 
 class BetouleSN(CompressedSNLikelihood):
+    """
+    Likelihood to binned JLA dataset.
+    """
     def __init__(self):
-    	
-        # CompressedSNLikelihood.__init__(self, "BetouleSN", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLADO_inter.dat",
-        #                                 "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_COVAE_DO.dat")
-
-
-        # CompressedSNLikelihood.__init__(self, "BetouleSN", "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_inter.dat",
-        #                                 "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/fake_binned_JLA_COVAE.dat")
-
-
-        # CompressedSNLikelihood.__init__(self, "BetouleSN", "simplemc/data/jla_binned_distances_31nodes_v1.txt",
-        #                                 "simplemc/data/cov_jla_binned_distances_31nodes_v1.txt")
         CompressedSNLikelihood.__init__(self, "BetouleSN", cdir+"/data/jla_binned_distances_31nodes_v1.txt",
                                         cdir+"/data/cov_jla_binned_distances_31nodes_v1.txt")
 
 
-
 class UnionSN(CompressedSNLikelihood):
+    """
+    Likelihood to binned Union 2.1 dataset
+    """
     def __init__(self):
         CompressedSNLikelihood.__init__(self, "UnionSNV2", cdir+"/data/binned-sne-union21-v2.txt",
                                         cdir+"/data/binned-covariance-sne-union21-v2.txt")
 
 
-class BinnedPantheon(CompressedSNLikelihood):
-    def __init__(self):
-        CompressedSNLikelihood.__init__(self, "BinnedPantheon", cdir+"/data/binned_pantheon_15.txt",
-                                        cdir+"/data/binned_cov_pantheon_15.txt")
+# class BinnedPantheon(CompressedSNLikelihood):
+#     """
+#     Likelihood to binned Pantheon dataset.
+#     """
+#     def __init__(self):
+#         CompressedSNLikelihood.__init__(self, "BinnedPantheon", cdir+"/data/binned_pantheon_15.txt",
+#                                         cdir+"/data/binned_cov_pantheon_15.txt")

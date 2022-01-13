@@ -112,8 +112,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
                   compute_jac=False,
                   enlarge=None, bootstrap=0, vol_dec=0.5, vol_check=2.0,
                   walks=25, facc=0.5, slices=5, fmove=0.9, max_move=100,
-                  update_func=None, neuralike=False,
-                  **kwargs):
+                  update_func=None, **kwargs):
     """
     Initializes and returns a sampler object for Static Nested Sampling.
 
@@ -566,7 +565,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
     sampler = _SAMPLERS[bound](loglike, ptform, npdim,
                                live_points, sample, update_interval,
                                first_update, rstate, queue_size, pool,
-                               use_pool, neuralike, kwargs)
+                               use_pool, kwargs)
 
     return sampler
 

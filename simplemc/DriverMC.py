@@ -5,10 +5,10 @@ from .analyzers import MaxLikeAnalyzer
 from .analyzers import GA_deap
 from .analyzers import MCMCAnalyzer
 from .analyzers import DynamicNestedSampler, NestedSampler
-from .analyzers import EnsembleSampler
+#from .analyzers import EnsembleSampler
 from .cosmo.Derivedparam import AllDerived
 from . import ParseDataset, ParseModel
-from . import PostProcessing
+from .PostProcessing import PostProcessing
 from scipy.special import ndtri
 from simplemc import logger
 import numpy as np
@@ -73,7 +73,6 @@ class DriverMC:
 
         self.dict_resulẗ́ = {}
         self.iniFile = iniFile
-        self.trained_net = False
         if self.iniFile:    self.iniReader(iniFile)
         else:
             self.chainsdir    = kwargs.pop('chainsdir', 'simplemc/chains')
@@ -83,7 +82,7 @@ class DriverMC:
             self.datasets     = kwargs.pop('datasets','HD')
             self.analyzername = kwargs.pop('analyzername', None)
             self.addDerived   = kwargs.pop('addDerived', False)
-            self.useNeuralike = kwargs.pop('useNeuralike', False)
+            self.useNeuralLike = kwargs.pop('useNeuralLike', False)
             self.mcevidence = kwargs.pop('mcevidence', False)
             self.mcevidence_k = kwargs.pop('mcevidence_k', 4)
             self.overwrite = kwargs.pop('overwrite', True)
@@ -141,7 +140,10 @@ class DriverMC:
                                     self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
-        self.neuralike_settings = self.neuralike_dict(iniFile=self.iniFile)
+        if self.useNeuralLike:
+            print("Neuralike is under development. It cannot be used at this time.")
+            # neural_model = self.neuralLike(iniFile=self.iniFile)
+            # self.logLike = neural_model.loglikelihood
 
 
     def executer(self, **kwargs):
@@ -191,7 +193,7 @@ class DriverMC:
         self.analyzername = self.config.get(        'custom', 'analyzername', fallback=None)
         self.varys8       = self.config.getboolean( 'custom', 'varys8',       fallback=False)
         self.addDerived   = self.config.getboolean( 'custom', 'addDerived',   fallback=False)
-        self.useNeuralike = self.config.getboolean('custom', 'useNeuralike', fallback=False)
+        self.useNeuralLike = self.config.getboolean('custom', 'useNeuralLike', fallback=False)
         self.mcevidence = self.config.getboolean('custom', 'mcevidence', fallback=False)
         self.mcevidence_k = self.config.getint('custom', 'mcevidence_k', fallback=4)
         self.overwrite = self.config.getboolean('custom', 'overwrite', fallback=True)
@@ -275,8 +277,9 @@ class DriverMC:
 
         self.ttime = time.time() - ti
 
-        res = {'samples': M.get_results()[0], 'weights': M.get_results()[1],
-               'maxlike': M.maxloglike, 'gr_diagnostic': M.get_results()[2]}
+        res = {'samples': M.get_results()['samples'], 'weights': M.get_results()['weights'],
+               'maxlike': -M.maxloglike, 'loglikes': M.get_results()['loglikes'],
+               'gr_diagnostic': M.get_results()['gr_diagnostic']}
 
         self.dict_result = {'analyzer': 'mcmc', 'result': res}
 
@@ -326,7 +329,6 @@ class DriverMC:
             self.priortype = self.config.get('nested', 'priortype', fallback='u')
             #nsigma is the default value for sigma in gaussian priors
             self.nsigma = self.config.get('nested', 'sigma', fallback=2)
-
         else:
             dynamic     = kwargs.pop('dynamic',    False)
             nestedType  = kwargs.pop('nestedType', 'multi')
@@ -368,19 +370,16 @@ class DriverMC:
 
             sampler.run_nested(nlive_init=nlivepoints, dlogz_init=0.05, nlive_batch=100,
                             maxiter_init=10000, maxiter_batch=1000, maxbatch=10,
-                            outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L,
-                            neuralike_settings=self.neuralike_settings)
+                            outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L)
             M = sampler.results
 
 
         else:
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
                         bound=nestedType, sample = 'unif', nlive = nlivepoints,
-                        pool = pool, queue_size=nprocess,
-                        neuralike=self.useNeuralike)
+                        pool = pool, queue_size=nprocess, use_pool={'loglikelihood': False})
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
-                               addDerived=self.addDerived, simpleLike=self.L,
-                               neuralike_settings=self.neuralike_settings)
+                               addDerived=self.addDerived, simpleLike=self.L)
             M = sampler.results
 
         try:
@@ -389,13 +388,13 @@ class DriverMC:
             pass
         self.ttime = time.time() - ti
 
-        res = {'samples': M.samples, 'logwt': M.logwt, 'nlive': M.nlive, 'niter': M.niter,
+        res = {'samples': M.samples, 'logwt': M.logwt, 'maxlike': -np.max(M.logl),
+               'loglikes': -M.logl, 'nlive': M.nlive, 'niter': M.niter,
                'ncall': sum(M.ncall), '%eff': M.eff, 'logz': M.logz[-1], 'logzerr': M.logzerr[-1],
                'weights': np.exp(M.logwt - M.logz[-1])}
 
         self.dict_result = {'analyzer': 'nested',  'nested_algorithm': nestedType,
-                           'dynamic': dynamic,
-                           'result': res}
+                           'dynamic': dynamic, 'result': res}
         return True
 
 
@@ -471,7 +470,8 @@ class DriverMC:
             pass
         samples = sampler.get_chain(flat=True)
         weights = np.ones(len(samples))
-        res = {'samples': samples, 'weights': weights}
+        res = {'samples': samples, 'weights': weights,
+               'loglikes': sampler.loglikes, 'maxlike': np.max(sampler.loglikes)}
         self.dict_result = {'analyzer': 'emcee', 'walkers': walkers, 'nsamples': nsamp, 'result': res}
         return True
 
@@ -523,7 +523,7 @@ class DriverMC:
         ti = time.time()
         A = MaxLikeAnalyzer(self.L, self.model, compute_errors=compute_errors,
                             compute_derived=compute_derived, show_contours=show_contours,\
-                            plot_param1=plot_param1, plot_param2=plot_param2)
+                            plot_param1=plot_param1, plot_param2=plot_param2, outputname=self.outputpath)
         self.T.printParameters(A.params)
         self.ttime = time.time() - ti
         res = A.result()
@@ -615,7 +615,6 @@ class DriverMC:
             loglike=cloglikes.sum()
         else:
             loglike = self.L.loglike_wprior()
-
         return loglike
 
 
@@ -772,6 +771,9 @@ class DriverMC:
 
         pp.writeSummary()
 
+        if self.analyzername in ['nested', 'emcee']:
+            pp.writeMaxlike()
+
         if self.getdist:
             pp.plot(chainsdir=self.chainsdir, show=self.showfig).simpleGetdist()
         if self.corner:
@@ -800,6 +802,7 @@ class DriverMC:
 
         """
         import multiprocessing as mp
+        from multiprocessing.pool import ThreadPool
         if nproc <= 0:
             ncores = mp.cpu_count()
             nprocess = ncores//2
@@ -818,52 +821,36 @@ class DriverMC:
 
         return pool, nprocess
 
-    def neuralike_dict(self, iniFile=None, **kwargs):
+    def neuralLike(self, iniFile=None, **kwargs):
         """
         Under construction.
         This method trains a neural network in order to learn the likelihood function.
         """
-        if self.useNeuralike:
-            self.outputpath = '{}_neuralike'.format(self.outputpath)
-
+        from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
+        self.outputpath = '{}_neuralike'.format(self.outputpath)
         if iniFile:
-            epochs = self.config.getint('neuralike', 'epochs', fallback=100)
+            ndivsgrid = self.config.getint('neuralike', 'ndivsgrid', fallback=50)
+            epochs = self.config.getint('neuralike', 'epochs', fallback=500)
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
             psplit = self.config.getfloat('neuralike', 'psplit', fallback=0.8)
             hidden_layers_neurons = [int(x) for x in self.config.get('neuralike', 'hidden_layers_neurons',
                                                                      fallback=[100, 100, 200]).split(',')]
-            plot = self.config.getboolean('neuralike', 'plot', fallback=True)
-            patience = self.config.getfloat('neuralike', 'patience', fallback=10)
-            nrand = self.config.getint('neuralike', 'nrand', fallback=5)
-            nstart_samples = self.config.getint('neuralike', 'nstart_samples', fallback=500)
-            nstart_stop_criterion = self.config.getfloat('neuralike', 'nstart_stop_criterion', fallback=1.0)
-            updInt = self.config.getint('neuralike', 'updInt', fallback=100)
-            ncalls_excess = self.config.getint('neuralike', 'ncalls_excess', fallback=40)
-            valid_delta_mse = self.config.getfloat('neuralike', 'valid_delta_mse', fallback=40)
+            nproc = self.config.getint('neuralike', 'nproc', fallback=3)
         else:
-            epochs = kwargs.pop('epochs', 100)
+            ndivsgrid = kwargs.pop('ndivsgrid', 50)
+            epochs = kwargs.pop('epochs', 500)
             learning_rate = kwargs.pop('learning_rate', 5e-4)
             batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
             hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
-            plot = kwargs.pop('plot', True)
-            patience = kwargs.pop('patience', 10)
-            nrand = kwargs.pop('nrand', 5)
-            nstart_samples = kwargs.pop('nstart_samples', 500)
-            nstart_stop_criterion = kwargs.pop('nstart_stop_criterion', 1.0)
-            updInt = kwargs.pop('updInt', 100)
-            ncalls_excess = kwargs.pop('ncalls_excess', 40)
-            valid_delta_mse = kwargs.pop('valid_delta_mse', 0.01)
+            nproc = kwargs.pop('nproc', 3)
+        if nproc > 1:
+            import multiprocessing as mp
+            pool = mp.Pool(processes=nproc)
+        else:
+            pool = None
 
-        return {'loglike': self.logLike, 'rootname': self.root,
-                'hidden_layers_neurons': hidden_layers_neurons,
-                'epochs': epochs, 'psplit': psplit,
-                'learning_rate': learning_rate, 'batch_size': batch_size,
-                'plot':plot, 'patience':patience,
-                'valid_delta_mse': valid_delta_mse,
-                'nstart_samples': nstart_samples,
-                'nstart_stop_criterion': nstart_stop_criterion,
-                'updInt': updInt, 'nrand': nrand,
-                'ncalls_excess': ncalls_excess}
-
+        return NeuralManager(self.logLike, self.bounds, self.root, ndivsgrid=ndivsgrid,
+                             epochs=epochs, hidden_layers_neurons=hidden_layers_neurons, psplit=psplit,
+                             learning_rate=learning_rate, batch_size=batch_size, pool=pool)

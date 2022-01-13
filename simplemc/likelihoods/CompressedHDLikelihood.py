@@ -49,13 +49,5 @@ class CompressedHDLikelihood(BaseLikelihood):
 class HubbleDiagram(CompressedHDLikelihood):
     # data from https://arxiv.org/abs/1802.01505
     def __init__(self):
-       # CompressedHDLikelihood.__init__(self,"HD","/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/autoEncoderHz100dropout.dat",
-       #                                     "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/autoEncoderHz_cov100dropout.dat")
-
-
-       # CompressedHDLikelihood.__init__(self,"HD","/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/autoEncoderHz50_.dat",
-       #                                       "/home/cosmocicatais/Documents/github/neuralCosmoReconstruction/notebooks/autoEncoderHz_cov50_.dat")
-
-
-       CompressedHDLikelihood.__init__(self, "HD", cdir+"/data/HDiagramCompilacion-data_31.txt",
-                                        cdir+"/data/HDiagramCompilacion-cov_31.txt")
+        CompressedHDLikelihood.__init__(self,"HD", cdir+"/data/HDiagramCompilacion-data_31.txt",
+                                            cdir+"/data/HDiagramCompilacion-cov_31.txt")
