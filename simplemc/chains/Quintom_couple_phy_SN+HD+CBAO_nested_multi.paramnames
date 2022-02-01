@@ -4,11 +4,12 @@ h			h
 mquin			m_{\phi}
 mphan			m_{\psi}
 beta			\beta
+BetouleSN_like 			BetouleSN
+HD_like 			HD
 BAODR12_like 			BAODR12
 DR14LyaAuto_like 			DR14LyaAuto
 DR14LyaCross_like 			DR14LyaCross
 SixdFGS_like 			SixdFGS
 MGS_like 			MGS
 eBOSS_like 			eBOSS
-HD_like 			HD
 theory_prior 			 None 
