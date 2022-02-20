@@ -38,7 +38,7 @@ class PostProcessing:
         if addDerived:
             self.AD = AllDerived()
 
-        self.maxlogl = np.max(self.result['loglikes'])
+        self.maxlogl = np.max(-self.result['loglikes'])
 
     def writeSummary(self):
         file = open(self.filename + "_Summary" + ".txt", 'w')
@@ -95,11 +95,11 @@ class PostProcessing:
 
     def writeMaxlike(self):
         file = open(self.filename + ".maxlike", 'w')
-        maxlogl_idx = np.argmax(self.result['loglikes'])
+        maxlogl_idx = np.argmax(-self.result['loglikes'])
 
         maxsamp = str(self.result['samples'][maxlogl_idx]).lstrip('[').rstrip(']')
-        maxw = self.result['weights'][maxlogl_idx]
-        file.write('{} {} {}'.format(maxw, self.maxlogl, maxsamp))
+
+        file.write('# -2maxlogL\n{} {}'.format(-2*self.maxlogl, maxsamp))
         file.close()
 
     def mcevidence(self, k):
