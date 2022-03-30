@@ -169,5 +169,5 @@ wcpl_par = Parameter("wcpl", 0.0, 0.03, (0, 0.5), "w_{cpl}")
 LMBD_par = Parameter("LMBD", 0.65, 0.02, (0, 1), "w_{cpl}")
 
 # NLED Cosmology
-b_par = Parameter("b", 0.0, 0.01, (-1, 1), "b")
+b_par = Parameter("b", 0.5*108/343, 0.01, (0, 108/343), "b")
 
