@@ -26,5 +26,6 @@ from .TiredLightDecorator import TiredLightDecorator
 from .wCDMCosmology import wCDMCosmology
 from .WeirdCDMCosmology import WeirdCDMCosmology
 from .wFourierCosmology import wFourierCosmology
+from .NLEDCosmology import NLEDCosmology
 
 #from .ePhiCDMCosmology import ePhiCosmology
