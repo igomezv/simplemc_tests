@@ -40,9 +40,9 @@ class NLEDCosmology(LCDMCosmology):
     # this is relative hsquared as a function of a
     ## i.e. H(z)^2/H(z=0)^2
     def RHSquared_a(self, a):
-        NuContrib = self.NuDensity.rho(a)/self.h**2
+        # NuContrib = self.NuDensity.rho(a)/self.h**2
         beta = 1.0
         H_0 = 100*self.h
         num_term = self.b*self.Omrad/a**4
         den_term = (24*beta*H_0**2*self.Omrad/a**4)+1
-        return self.Ocb/a**3+self.Omrad/a**4+NuContrib + num_term/den_term
+        return self.Om/a**3+self.Omrad/a**4 + num_term/den_term
