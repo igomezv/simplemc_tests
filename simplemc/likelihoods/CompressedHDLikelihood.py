@@ -51,7 +51,6 @@ class HubbleDiagram(CompressedHDLikelihood):
     def __init__(self):
         CompressedHDLikelihood.__init__(self,"HD", cdir+"/data/HDiagramCompilacion-data_31.txt",
                                             cdir+"/data/HDiagramCompilacion-cov_31.txt")
-
     # def __init__(self):
     #     cranndir = '/home/isidro/Documents/gitHub/crann'
     #     CompressedHDLikelihood.__init__(self,"HD", cranndir+"/Hz_ffnn_mock.dat",

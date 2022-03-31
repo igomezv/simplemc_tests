@@ -53,7 +53,7 @@ class fs8Diagram(Compressedfs8Likelihood):
     #     cranndir = '/home/isidro/Documents/gitHub/crann'
     #     Compressedfs8Likelihood.__init__(self,"fs8", cranndir+"/fs8_ffnn_mock.dat",
     #                                         cranndir+"/fs8_ffnn_mock_cov.dat")
-    #
+
     # def __init__(self):
     #     cranndir = '/home/isidro/Documents/gitHub/crann'
     #     Compressedfs8Likelihood.__init__(self,"fs8", cranndir+"/fs8_mcdo_mock.dat",
