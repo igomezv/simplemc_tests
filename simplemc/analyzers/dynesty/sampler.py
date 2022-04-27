@@ -338,7 +338,8 @@ class Sampler(object):
                 self.nqueue = 0
                 break
 
-    def _fill_queue(self, loglstar, neuralike=False):
+    def _fill_queue(self, loglstar):
+                    # , neuralike=False):
         """Sequentially add new live point proposals to the queue."""
 
         # Add/zip arguments to submit to the queue.
@@ -365,7 +366,8 @@ class Sampler(object):
         args = zip(point_queue, loglstars, axes_queue,
                    scales, ptforms, logls, kwargs)
 
-        if self.use_pool_evolve and neuralike is False:
+        if self.use_pool_evolve:
+            # and neuralike is False:
             # Use the pool to propose ("evolve") a new live point.
             self.queue = list(self.M(evolve_point, args))
         # elif self.use_pool_evolve and neuralike:
@@ -381,7 +383,8 @@ class Sampler(object):
 
         # If the queue is empty, refill it.
         if self.nqueue <= 0:
-            self._fill_queue(loglstar, neuralike=self.trained_net)
+            self._fill_queue(loglstar)
+            # , neuralike=self.trained_net)
 
         # Grab the earliest entry.
         u, v, logl, nc, blob = self.queue.pop(0)

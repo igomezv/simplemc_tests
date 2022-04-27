@@ -37,7 +37,7 @@ class NeuralManager:
             self.psplit = neuralike_settings['psplit']
             hidden_layers_neurons = neuralike_settings['hidden_layers_neurons']
             self.plot = neuralike_settings['plot']
-            self.valid_delta_mse = neuralike_settings['valid_delta_mse']
+            self.valid_delta_loss = neuralike_settings['valid_delta_loss']
             self.nrand = neuralike_settings['nrand']
         else:
             self.learning_rate = 5e-4
@@ -47,7 +47,7 @@ class NeuralManager:
             self.psplit = 0.8
             hidden_layers_neurons = [100, 100, 100]
             self.plot = True
-            self.valid_delta_mse = 0.05
+            self.valid_delta_loss = 0.05
             self.nrand = 5
 
         self.loglikelihood_fn = loglikelihood
@@ -98,22 +98,22 @@ class NeuralManager:
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience,
-                                      valid_delta_mse=self.valid_delta_mse)
+                                      valid_delta_loss=self.valid_delta_loss)
 
         self.neural_model.train()
         # neural_model.save_model('{}'.format(self.model_path))
         if self.plot:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
 
-        delta_mse = np.abs(self.neural_model.mse_val - self.neural_model.mse_train)
-        if self.neural_model.delta_mse() < self.valid_delta_mse:
+        delta_loss = np.abs(self.neural_model.loss_val - self.neural_model.loss_train)
+        if self.neural_model.delta_loss() < self.valid_delta_loss:
             self.valid = True
-            print("\nValid Neural net: mse_val={}, "
-                  "mse_train={}".format(np.min(self.neural_model.mse_val),
-                                        np.min(self.neural_model.mse_train)))
+            print("\nValid Neural net: loss_val={}, "
+                  "loss_train={}".format(np.min(self.neural_model.loss_val),
+                                        np.min(self.neural_model.loss_train)))
         else:
             self.valid = False
-            print("\nNOT valid neural net. Delta_mse: {}".format(delta_mse))
+            print("\nNOT valid neural net. Delta_mse: {}".format(delta_loss))
 
 
     def load(self):
@@ -140,13 +140,15 @@ class NeuralManager:
         if self.like_valid(likes):
             return likes
         else:
-            print("Using original like")
+            print("Using original like", end='\r')
             self.valid = False
             return self.loglikelihood_fn(params)
 
     def like_valid(self, loglike):
-        first_cond = (loglike < (self.maxl + self.neural_model.delta_mse()))
-        second_cond = (loglike > (self.minl - self.neural_model.delta_mse()))
+        # first_cond = (loglike < (self.maxl + self.neural_model.delta_mse()))
+        # second_cond = (loglike > (self.minl - self.neural_model.delta_mse()))
+        first_cond = (loglike < (10*self.maxl))
+        second_cond = (loglike > (self.minl/10))
         if first_cond and second_cond:
             return True
         else:
