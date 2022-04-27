@@ -28,6 +28,7 @@ class NeuralNet:
         self.load = load
         self.model_path = model_path
         self.topology = topology
+        self.dims = topology[0]
         self.epochs = kwargs.pop('epochs', 50)
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
@@ -46,7 +47,7 @@ class NeuralNet:
             self.X_train, self.X_test = np.split(X, indx)
             self.Y_train, self.Y_test = np.split(Y, indx)
             # Initialize the MLP
-            self.model = MLP()
+            self.model = MLP(self.dims, self.topology[-1])
             # mlp = self.model()
             self.model.float()
 
@@ -186,15 +187,14 @@ class MLP(nn.Module):
     Multilayer Perceptron for regression.
     '''
 
-    def __init__(self):
+    def __init__(self, ncols, noutput):
         super().__init__()
-        ncols = 3
         self.layers = nn.Sequential(
             nn.Linear(ncols, 200),
             nn.ReLU(),
             nn.Linear(200, 200),
             nn.ReLU(),
-            nn.Linear(200, 1)
+            nn.Linear(200, noutput)
         )
 
     def forward(self, x):
