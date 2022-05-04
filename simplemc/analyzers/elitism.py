@@ -1,3 +1,5 @@
+import numpy as np
+
 try:
     from deap import tools
     from deap import algorithms
@@ -45,6 +47,8 @@ def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
     # Write output file on the fly
     f = open('{}_1.txt'.format(outputname), 'w')
     # f.write("#Generation(first column) fitness(second column) individual\n")
+    # Also save individuals and loglike ind a numpy array
+    book = []
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -68,7 +72,9 @@ def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
             # Back to the old param values
             bds = lambda i, x: bounds[i][0] + (bounds[i][1] - bounds[i][0]) * x
             indall_tmp = [bds(i, x) for i, x in enumerate(indall)]
-
+            book_row = np.array(indall_tmp)
+            book_row = np.append(book_row, fitall[0])
+            book.append(book_row)
             strindall = str(indall_tmp).lstrip('[').rstrip(']')
             strfitall = str(fitall).lstrip('(').rstrip(')')
             strrow = "{} {} {}\n".format(gen, strfitall, strindall)
@@ -92,5 +98,7 @@ def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
             print(logbook.stream)
 
     f.close()
-    return population, logbook, gen
+    book = np.array(book)
+    print("BOOK\n", book, np.shape(book))
+    return population, logbook, gen, book
 

@@ -154,7 +154,16 @@ class DriverMC:
         if self.analyzername == 'mcmc':
             self.mcmcRunner(iniFile=self.iniFile, **kwargs)
         elif self.analyzername == 'nested':
-            self.nestedRunner(iniFile=self.iniFile, **kwargs)
+            if self.useNeuralike:
+                genopt = self.geneticdeap(iniFile=self.iniFile, **kwargs)
+                book = genopt['book']
+                u, v, logl = self.points_GeNNeS(book, map)
+                self.live_points = [u, v, logl]
+                self.nestedRunner(iniFile=self.iniFile, **kwargs)
+            else:
+                self.live_points = None
+                self.nestedRunner(iniFile=self.iniFile, **kwargs)
+
         elif self.analyzername == 'emcee':
             self.emceeRunner(iniFile=self.iniFile, **kwargs)
         elif self.analyzername == 'maxlike':
@@ -364,7 +373,7 @@ class DriverMC:
             logger.info("\nUsing dynamic nested sampling...")
             sampler = DynamicNestedSampler(self.logLike, self.priorTransform,
                                            self.dims, bound=nestedType, pool=pool,
-                                           queue_size=nprocess)
+                                           queue_size=nprocess, live_points=self.live_points)
 
             sampler.run_nested(nlive_init=nlivepoints, dlogz_init=0.05, nlive_batch=100,
                             maxiter_init=10000, maxiter_batch=1000, maxbatch=10,
@@ -581,10 +590,11 @@ class DriverMC:
         res = M.main()
         self.ttime = time.time() - ti
         #M.plotting()
+        print("RES toolbox\n", res)
         res['weights'], res['samples'] = None, None
         self.dict_result = {'analyzer': 'ga_deap', 'max_generations': max_generation,
                             'mutation': mutation, 'crossover': crossover, 'result': res}
-        return True
+        return res
 
 ##---------------------- logLike and prior Transform function ----------------------
 ##---------------------- for nested samplers ----------------------
@@ -866,4 +876,14 @@ class DriverMC:
                 'nstart_stop_criterion': nstart_stop_criterion,
                 'updInt': updInt, 'nrand': nrand,
                 'ncalls_excess': ncalls_excess}
+
+    def points_GeNNeS(self, book, map_fn):
+        logl = book[0, :]
+        print(np.shape(logl))
+        v = book[1:, :]
+        print(np.shape(v))
+        u = self.priorTransform(v)
+        print(np.shape(u))
+        return v, u, logl
+
 

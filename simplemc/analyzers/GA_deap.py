@@ -108,7 +108,7 @@ class GA_deap:
         hof = tools.HallOfFame(self.HALL_OF_FAME_SIZE)
 
         # perform the Genetic Algorithm flow with elitism:
-        population, logbook, gens = elitism.eaSimpleWithElitism(population, toolbox, cxpb=self.P_CROSSOVER, \
+        population, logbook, gens, book = elitism.eaSimpleWithElitism(population, toolbox, cxpb=self.P_CROSSOVER, \
                                                                 mutpb=self.P_MUTATION, ngen=self.MAX_GENERATIONS, \
                                                                 stats=stats, halloffame=hof, verbose=True,
                                                                 outputname=self.outputname, bounds=self.bounds)
@@ -163,10 +163,10 @@ class GA_deap:
 
             fig = plt.figure(figsize=(6, 6))
             ax = fig.add_subplot(111)
-            plot_elipses(best_params, self.cov, idx_param1, idx_param2, param_Ltx1, param_Ltx2, ax=ax)
-            plt.show()
+            # plot_elipses(best_params, self.cov, idx_param1, idx_param2, param_Ltx1, param_Ltx2, ax=ax)
+            # plt.show()
 
-        return {'population': len(population), 'no_generations': gens, 'param_fit': best_params,
+        return {'population': len(population), 'no_generations': gens, 'param_fit': best_params, 'book': book,
                 'best_fitness': best.fitness.values[0], 'cov': self.cov, 'maxlike': best.fitness.values[0]}
 
     # helper function for creating random real numbers uniformly distributed within a given range [low, up]
