@@ -641,9 +641,9 @@ class DriverMC:
             Vector of the parameter space
         """
         priors = []
-        n = self.nsigma
 
         if self.priortype == 'g':
+            n = self.nsigma
             for c, bound in enumerate(self.bounds):
                 mu = self.means[c]
                 sigma = (bound[1]-bound[0])/n
