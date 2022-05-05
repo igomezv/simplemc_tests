@@ -88,6 +88,7 @@ class Sampler(object):
                          "dlogz: {:.4f} | loglstar: {:.4f} | point {}"
 
         # distributions
+        print("\n\nINITIAL LIVE POINTS\n\n", len(live_points[0]))
         self.loglikelihood_control = loglikelihood
         self.loglikelihood = loglikelihood
         self.prior_transform = prior_transform

@@ -386,7 +386,7 @@ class DriverMC:
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
                         bound=nestedType, sample = 'unif', nlive = nlivepoints,
                         pool = pool, queue_size=nprocess,
-                        neuralike=self.useNeuralike)
+                        neuralike=self.useNeuralike, live_points=self.live_points)
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
                                addDerived=self.addDerived, simpleLike=self.L,
                                neuralike_settings=self.neuralike_settings)
@@ -641,7 +641,6 @@ class DriverMC:
             Vector of the parameter space
         """
         priors = []
-
         if self.priortype == 'g':
             n = self.nsigma
             for c, bound in enumerate(self.bounds):
@@ -653,6 +652,25 @@ class DriverMC:
                # When theta 0-> append bound[0], if theta 1-> append bound[1]
                 priors.append(theta[c]*(bound[1]-bound[0])+bound[0])
                 # At this moment, np.array(priors) has shape (dims,)
+        return np.array(priors)
+
+        # priorsTransform
+    def inverse_priorTransform(self, theta):
+        """
+        inverse prior Transform for gaussian and flat priors
+        maps to parameter space coordinates to unit cube
+
+        Parameters
+        -----------
+
+        theta : array
+            Vector of the parameter space
+        """
+        priors = []
+        for c, bound in enumerate(self.bounds):
+            # When theta 0-> append bound[0], if theta 1-> append bound[1]
+            priors.append((theta[c] - bound[0]) / (bound[1] - bound[0]))
+            # At this moment, np.array(priors) has shape (dims,)
         return np.array(priors)
 
 ############# for emcee: logPosterior and logPrior
@@ -878,11 +896,12 @@ class DriverMC:
                 'ncalls_excess': ncalls_excess}
 
     def points_GeNNeS(self, book, map_fn):
-        logl = book[0, :]
+        print(np.shape(book))
+        logl = book[:, 0]
         print(np.shape(logl))
-        v = book[1:, :]
+        v = book[:, 1:]
         print(np.shape(v))
-        u = self.priorTransform(v)
+        u = np.array(list(map_fn(self.inverse_priorTransform, v)))
         print(np.shape(u))
         return v, u, logl
 
