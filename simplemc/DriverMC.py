@@ -897,12 +897,12 @@ class DriverMC:
 
     def points_GeNNeS(self, book, map_fn):
         print(np.shape(book))
-        logl = book[:, 0]
-        print(np.shape(logl))
+        logl = -book[:, 0]
+        print(np.shape(logl), logl[-1])
         v = book[:, 1:]
-        print(np.shape(v))
+        print(np.shape(v), v[-1, :])
         u = np.array(list(map_fn(self.inverse_priorTransform, v)))
-        print(np.shape(u))
-        return v, u, logl
+        print(np.shape(u), u[-1, :])
+        return u, v, logl
 
 
