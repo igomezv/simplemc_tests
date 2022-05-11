@@ -590,7 +590,7 @@ class DriverMC:
         res = M.main()
         self.ttime = time.time() - ti
         #M.plotting()
-        print("RES toolbox\n", res)
+		# print("RES toolbox\n", res)
         res['weights'], res['samples'] = None, None
         self.dict_result = {'analyzer': 'ga_deap', 'max_generations': max_generation,
                             'mutation': mutation, 'crossover': crossover, 'result': res}
@@ -896,13 +896,12 @@ class DriverMC:
                 'ncalls_excess': ncalls_excess}
 
     def points_GeNNeS(self, book, map_fn):
-        print(np.shape(book))
-        logl = -book[:, 0]
-        print(np.shape(logl), logl[-1])
+        logl = book[:, 0]
+        # print(np.shape(logl), max(logl), min(logl))
         v = book[:, 1:]
-        print(np.shape(v), v[-1, :])
+        # print(np.shape(v), v[-1, :])
         u = np.array(list(map_fn(self.inverse_priorTransform, v)))
-        print(np.shape(u), u[-1, :])
+        # print(np.shape(u), u[-1, :])
         return u, v, logl
 
 

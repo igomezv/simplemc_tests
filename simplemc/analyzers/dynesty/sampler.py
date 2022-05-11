@@ -88,13 +88,13 @@ class Sampler(object):
                          "dlogz: {:.4f} | loglstar: {:.4f} | point {}"
 
         # distributions
-        print("\n\nINITIAL LIVE POINTS\n\n", len(live_points[0]))
         self.loglikelihood_control = loglikelihood
         self.loglikelihood = loglikelihood
         self.prior_transform = prior_transform
         self.npdim = npdim
 
         # live points
+        print("\n\nINITIAL LIVE POINTS\n\n", np.shape(live_points[0]), np.shape(live_points[1]), np.shape(live_points[2]))
         self.live_u, self.live_v, self.live_logl = live_points
         self.nlive = len(self.live_u)
         self.live_bound = np.zeros(self.nlive, dtype='int')

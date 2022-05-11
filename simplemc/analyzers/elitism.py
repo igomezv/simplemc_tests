@@ -72,9 +72,9 @@ def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
             # Back to the old param values
             bds = lambda i, x: bounds[i][0] + (bounds[i][1] - bounds[i][0]) * x
             indall_tmp = [bds(i, x) for i, x in enumerate(indall)]
-            book_row = np.array(indall_tmp)
-            book_row = np.append(book_row, fitall[0])
-            book.append(book_row)
+            rowbook = np.array(-fitall[0])
+            rowbook = np.append(rowbook, indall_tmp)
+            book.append(rowbook)
             strindall = str(indall_tmp).lstrip('[').rstrip(']')
             strfitall = str(fitall).lstrip('(').rstrip(')')
             strrow = "{} {} {}\n".format(gen, strfitall, strindall)
@@ -95,10 +95,10 @@ def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print(logbook.stream)
+            (logbook.stream)
 
     f.close()
     book = np.array(book)
-    print("BOOK\n", book, np.shape(book))
+    print("SHAPE BOOK", np.shape(book))
     return population, logbook, gen, book
 

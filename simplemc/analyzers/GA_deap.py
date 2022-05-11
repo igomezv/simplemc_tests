@@ -136,7 +136,7 @@ class GA_deap:
         self.cov = la.inv(hess)
         print('Covariance matrix \n', self.cov)
 
-        with open('{}.maxlike'.format(self.outputname), 'w') as f:
+        with open('{}.'.format(self.outputname), 'w') as f:
             np.savetxt(f, best_params, fmt='%.4e', delimiter=',')
 
         with open('{}.cov'.format(self.outputname), 'w') as f:

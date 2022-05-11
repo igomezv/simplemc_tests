@@ -518,6 +518,9 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
             else:
                 live_logl = np.array(list(map(loglike,
                                               np.array(live_v))))
+            print("LIVE_LOGL", np.shape(live_logl), max(live_logl), min(live_logl))
+            print("LIVE_u", np.shape(live_u), live_u[-1,:])
+            print("LIVE_v", np.shape(live_v), live_v[-1,:])
             live_points = [live_u, live_v, live_logl]
 
             # Convert all `-np.inf` log-likelihoods to finite large numbers.
