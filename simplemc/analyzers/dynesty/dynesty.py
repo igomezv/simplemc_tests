@@ -503,7 +503,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
     if live_points is None:
         # If no live points are provided, propose them by randomly sampling
         # from the unit cube.
-        print("LIVE POINTS IS NONE... GENERATING")
+        print("Generating live points...")
         for attempt in range(100):
             live_u = rstate.rand(nlive, npdim)  # positions in unit cube
             if use_pool.get('prior_transform', True):
@@ -518,9 +518,6 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
             else:
                 live_logl = np.array(list(map(loglike,
                                               np.array(live_v))))
-            print("LIVE_LOGL", np.shape(live_logl), max(live_logl), min(live_logl))
-            print("LIVE_u", np.shape(live_u), live_u[-1,:])
-            print("LIVE_v", np.shape(live_v), live_v[-1,:])
             live_points = [live_u, live_v, live_logl]
 
             # Convert all `-np.inf` log-likelihoods to finite large numbers.
@@ -550,7 +547,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
     else:
         # If live points were provided, convert the log-likelihoods and then
         # run a quick safety check.
-        print("USING LIVE POINTS PROVIDED")
+        print("Using provided live points.")
         for i, logl in enumerate(live_points[2]):
             if not np.isfinite(logl):
                 if np.sign(logl) < 0:
