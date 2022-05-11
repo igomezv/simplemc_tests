@@ -99,6 +99,5 @@ def eaSimpleWithElitism(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
     f.close()
     book = np.array(book)
-    print("SHAPE BOOK", np.shape(book))
     return population, logbook, gen, book
 
