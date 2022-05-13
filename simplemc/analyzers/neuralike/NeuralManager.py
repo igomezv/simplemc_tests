@@ -142,15 +142,17 @@ class NeuralManager:
         if self.like_valid(likes):
             return likes
         else:
-            print("Using original like", end='\r')
+            print("Using original like....", end='\r')
             self.valid = False
             return self.loglikelihood_fn(params)
 
     def like_valid(self, loglike):
         # first_cond = (loglike < (self.maxl + 10*self.neural_model.delta_loss()))
         # second_cond = (loglike > (self.minl - 10*self.neural_model.delta_loss()))
-        first_cond = (loglike < (self.maxl+self.maxl/10))
-        second_cond = (loglike > (self.minl-self.minl/10))
+        # first_cond = (loglike < (10*self.maxl))
+        # second_cond = (loglike > (10*self.minl))
+        first_cond = True
+        second_cond = True
         if first_cond and second_cond:
             return True
         else:

@@ -39,6 +39,10 @@ class NeuralNet:
             self.model = self.load_model()
             self.model.summary()
         else:
+            X2 = X+np.random.normal(0, 0.05, np.shape(X))
+            Y2 = Y+np.random.normal(0, 0.05, np.shape(Y))
+            X = np.append(X, X2, axis=0)
+            Y = np.append(Y, Y2, axis=0)
             ntrain = int(psplit * len(X))
             indx = [ntrain]
             shuffle = np.random.permutation(len(X))
@@ -189,10 +193,13 @@ class MLP(nn.Module):
     def __init__(self, ncols, noutput):
         super().__init__()
         self.layers = nn.Sequential(
+            nn.Dropout(0.5),
             nn.Linear(ncols, 200),
             nn.ReLU(),
+            nn.Dropout(0.5),
             nn.Linear(200, 200),
             nn.ReLU(),
+            nn.Dropout(0.5),
             nn.Linear(200, noutput)
         )
 
