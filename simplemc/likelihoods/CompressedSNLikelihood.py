@@ -79,8 +79,8 @@ class BinnedPantheon(CompressedSNLikelihood):
 
 class NeuralSN(CompressedSNLikelihood):
     def __init__(self):
-        CompressedSNLikelihood.__init__(self, "NeuralSN", cdir+"/data/sneural/test2/sn_news.dat",
-                                        cdir+"/data/sneural/test2/sn_news_cov.dat")
+        CompressedSNLikelihood.__init__(self, "NeuralSN", cdir+"/data/sneural/sn_news.dat",
+                                        cdir+"/data/sneural/sn_news_cov.dat")
         # in pantheon but not in jla
         # CompressedSNLikelihood.__init__(self, "NeuralSN", cdir+"/data/sneural/not_jla.dat",
         #                                 cdir+"/data/sneural/not_jla_cov.dat")
