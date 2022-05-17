@@ -21,12 +21,21 @@ class PantheonSNLikelihood(BaseLikelihood):
         ## first read data file
         self.name_="PantheonSN"
         da=[x.split() for x in open(cdir+'/data/pantheon_lcparam_full_long_zhel.txt').readlines()[1:]]
+        # jla
+        # da=[x.split() for x in open(cdir+'/data/jla_lcparams.txt').readlines()[1:]]
         self.zcmb = np.array([float(line[1]) for line in da])
         self.zhelio = np.array([float(line[2]) for line in da])
         self.mag = np.array([float(line[4]) for line in da])
         self.dmag = np.array([float(line[5]) for line in da])
         self.N=len(self.mag)
-        self.syscov=np.loadtxt(cdir+'/data/pantheon_sys_full_long.txt',skiprows=1).reshape((self.N,self.N))
+        # pantheon full
+        # self.syscov = np.loadtxt(cdir + '/data/pantheon_sys_full_long.txt', skiprows=1).reshape((self.N, self.N))
+        # pantheon diag diag_cov_pantheon.dat
+        # self.syscov = np.loadtxt(cdir + '/data/sneural/diag_cov_pantheon.dat', skiprows=1)
+        # jla full
+        # self.syscov=np.loadtxt(cdir+'/data/jla_v0_covmatrix.dat',skiprows=1).reshape((self.N,self.N))
+        # jla diag
+        # self.syscov=np.loadtxt(cdir+'/data/sneural/diag_cov_jla.dat',skiprows=1)
         self.cov=np.copy(self.syscov)
         self.cov[np.diag_indices_from(self.cov)]+=self.dmag**2
         self.xdiag=1/self.cov.diagonal() ## diagonal before marginalising constant
