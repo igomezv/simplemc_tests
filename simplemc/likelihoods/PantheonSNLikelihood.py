@@ -29,7 +29,7 @@ class PantheonSNLikelihood(BaseLikelihood):
         self.dmag = np.array([float(line[5]) for line in da])
         self.N=len(self.mag)
         # pantheon full
-        # self.syscov = np.loadtxt(cdir + '/data/pantheon_sys_full_long.txt', skiprows=1).reshape((self.N, self.N))
+        self.syscov = np.loadtxt(cdir + '/data/pantheon_sys_full_long.txt', skiprows=1).reshape((self.N, self.N))
         # pantheon diag diag_cov_pantheon.dat
         # self.syscov = np.loadtxt(cdir + '/data/sneural/diag_cov_pantheon.dat', skiprows=1)
         # jla full
