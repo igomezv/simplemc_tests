@@ -7,10 +7,12 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from time import time
+import math
 
 import torch
 from torch import nn
 from torchinfo import summary
+# from pytorchtools import EarlyStopping
 
 
 class NeuralNet:
@@ -33,14 +35,18 @@ class NeuralNet:
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
         self.patience = kwargs.pop('patience', 5)
+        self.minlike = kwargs.pop('minlike', 1)
+        self.minsample = kwargs.pop('minsample', 1e-6)
         psplit = kwargs.pop('psplit', 0.8)
         # self.valid_delta_mse = kwargs.pop('valid_delta_ms', 0.1)
         if load:
             self.model = self.load_model()
             self.model.summary()
         else:
-            X2 = X+np.random.normal(0, 0.05, np.shape(X))
-            Y2 = Y+np.random.normal(0, 0.05, np.shape(Y))
+            ordmagL = math.floor(math.log(self.minlike, 10))
+            ordmagS = math.floor(math.log(self.minsample, 10))
+            X2 = X+np.random.normal(0, 0.5*10**ordmagS, np.shape(X))
+            Y2 = Y+np.random.normal(0, 0.5*10**ordmagS, np.shape(Y))
             X = np.append(X, X2, axis=0)
             Y = np.append(Y, Y2, axis=0)
             ntrain = int(psplit * len(X))
@@ -67,10 +73,12 @@ class NeuralNet:
         trainloader = torch.utils.data.DataLoader(dataset_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
         validloader = torch.utils.data.DataLoader(dataset_val, batch_size=self.batch_size, shuffle=True, num_workers=1)
 
-
         # Define the loss function and optimizer
-        loss_function = nn.L1Loss()
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
+        # loss_function = nn.L1Loss()
+        loss_function = nn.MSELoss()
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        # optimizer = torch.optim.SGD(self.model.parameters(), lr=0.1, momentum=0.9)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
         # try:
         summary(self.model)
         t0 = time()
@@ -125,8 +133,9 @@ class NeuralNet:
 
                 output_val = self.model(inputs)
                 valid_loss = loss_function(output_val, targets)
-
                 valid_loss += loss.item()
+                scheduler.step(valid_loss)
+
             history_val = np.append(history_val, valid_loss.item())
             print('Training Loss: {:.3f} \t\t Validation Loss:' \
                   '{:.3f}'.format(loss.item(), valid_loss.item()))
@@ -184,6 +193,7 @@ class LoadDataSet:
 
     def __getitem__(self, i):
         return self.X[i], self.y[i]
+
 
 class MLP(nn.Module):
     '''
