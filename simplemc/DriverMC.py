@@ -868,7 +868,7 @@ class DriverMC:
             nstart_stop_criterion = self.config.getfloat('neuralike', 'nstart_stop_criterion', fallback=1.0)
             updInt = self.config.getint('neuralike', 'updInt', fallback=100)
             ncalls_excess = self.config.getint('neuralike', 'ncalls_excess', fallback=40)
-            valid_delta_loss = self.config.getfloat('neuralike', 'valid_delta_loss', fallback=40)
+            valid_loss = self.config.getfloat('neuralike', 'valid_loss', fallback=40)
         else:
             epochs = kwargs.pop('epochs', 100)
             learning_rate = kwargs.pop('learning_rate', 5e-4)
@@ -882,14 +882,14 @@ class DriverMC:
             nstart_stop_criterion = kwargs.pop('nstart_stop_criterion', 1.0)
             updInt = kwargs.pop('updInt', 100)
             ncalls_excess = kwargs.pop('ncalls_excess', 40)
-            valid_delta_loss = kwargs.pop('valid_delta_loss', 0.01)
+            valid_loss = kwargs.pop('valid_loss', 0.01)
 
         return {'loglike': self.logLike, 'rootname': self.root,
                 'hidden_layers_neurons': hidden_layers_neurons,
                 'epochs': epochs, 'psplit': psplit,
                 'learning_rate': learning_rate, 'batch_size': batch_size,
                 'plot':plot, 'patience':patience,
-                'valid_delta_loss': valid_delta_loss,
+                'valid_loss': valid_loss,
                 'nstart_samples': nstart_samples,
                 'nstart_stop_criterion': nstart_stop_criterion,
                 'updInt': updInt, 'nrand': nrand,
