@@ -828,10 +828,11 @@ class Sampler(object):
             if self.neuralike:
                 if (self.it >= self.nstart_samples) or (delta_logz <= self.nstart_stop_criterion):
                     print("\nneural calls: {} | neuralikes: {} |"   
-                          "neural models: {}| neural trains: {}".format(ncalls_neural,
-                                                                        n_neuralikes,
-                                                                        neural_models_c,
-                                                                        train_counter))
+                          "neural models: {}|"
+                          " neural trains: {}".format(ncalls_neural,
+                                                    n_neuralikes,
+                                                    neural_models_c,
+                                                    train_counter))
                     if nc >= self.ncalls_excess and self.trained_net:
                       warnings.warn("Seems that the neural network has several difficulties. "
                                     "Please set a larger number of nstart_samples, "
@@ -857,14 +858,8 @@ class Sampler(object):
                                 neural_models_c += 1
                             else:
                                 self.trained_net = False
-
-                    if self.trained_net:
-                        n_neuralikes += 1
-                        print("\nUsing neuralike function")
-                        ncalls_neural += nc
-                    else:
-                        self.loglikelihood = self.loglikelihood_control
-                        print("\nUsing original loglike function")
+                    if net.liketype == 'original':
+                        self.trained_net = False
 
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
