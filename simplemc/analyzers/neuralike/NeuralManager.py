@@ -28,6 +28,7 @@ class NeuralManager:
 
     def __init__(self, loglikelihood, samples, likes,
                  rootname='neural', neuralike_settings=None):
+        self.liketype = 'original'
         if neuralike_settings:
             self.learning_rate = neuralike_settings['learning_rate']
             self.batch_size = neuralike_settings['batch_size']
@@ -49,8 +50,6 @@ class NeuralManager:
             self.valid_loss = 0.05
             self.nrand = 5
 
-        self.neural_fails_c = 0
-        self.likevalidation = True
         self.loglikelihood_fn = loglikelihood
         _, self.dims = np.shape(samples)
         ml_idx = np.argmax(likes)
@@ -110,11 +109,11 @@ class NeuralManager:
         lasttrain = self.neural_model.loss_train[-1]
         if lastval < self.valid_loss and lasttrain < self.valid_loss:
             self.valid = True
-            print("\nValid Neural net: loss_train={},"
-                  "loss_val={}".format(lasttrain, lastval))
+            print("\nValid Neural net: loss_train={:.4f},"
+                  "loss_val={:.4f}".format(lasttrain, lastval))
         else:
             self.valid = False
-            print("\nNOT valid neural net. last train loss:{} last val loss: {}".format(lasttrain, lastval))
+            print("\nNOT valid neural net. last train loss:{:.4f} last val loss: {:.4f}".format(lasttrain, lastval))
 
     def load(self):
         neural_model = NeuralNet(load=True, model_path=self.model_path)
@@ -135,23 +134,23 @@ class NeuralManager:
         pred = self.neural_model.predict(np.array(params).reshape(1, -1))
         likes = self.likes_scaler.inverse_transform(pred)
         likes = np.array(likes)
-        if self.neural_fails_c >= 10:
-            self.training()
         if self.like_valid(likes):
-            self.neural_fails_c = 0
+            print("Using neuralike", end='\r')
+            self.liketype = 'neural'
             return likes
         else:
-            self.neural_fails_c += 1
-            print("Using original like| Neural fails: {}".format(self.neural_fails_c), end='\r')
+            print("Using original like", end='\r')
             self.valid = False
+            self.liketype = 'original'
             return self.loglikelihood_fn(params)
 
 
     def like_valid(self, loglike):
         # first_cond = (loglike < (self.maxl + 10*self.neural_model.delta_loss()))
         # second_cond = (loglike > (self.minl - 10*self.neural_model.delta_loss()))
-        first_cond = (loglike < (10*self.maxl))
-        second_cond = (loglike > (self.minl/10))
+        # remember that is - loglike, it came from negative infinite to zero
+        first_cond = (loglike < (self.maxl/2))
+        second_cond = (loglike > (self.minl*2))
         # first_cond = True
         # second_cond = True
         if first_cond and second_cond:

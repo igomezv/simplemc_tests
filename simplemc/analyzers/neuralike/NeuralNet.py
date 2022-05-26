@@ -137,8 +137,8 @@ class NeuralNet:
                 scheduler.step(valid_loss)
 
             history_val = np.append(history_val, valid_loss.item())
-            print('Training Loss: {:.3f} \t\t Validation Loss:' \
-                  '{:.3f}'.format(loss.item(), valid_loss.item()))
+            print('Training Loss: {:.5f} | Validation Loss:'
+                  '{:.5f}'.format(loss.item(), valid_loss.item()))
         # Process is complete.
         print('Training process has finished.')
         self.history = {'loss': history_train, 'val_loss': history_val}
@@ -156,7 +156,8 @@ class NeuralNet:
         plt.plot(self.history['val_loss'], label='validation set')
         if ylogscale:
             plt.yscale('log')
-        plt.title('MSE: {:.4f}'.format(np.min(self.loss_val)))
+        plt.title('MSE train: {:.4f} | val: {:.4f}'.format(self.loss_train[-1],
+                                                           self.loss_val[-1]))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
@@ -166,14 +167,6 @@ class NeuralNet:
             plt.show()
         return True
 
-    def delta_loss(self):
-        delta_loss = np.abs(self.loss_val - self.loss_train)
-        return np.mean(delta_loss)
-        # if np.all(delta_mse <= self.valid_delta_mse):
-        #     return True
-        # else:
-        #     return False
-    #
 
 class LoadDataSet:
     '''
