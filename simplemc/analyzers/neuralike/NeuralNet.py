@@ -35,25 +35,26 @@ class NeuralNet:
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
         self.patience = kwargs.pop('patience', 5)
-        self.minlike = kwargs.pop('minlike', 1)
-        self.minsample = kwargs.pop('minsample', 1e-6)
-        psplit = kwargs.pop('psplit', 0.8)
+        psplit = kwargs.pop('psplit', 0.7)
         # self.valid_delta_mse = kwargs.pop('valid_delta_ms', 0.1)
         if load:
             self.model = self.load_model()
             self.model.summary()
         else:
-            ordmagL = math.floor(math.log(self.minlike, 10))
-            ordmagS = math.floor(math.log(self.minsample, 10))
-            X2 = X+np.random.normal(0, 0.5*10**ordmagS, np.shape(X))
-            Y2 = Y+np.random.normal(0, 0.5*10**ordmagS, np.shape(Y))
-            X = np.append(X, X2, axis=0)
-            Y = np.append(Y, Y2, axis=0)
             ntrain = int(psplit * len(X))
             indx = [ntrain]
             shuffle = np.random.permutation(len(X))
             X = X[shuffle]
             Y = Y[shuffle]
+            # print(np.shape(X), np.shape(Y))
+            # ruido_x = np.random.normal(0, 5e-5, (np.shape(X)[0], np.shape(X)[1]))
+            # print(np.shape(ruido_x))
+            # ruido_y = np.random.normal(0, 0.05, (len(Y), 1))
+            # print(np.shape(ruido_y))
+            # X_r = X + ruido_x
+            # Y_r = Y +ruido_y
+            # X = np.concatenate((X_r, X), axis=0)
+            # Y = np.concatenate((Y_r, Y), axis=0)
             self.X_train, self.X_test = np.split(X, indx)
             self.Y_train, self.Y_test = np.split(Y, indx)
             # Initialize the MLP
@@ -87,7 +88,7 @@ class NeuralNet:
         history_val = np.empty((1,))
         for epoch in range(0, self.epochs):
             # Print epoch
-            print(f'Starting epoch {epoch + 1}')
+            # print(f'Starting epoch {epoch + 1}', end=' ')
 
             # Set current loss value
             current_loss = 0.0
@@ -117,9 +118,9 @@ class NeuralNet:
                 # Print statistics
                 current_loss += loss.item()
                 if i % 10 == 0:
-                    print('Loss after mini-batch %5d: %.3f' %
-                          #                 (i + 1, current_loss / 500))
-                          (i + 1, loss.item()), end='\r')
+                    # print('Loss after mini-batch %5d: %.3f' %
+                    #       #                 (i + 1, current_loss / 500))
+                    #       (i + 1, loss.item()), end='\r')
                     current_loss = 0.0
             history_train = np.append(history_train, current_loss)
 
@@ -137,8 +138,8 @@ class NeuralNet:
                 scheduler.step(valid_loss)
 
             history_val = np.append(history_val, valid_loss.item())
-            print('Training Loss: {:.5f} | Validation Loss:'
-                  '{:.5f}'.format(loss.item(), valid_loss.item()))
+            print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
+                  '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
         # Process is complete.
         print('Training process has finished.')
         self.history = {'loss': history_train, 'val_loss': history_val}
@@ -196,14 +197,14 @@ class MLP(nn.Module):
     def __init__(self, ncols, noutput):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Dropout(0.5),
+            # nn.Dropout(0.2),
             nn.Linear(ncols, 200),
             nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(200, 200),
+            # nn.Dropout(0.2),
+            nn.Linear(200, 100),
             nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(200, noutput)
+            # nn.Dropout(0.2),
+            nn.Linear(100, noutput)
         )
 
     def forward(self, x):

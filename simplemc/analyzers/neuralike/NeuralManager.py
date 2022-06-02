@@ -2,6 +2,7 @@
 Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
 Date: Dec 2021
 """
+import sys
 
 from .NeuralNet import NeuralNet
 from .RandomSampling import RandomSampling
@@ -26,16 +27,19 @@ class NeuralManager:
         plot
     """
 
-    def __init__(self, loglikelihood, samples, likes,
-                 rootname='neural', neuralike_settings=None):
-        self.liketype = 'original'
+    # def __init__(self, loglikelihood, samples, likes,
+    #              rootname='neural', neuralike_settings=None):
+    def __init__(self, loglikelihood, rootname='neural', neuralike_settings=None):
+        self.loglikelihood_fn = loglikelihood
+        self.valid = False
+        self.fig_path = '{}.png'.format(rootname)
         if neuralike_settings:
             self.learning_rate = neuralike_settings['learning_rate']
             self.batch_size = neuralike_settings['batch_size']
             self.epochs = neuralike_settings['epochs']
             self.patience = neuralike_settings['patience']
             self.psplit = neuralike_settings['psplit']
-            hidden_layers_neurons = neuralike_settings['hidden_layers_neurons']
+            self.hidden_layers_neurons = neuralike_settings['hidden_layers_neurons']
             self.plot = neuralike_settings['plot']
             self.valid_loss = neuralike_settings['valid_loss']
             self.nrand = neuralike_settings['nrand']
@@ -45,59 +49,53 @@ class NeuralManager:
             self.epochs = 100
             self.patience = self.epochs//2
             self.psplit = 0.8
-            hidden_layers_neurons = [100, 100, 100]
+            self.hidden_layers_neurons = [100, 100, 100]
             self.plot = True
-            self.valid_loss = 0.05
+            self.valid_loss = 0.5
             self.nrand = 5
+        # self.model_path = '{}.h5'.format(rootname)
+        # if not self.modelChecker():
+        #     self.training()
+        # else:
+        #     self.neural_model = self.load()
 
-        self.loglikelihood_fn = loglikelihood
+    def training(self, samples, likes):
         _, self.dims = np.shape(samples)
+        self.topology = [self.dims] + self.hidden_layers_neurons + [1]
+
         ml_idx = np.argmax(likes)
         means = samples[ml_idx, :]
-
-        self.model_path = '{}.h5'.format(rootname)
-        self.fig_path = '{}.png'.format(rootname)
-
-        # create scaler
-        self.scaler = StandardScaler()
-        self.likes_scaler = StandardScaler()
 
         rsampling = RandomSampling(self.loglikelihood_fn, means=means,
                                    cov=np.cov(samples.T),
                                    nrand=self.nrand)
-                                   # files_path=self.model_path)
+
         rsamples, rlikes = rsampling.make_dataset()
 
-        self.original_likes = likes
-        self.likes = np.append(rlikes, likes)
-        self.samples = np.append(rsamples, samples, axis=0)
-        self.valid = False
-        # self.likes = likes
-        # self.samples = samples
-        self.maxl = np.max(self.original_likes)
-        self.minl = np.min(self.original_likes)
-        self.dev = np.std(self.original_likes[-len(self.original_likes)//10:])
+        likes = np.append(rlikes, likes)
+        samples = np.append(rsamples, samples, axis=0)
 
-        self.topology = [self.dims] + hidden_layers_neurons + [1]
+        rsampling_test = RandomSampling(self.loglikelihood_fn, means=means,
+                                        cov=np.cov(samples.T),
+                                        nrand=int(0.1*len(likes)))
+        rsamples_test, rlikes_test = rsampling_test.make_dataset()
+        # # create scaler
+        # # self.scaler = StandardScaler()
+        # self.scaler = MinMaxScaler(feature_range=(0.5, 1))
+        # self.likes_scaler = StandardScaler()
+        self.likes_scaler = MinMaxScaler(feature_range=(0, 1))
+        #
+        # self.scaler.fit(samples)
+        self.likes_scaler.fit(likes.reshape(-1, 1))
+        # # apply transforms
+        # sc_samples = self.scaler.transform(samples)
+        sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
 
-        if not self.modelChecker():
-            self.training()
-        else:
-            self.neural_model = self.load()
-
-    def training(self):
-        # fit scaler on data
-        self.scaler.fit(self.samples)
-        # apply transform
-        sc_samples = self.scaler.transform(self.samples)
-        self.likes_scaler.fit(self.likes.reshape(-1, 1))
-        sc_likes = self.likes_scaler.transform(self.likes.reshape(-1, 1))
-
-        self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, topology=self.topology,
+        self.neural_model = NeuralNet(X=samples, Y=sc_likes, topology=self.topology,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience,
-                                      minsample=np.min(np.abs(sc_samples)))
+                                      minsample=np.min(np.abs(samples)))
 
         self.neural_model.train()
         # neural_model.save_model('{}'.format(self.model_path))
@@ -107,13 +105,14 @@ class NeuralManager:
         # delta_loss = np.abs(self.neural_model.loss_val - self.neural_model.loss_train)
         lastval = self.neural_model.loss_val[-1]
         lasttrain = self.neural_model.loss_train[-1]
-        if lastval < self.valid_loss and lasttrain < self.valid_loss:
+        test_set_test = self.test_neural(rsamples_test, rlikes_test)
+        if lastval < self.valid_loss and lasttrain < self.valid_loss and test_set_test:
             self.valid = True
-            print("\nValid Neural net: loss_train={:.4f},"
-                  "loss_val={:.4f}".format(lasttrain, lastval))
+            print("\nValid Neural net | Train loss: {:.4f} | "
+                  "Val loss: {:.4f}\n".format(lasttrain, lastval))
         else:
             self.valid = False
-            print("\nNOT valid neural net. last train loss:{:.4f} last val loss: {:.4f}".format(lasttrain, lastval))
+            print("\nNOT valid neural net | Train loss:{:.4f} | Val loss: {:.4f}\n".format(lasttrain, lastval))
 
     def load(self):
         neural_model = NeuralNet(load=True, model_path=self.model_path)
@@ -129,32 +128,29 @@ class NeuralManager:
         else:
             return False
 
-    def loglikelihood(self, params):
-        self.likes_scaler.fit(self.likes.reshape(-1, 1))
-        pred = self.neural_model.predict(np.array(params).reshape(1, -1))
+    def neuralike(self, params):
+        # loglikelihood only can work if trainning was executed
+        # sc_params = self.scaler.transform(np.array(params).reshape(len(params), self.dims))
+        # pred = self.neural_model.predict(sc_params)
+        pred = self.neural_model.predict(params)
         likes = self.likes_scaler.inverse_transform(pred)
         likes = np.array(likes)
-        if self.like_valid(likes):
-            print("Using neuralike", end='\r')
-            self.liketype = 'neural'
-            return likes
-        else:
-            print("Using original like", end='\r')
-            self.valid = False
-            self.liketype = 'original'
-            return self.loglikelihood_fn(params)
+        # likes = self.neural_model.predict(params)
+        return likes
 
 
-    def like_valid(self, loglike):
-        # first_cond = (loglike < (self.maxl + 10*self.neural_model.delta_loss()))
-        # second_cond = (loglike > (self.minl - 10*self.neural_model.delta_loss()))
-        # remember that is - loglike, it came from negative infinite to zero
-        first_cond = (loglike < (self.maxl/2))
-        second_cond = (loglike > (self.minl*2))
-        # first_cond = True
-        # second_cond = True
-        if first_cond and second_cond:
-            self.likevalidation = True
+    def test_neural(self, x_test, y_test):
+        # sc_x = self.scaler.transform(np.array(x_test).reshape(len(y_test), self.dims))
+        # pred = self.neural_model.predict(sc_x)
+        pred = self.neural_model.predict(x_test)
+        y_pred_test = self.likes_scaler.inverse_transform(pred)
+        # y_pred_test = self.neural_model.predict(x_test)
+        mse = ((y_pred_test - y_test) ** 2).mean(axis=1)
+        diff = np.abs(y_pred_test - y_test)
+        maxlike_test = np.max(y_test)
+        print("MSE in test set", mse)
+        print("diff in test set", diff)
+        if np.all(diff < np.abs(maxlike_test/10)):
+            return True
         else:
-            self.likevalidation = False
-        return self.likevalidation
+            return False
