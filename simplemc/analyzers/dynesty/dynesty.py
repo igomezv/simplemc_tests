@@ -528,12 +528,12 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
                         live_points[2][i] = -1e300
                     else:
                         #jav
-                        # live_points[2][i] = -1e3
-                        raise ValueError("The log-likelihood ({0}) of live "
-                                        "point {1} located at u={2} v={3} "
-                                        "is invalid."
-                                        .format(logl, i, live_points[0][i],
-                                                live_points[1][i]))
+                        live_points[2][i] = -1e3
+                        # raise ValueError("The log-likelihood ({0}) of live "
+                        #                 "point {1} located at u={2} v={3} "
+                        #                 "is invalid."
+                        #                 .format(logl, i, live_points[0][i],
+                        #                         live_points[1][i]))
 
             # Check to make sure there is at least one finite log-likelihood
             # value within the initial set of live points.
