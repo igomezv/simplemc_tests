@@ -12,9 +12,10 @@
 from simplemc.cosmo.Parameter import Parameter
 
 # Parameters are value, variation, bounds.
-Om_par   = Parameter("Om",   0.3038,  0.05,    (0.1, 0.5),   "\Omega_m")
+# 1.5?
+Om_par   = Parameter("Om",   0.3038,  0.05,    (0.05, 1.0),   "\Omega_m")
 Obh2_par = Parameter("Obh2", 0.02234, 0.001, (0.02, 0.025), "\Omega_{b}h^2")
-h_par    = Parameter("h",    0.6821,  0.05,   (0.4, 0.9),    "h")
+h_par    = Parameter("h",    0.6821,  0.05,   (0.4, 1.0),    "h")
 
 mnu_par  = Parameter("mnu",  0.06,    0.1,    (0, 1.0),      "\Sigma m_{\\nu}")
 Nnu_par  = Parameter("Nnu",  3.046,   0.5,    (3.046, 5.046),"N_{\\rm eff}")
@@ -118,7 +119,7 @@ alpha_par  = Parameter("alpha", 0., 0.01, (-1, 1), "alpha")
 mquin_par = Parameter("mquin", 1.7, 0.2, (0, 4.0), "m_{\phi}")
 mphan_par = Parameter("mphan", 0.8, 0.2, (0, 3.0), "m_{\psi}")
 iniphi_par = Parameter("iniphi", 0.5, 0.1, (0, 1.5), "\phi_0")
-coupling_par = Parameter("beta",  1.0, 0.5, (-10, 10), "\\beta")
+coupling_par = Parameter("beta",  1.0, 0.5, (-2, 2), "\\beta")
 
 # Fourier series expansion for w(z).
 a0_par = Parameter("a0", -2., 0.1, (-3.0, -1.0), "a_0")
