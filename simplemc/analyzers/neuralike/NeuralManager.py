@@ -3,13 +3,12 @@ Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
 Date: Dec 2021
 """
 import sys
+import math
 
 from .NeuralNet import NeuralNet
 from .RandomSampling import RandomSampling
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
-import multiprocessing as mp
-
 import os
 
 
@@ -29,10 +28,14 @@ class NeuralManager:
 
     # def __init__(self, loglikelihood, samples, likes,
     #              rootname='neural', neuralike_settings=None):
-    def __init__(self, loglikelihood, rootname='neural', neuralike_settings=None):
+    def __init__(self, loglikelihood, min_live_logL, max_live_logL, rootname='neural',
+                 pool=None, neuralike_settings=None):
         self.loglikelihood_fn = loglikelihood
         self.valid = False
         self.fig_path = '{}.png'.format(rootname)
+        self.min_live_logL = min_live_logL
+        self.max_live_logL = max_live_logL
+        self.pool = pool
         if neuralike_settings:
             self.learning_rate = neuralike_settings['learning_rate']
             self.batch_size = neuralike_settings['batch_size']
@@ -43,6 +46,7 @@ class NeuralManager:
             self.plot = neuralike_settings['plot']
             self.valid_loss = neuralike_settings['valid_loss']
             self.nrand = neuralike_settings['nrand']
+            # self.rmse_criterion = neuralike_settings['rmse_criterion']
         else:
             self.learning_rate = 5e-4
             self.batch_size = 32
@@ -53,6 +57,8 @@ class NeuralManager:
             self.plot = True
             self.valid_loss = 0.5
             self.nrand = 5
+        self.rmse_criterion = self.valid_loss
+
         # self.model_path = '{}.h5'.format(rootname)
         # if not self.modelChecker():
         #     self.training()
@@ -62,36 +68,47 @@ class NeuralManager:
     def training(self, samples, likes):
         _, self.dims = np.shape(samples)
         self.topology = [self.dims] + self.hidden_layers_neurons + [1]
+        # print(likes)
+        # print("minl, maxl", self.min_live_logL, self.max_live_logL)
+        # idx_val_logL1 = np.argwhere(likes > self.min_live_logL)
+        # idx_val_logL2 = np.argwhere(likes < self.max_live_logL)
+        # idx_val_logL = np.intersect1d(idx_val_logL1, idx_val_logL2)
+
+        # likes = likes[idx_val_logL]
+        # samples = samples[idx_val_logL]
+        print(np.shape(likes), np.shape(samples), type(likes), type(samples))
 
         ml_idx = np.argmax(likes)
         means = samples[ml_idx, :]
-
-        rsampling = RandomSampling(self.loglikelihood_fn, means=means,
-                                   cov=np.cov(samples.T),
-                                   nrand=self.nrand)
-
-        rsamples, rlikes = rsampling.make_dataset()
-
-        likes = np.append(rlikes, likes)
-        samples = np.append(rsamples, samples, axis=0)
-
-        rsampling_test = RandomSampling(self.loglikelihood_fn, means=means,
-                                        cov=np.cov(samples.T),
-                                        nrand=int(0.1*len(likes)))
-        rsamples_test, rlikes_test = rsampling_test.make_dataset()
-        # # create scaler
-        # # self.scaler = StandardScaler()
-        # self.scaler = MinMaxScaler(feature_range=(0.5, 1))
-        # self.likes_scaler = StandardScaler()
-        self.likes_scaler = MinMaxScaler(feature_range=(0, 1))
+        print("\nGenerating training set...")
+        # rsampling = RandomSampling(self.loglikelihood_fn, means=means,
+        #                            cov=np.cov(samples.T),
+        #                            nrand=self.nrand, pool=self.pool)
         #
-        # self.scaler.fit(samples)
+        # rsamples, rlikes = rsampling.make_dataset()
+        # print("Training dataset created!")
+        # likes = np.append(rlikes, likes)
+        # samples = np.append(rsamples, samples, axis=0)
+        print("\nGenerating test set...")
+        # rsampling_test = RandomSampling(self.loglikelihood_fn,
+        #                                 means=means,
+        #                                 cov=np.cov(samples.T),
+        #                                 nrand=int(0.1*len(likes)))
+        # rsamples_test, rlikes_test = rsampling_test.make_dataset()
+        print("Test dataset created!")
+
+        ## scale params
+        self.samples_scaler = MinMaxScaler(feature_range=(0.5, 1))
+        self.samples_scaler.fit(samples)
+        sc_samples = self.samples_scaler.transform(samples)
+        print(sc_samples)
+        # # create scaler
+        self.likes_scaler = MinMaxScaler(feature_range=(0.5, 1))
         self.likes_scaler.fit(likes.reshape(-1, 1))
-        # # apply transforms
-        # sc_samples = self.scaler.transform(samples)
+        # # # apply transforms
         sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
 
-        self.neural_model = NeuralNet(X=samples, Y=sc_likes, topology=self.topology,
+        self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, topology=self.topology,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience,
@@ -101,12 +118,17 @@ class NeuralManager:
         # neural_model.save_model('{}'.format(self.model_path))
         if self.plot:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
-
-        # delta_loss = np.abs(self.neural_model.loss_val - self.neural_model.loss_train)
         lastval = self.neural_model.loss_val[-1]
         lasttrain = self.neural_model.loss_train[-1]
-        test_set_test = self.test_neural(rsamples_test, rlikes_test)
-        if lastval < self.valid_loss and lasttrain < self.valid_loss and test_set_test:
+        ## preparing for testing
+        # y_pred_test = self.neural_model.predict(rsamples_test)
+        # y_pred_test = self.likes_scaler.inverse_transform(y_pred_test.reshape(-1, 1))
+        # test_set_test = self.test_neural(y_pred=y_pred_test, y_real=rlikes_test, nfrac=1)
+        test_mse = self.neural_model.test_mse()
+        test_rmse = np.sqrt(test_mse)
+        # criterion = float(self.likes_scaler.transform(np.array([self.rmse_criterion]).reshape(1, 1)))
+        print("Test RMSE: {:.4f} | Criterion: {:.4f}".format(test_rmse, self.rmse_criterion))
+        if test_rmse < self.rmse_criterion:
             self.valid = True
             print("\nValid Neural net | Train loss: {:.4f} | "
                   "Val loss: {:.4f}\n".format(lasttrain, lastval))
@@ -130,27 +152,56 @@ class NeuralManager:
 
     def neuralike(self, params):
         # loglikelihood only can work if trainning was executed
-        # sc_params = self.scaler.transform(np.array(params).reshape(len(params), self.dims))
+        # sc_params = self.samples_scaler.transform(np.array(params).reshape(len(params), self.dims))
+        # print(params.shape)
+        sc_params = self.samples_scaler.transform(np.array(params).reshape(1, self.dims))
         # pred = self.neural_model.predict(sc_params)
-        pred = self.neural_model.predict(params)
-        likes = self.likes_scaler.inverse_transform(pred)
+        pred = self.neural_model.predict(sc_params)
+        # likes = np.array(pred)
+        likes = self.likes_scaler.inverse_transform(pred.reshape(-1, 1))
         likes = np.array(likes)
-        # likes = self.neural_model.predict(params)
         return likes
 
+    def test_neural(self, y_pred, y_real, nfrac=10):
+        nlen = len(y_pred)
+        # if y_pred.shape != y_real.shape:
+        y_pred = y_pred.reshape(nlen, 1)
+        y_real = y_real.reshape(nlen, 1)
 
-    def test_neural(self, x_test, y_test):
-        # sc_x = self.scaler.transform(np.array(x_test).reshape(len(y_test), self.dims))
-        # pred = self.neural_model.predict(sc_x)
-        pred = self.neural_model.predict(x_test)
-        y_pred_test = self.likes_scaler.inverse_transform(pred)
-        # y_pred_test = self.neural_model.predict(x_test)
-        mse = ((y_pred_test - y_test) ** 2).mean(axis=1)
-        diff = np.abs(y_pred_test - y_test)
-        maxlike_test = np.max(y_test)
-        print("MSE in test set", mse)
-        print("diff in test set", diff)
-        if np.all(diff < np.abs(maxlike_test/10)):
+        shuffle = np.random.permutation(nlen)
+        nsize = int(len(y_pred)//nfrac)
+
+        y_pred = y_pred[shuffle][-nsize:]
+        y_real = y_real[shuffle][-nsize:]
+
+        mse = ((y_real - y_pred) ** 2).mean(axis=1)
+        mse_mean_sqrt = np.sqrt(mse.mean())
+        # diff_mean = np.mean(np.abs(y_real - y_pred))
+        print("MSE sqrt in test set: {:.8f}".format(mse_mean_sqrt))
+        # print("diff mean in test set: {:.8f}".format(diff_mean))
+        print("mse criterion", self.rmse_criterion)
+        if mse_mean_sqrt < self.rmse_criterion:
             return True
         else:
             return False
+
+    def orderOfMagnitude(self, number):
+        return math.floor(math.log(number, 10))
+
+    # def scaler_by_cols(self, dataset, fitted=False):
+    #     ## scaling column by column
+    #     print(np.shape(dataset), type(dataset))
+    #     if fitted is False:
+    #         self.scalers_list = []
+    #         for c in range(self.dims):
+    #             scaler = MinMaxScaler(feature_range=(0, 1))
+    #             scaler.fit(dataset[:, c].reshape(-1, 1))
+    #             self.scalers_list.append(scaler)
+    #             # datacol = scaler.transform(datacol.reshape(-1, 1))
+    #             # print(np.shape(datacol), type(datacol))
+    #             # sc_data[:, c] = datacol.reshape(rows,)
+    #             fitted = True
+    #     if fitted:
+    #         for c, scaler in enumerate(self.scalers_list):
+    #             dataset[:, c] = scaler.transform(dataset[:, c].reshape(-1, 1))
+    #     return dataset

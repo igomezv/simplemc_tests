@@ -36,40 +36,41 @@ class NeuralNet:
         self.batch_size = kwargs.pop('batch_size', 32)
         self.patience = kwargs.pop('patience', 5)
         psplit = kwargs.pop('psplit', 0.7)
-        # self.valid_delta_mse = kwargs.pop('valid_delta_ms', 0.1)
         if load:
             self.model = self.load_model()
             self.model.summary()
         else:
+
+            percentage = 0.05
+            nrows, ncols = X.shape
+            noise_x = np.zeros(X.shape)
+            for col in range(ncols):
+                noise_x[:, col] = np.random.normal(0, X[:, col].std(), nrows) * percentage
+            noise_y = np.random.normal(0, Y.std(), Y.shape) * percentage
+            X_r = X + noise_x
+            Y_r = Y + noise_y
+            X = np.concatenate((X_r, X), axis=0)
+            Y = np.concatenate((Y_r, Y), axis=0)
             ntrain = int(psplit * len(X))
             indx = [ntrain]
             shuffle = np.random.permutation(len(X))
             X = X[shuffle]
             Y = Y[shuffle]
-            # print(np.shape(X), np.shape(Y))
-            # ruido_x = np.random.normal(0, 5e-5, (np.shape(X)[0], np.shape(X)[1]))
-            # print(np.shape(ruido_x))
-            # ruido_y = np.random.normal(0, 0.05, (len(Y), 1))
-            # print(np.shape(ruido_y))
-            # X_r = X + ruido_x
-            # Y_r = Y +ruido_y
-            # X = np.concatenate((X_r, X), axis=0)
-            # Y = np.concatenate((Y_r, Y), axis=0)
             self.X_train, self.X_test = np.split(X, indx)
             self.Y_train, self.Y_test = np.split(Y, indx)
+
+            ntrain_valtest = int(0.5 * len(self.Y_test))
+            indx_valtest = [ntrain_valtest]
+            self.X_val, self.X_test = np.split(self.X_test, indx_valtest)
+            self.Y_val, self.Y_test = np.split(self.Y_test, indx_valtest)
             # Initialize the MLP
             self.model = MLP(self.dims, self.topology[-1])
-            # mlp = self.model()
             self.model.float()
-
-        # self.mse = np.min(self.history.history['val_loss'])
+        print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X.shape, Y.shape))
 
     def train(self):
         dataset_train = LoadDataSet(self.X_train, self.Y_train)
-        dataset_val = LoadDataSet(self.X_test, self.Y_test)
-
-        # X_test = torch.from_numpy(X_test).float()
-        # y_test = torch.from_numpy(y_test).float()
+        dataset_val = LoadDataSet(self.X_val, self.Y_val)
 
         trainloader = torch.utils.data.DataLoader(dataset_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
         validloader = torch.utils.data.DataLoader(dataset_val, batch_size=self.batch_size, shuffle=True, num_workers=1)
@@ -77,8 +78,8 @@ class NeuralNet:
         # Define the loss function and optimizer
         # loss_function = nn.L1Loss()
         loss_function = nn.MSELoss()
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
-        # optimizer = torch.optim.SGD(self.model.parameters(), lr=0.1, momentum=0.9)
+        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, weight_decay=1e-5)
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=1e-4, momentum=0.9, weight_decay=1e-5)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
         # try:
         summary(self.model)
@@ -157,8 +158,10 @@ class NeuralNet:
         plt.plot(self.history['val_loss'], label='validation set')
         if ylogscale:
             plt.yscale('log')
-        plt.title('MSE train: {:.4f} | val: {:.4f}'.format(self.loss_train[-1],
-                                                           self.loss_val[-1]))
+        plt.title('RMSE train: {:.4f} | RMSE val: {:.4f} | '
+                  'RMSE test: {:.4f}'.format(np.sqrt(self.loss_train[-1]),
+                                             np.sqrt(self.loss_val[-1]),
+                                             np.sqrt(self.test_mse())))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
@@ -167,6 +170,11 @@ class NeuralNet:
         if show:
             plt.show()
         return True
+
+    def test_mse(self):
+        y_pred = self.predict(self.X_test)
+        mse = ((self.Y_test - y_pred) ** 2).mean()
+        return mse
 
 
 class LoadDataSet:
@@ -197,14 +205,19 @@ class MLP(nn.Module):
     def __init__(self, ncols, noutput):
         super().__init__()
         self.layers = nn.Sequential(
-            # nn.Dropout(0.2),
             nn.Linear(ncols, 200),
-            nn.ReLU(),
-            # nn.Dropout(0.2),
-            nn.Linear(200, 100),
-            nn.ReLU(),
-            # nn.Dropout(0.2),
-            nn.Linear(100, noutput)
+            nn.SELU(),
+            nn.Dropout(0.5),
+            nn.Linear(200, 200),
+            nn.SELU(),
+            nn.Dropout(0.5),
+            nn.Linear(200, 200),
+            nn.SELU(),
+            nn.Dropout(0.5),
+            nn.Linear(200, 200),
+            nn.SELU(),
+            nn.Dropout(0.5),
+            nn.Linear(200, noutput)
         )
 
     def forward(self, x):
@@ -212,3 +225,34 @@ class MLP(nn.Module):
           Forward pass
         '''
         return self.layers(x)
+
+
+class L1(torch.nn.Module):
+    def __init__(self, module, weight_decay=1e-5):
+        super().__init__()
+        self.module = module
+        self.weight_decay = weight_decay
+
+        # Backward hook is registered on the specified module
+        self.hook = self.module.register_full_backward_hook(self._weight_decay_hook)
+
+    # Not dependent on backprop incoming values, placeholder
+    def _weight_decay_hook(self, *_):
+        for param in self.module.parameters():
+            # If there is no gradient or it was zeroed out
+            # Zeroed out using optimizer.zero_grad() usually
+            # Turn on if needed with grad accumulation/more safer way
+            # if param.grad is None or torch.all(param.grad == 0.0):
+
+            # Apply regularization on it
+            param.grad = self.regularize(param)
+
+    def regularize(self, parameter):
+        # L1 regularization formula
+        return self.weight_decay * torch.sign(parameter.data)
+
+    def forward(self, *args, **kwargs):
+        # Simply forward and args and kwargs to module
+        return self.module(*args, **kwargs)
+
+

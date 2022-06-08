@@ -830,36 +830,55 @@ class Sampler(object):
                     print("\nneural calls: {} | neuralikes: {} | neural trains: {}".format(ncalls_neural,
                                                                                            n_neuralikes,
                                                                                            train_counter))
-                    flag_train = ((self.it - flag_start_neural_it) % self.updInt == 0)
-                    if self.trained_net is False and flag_train:
+                    neural_it = self.it - flag_start_neural_it
+                    flag_train = (neural_it % self.updInt == 0)
+                    if self.trained_net is False and (flag_train or train_counter == 0):
                         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
                         flag_start_neural_it = self.it
                         net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                                 rootname=self.outputname,
+                                            min_live_logL=np.min(self.live_logl),
+                                            max_live_logL=np.max(self.live_logl),
+                                            rootname=self.outputname,
+
                                                  # likes=np.array(self.saved_logl),
                                                  # samples=np.array(self.saved_v),
                                                  # likes=np.array(self.saved_logl)[-self.it//2:],
                                                  # samples=np.array(self.saved_v)[-self.it//2:,:],
-                                                 neuralike_settings=self.neuralike_settings)
-                        net.training(samples=np.array(self.saved_v),
-                                          likes=np.array(self.saved_logl))
+                                            neuralike_settings=self.neuralike_settings)
+                        net.training(samples=np.array(self.live_v),
+                                     likes=np.array(self.live_logl))
                         train_counter += 1
                         self.trained_net = net.valid
+                        print("valid", net.valid)
 
                 if self.trained_net: #validar dentro de nested
                     self.loglikelihood = net.neuralike
-                    print("neuralike")
                     n_neuralikes += 1
                     ncalls_neural += nc
                     if nc > 200:
                         self.trained_net = False
-                        print("nc exceess, neuralike disabled")
-                    if flag_train:
-                        self.trained_net = self.neuralike_validation()
+                        print("\nExcesive number of calls, neuralike disabled")
+                    if n_neuralikes % (self.updInt//2) == 0:
+                        print("\nTesting neuralike predictions...")
+                        samples_test = np.array(self.saved_v)[-self.updInt:, :]
+                        neuralikes_test = np.array(self.saved_logl)[-self.updInt:]
+                        if self.use_pool_logl:
+                            real_logl = np.array(list(self.M(self.loglikelihood_control,
+                                                                 samples_test)))
+                        else:
+                            real_logl = np.array(list(map(self.loglikelihood_control,
+                                                             samples_test)))
+                        self.trained_net = net.test_neural(y_pred=neuralikes_test, y_real=real_logl)
+                        # if self.live_logl[-1] < worst:
+                        #     self.trained_net = False
+                        #     print("\nLower than worst")
+                        if self.trained_net is False:
+                            print("\nBad neuralike predictions")
                 else:
-                    self.trained_net = False
+                    print("\nUsing original logL function.")
+                    # self.trained_net = False
                     self.loglikelihood = self.loglikelihood_control
-                    print("original like")
+                    # print("original like")
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
             lzterm = (math.exp(loglstar - logz_new) * loglstar +
@@ -1140,24 +1159,3 @@ class Sampler(object):
             cloglikes = []
             cloglike = self.like.loglike_wprior()
         return cloglike, cloglikes
-
-    def neuralike_validation(self):
-        samples = np.array(self.saved_v)[-self.updInt:,:]
-        likes = np.array(self.saved_logl)[-self.updInt:]
-        frac = self.updInt // 10
-        shuffle = np.random.permutation(frac)
-        samples = samples[shuffle][-frac:,:]
-        likes = likes[shuffle][-frac:]
-        if self.use_pool_logl:
-            real_logl = np.array(list(self.M(self.loglikelihood_control,
-                                             samples)))
-        else:
-            real_logl = np.array(list(map(self.loglikelihood_control,
-                                             samples)))
-        mse = ((real_logl - likes) ** 2).mean(axis=None)
-        if np.all(mse < 0.1):
-            print("nice neuralike predictions, mse test:", mse)
-            return True
-        else:
-            print("bad neuralike predictions, mse test:", mse)
-            return False

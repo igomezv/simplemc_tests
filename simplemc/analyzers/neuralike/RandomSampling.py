@@ -17,17 +17,8 @@ class RandomSampling:
         """
         self.like = like
         self.means = means
-
-        # self.means = np.array([p.value for p in pars_info]) # los priors quedan lejos despues de N iteraciones
-        # self.paramsList = [p.name for p in pars_info]
         self.dims = len(means)
-
-        # squared_errors = [((p.bounds[1] - p.bounds[0])*2)**2 for p in pars_info]
-        # errors = [p.error for p in pars_info]
         self.cov = cov
-
-        # self.bounds = [p.bounds for p in pars_info]
-
         self.nrand = nrand
         self.pool = pool
         self.files_path = files_path
@@ -39,7 +30,7 @@ class RandomSampling:
 
     def make_sample(self):
         # if not self.filesChecker():
-        samples = np.random.multivariate_normal(self.means, self.cov, size=(self.nrand, ))
+        samples = np.random.multivariate_normal(self.means, 5e-3*self.cov, size=(self.nrand,))
         # else:
         #     print('Loading existing random_samples and likelihoods: {}'.format(self.files_path))
         #     samples = np.load('{}_random_samples.npy'.format(self.files_path))
@@ -60,27 +51,8 @@ class RandomSampling:
         # if not self.filesChecker():
         print("Evaluating likelihoods...")
         likes = np.array(list(self.M(self.like, samples)))
-        idx_nan = np.argwhere(np.isnan(likes))
-        likes = np.delete(likes, idx_nan)
-        samples = np.delete(samples, idx_nan, axis=0)
-        idx_complex = np.argwhere(np.iscomplex(likes))
-        likes = np.delete(likes, idx_complex)
-        likes = np.real(likes)
-        samples = np.delete(samples, idx_complex, axis=0)
-            # np.save('{}_random_samples.npy'.format(self.files_path), samples)
-            # np.save('{}_likes.npy'.format(self.files_path), likes)
-        # else:
-        #     print('Loading existing random samples and likelihoods: {}'.format(self.files_path))
-        #     likes = np.load('{}_likes.npy'.format(self.files_path))
-        # likes = np.array([self.like(x) for x in samples_grid])
-
         tf = time.time() - t1
         print("Time of {} likelihood evaluations {:.4f} min".format(len(likes), tf/60))
-        print("Training dataset created!")
-        # print("cov\n", self.cov)
-        # print("samples\n", np.shape(samples))
-        # print("likes\n", np.shape(likes))
-        print("shapes like, samples", np.shape(likes), np.shape(samples))
         if self.pool:
             self.pool.close()
         # print("Time of evaluating {} likelihoods with apply_along_axis: {:.4} s".format(len(likes), tf))
