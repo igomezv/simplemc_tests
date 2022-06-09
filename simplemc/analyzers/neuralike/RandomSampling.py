@@ -4,7 +4,8 @@ import time
 
 
 class RandomSampling:
-    def __init__(self, like, means, cov, nrand=10, pool=None, files_path='randomsampling'):
+    # def __init__(self, like, means, cov, nrand=10, pool=None, files_path='randomsampling'):
+    def __init__(self, like, mins, maxs, nrand=10, pool=None, files_path='randomsampling'):
         """
         Create a random samples in the parameter space and evaluate the likelihood in them.
         This is used to generate the training set for a neural network.
@@ -16,9 +17,12 @@ class RandomSampling:
         nrand: number of random points in the parameter space. Default is 500
         """
         self.like = like
-        self.means = means
-        self.dims = len(means)
-        self.cov = cov
+        # self.means = means
+        # self.dims = len(means)
+        self.mins = mins
+        self.maxs = maxs
+        self.dims = len(mins)
+        # self.cov = cov
         self.nrand = nrand
         self.pool = pool
         self.files_path = files_path
@@ -30,11 +34,14 @@ class RandomSampling:
 
     def make_sample(self):
         # if not self.filesChecker():
-        samples = np.random.multivariate_normal(self.means, 5e-3*self.cov, size=(self.nrand,))
+        # samples = np.random.multivariate_normal(self.means, 5e-3*self.cov, size=(self.nrand,))
         # else:
         #     print('Loading existing random_samples and likelihoods: {}'.format(self.files_path))
         #     samples = np.load('{}_random_samples.npy'.format(self.files_path))
         # print("cov, means, samples", np.shape(self.cov), np.shape(self.means), np.shape(samples))
+        samples = np.zeros((self.nrand, self.dims))
+        for i in range(self.dims):
+            samples[:, i] = np.random.uniform(low=self.mins[i], high=self.maxs[i], size=self.nrand)
         print("Random samples in the parameter space generated!")
         return samples
 
