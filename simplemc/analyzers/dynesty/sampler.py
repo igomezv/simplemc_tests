@@ -677,7 +677,8 @@ class Sampler(object):
         n_neuralikes = 0
         ncalls_neural = 0
         train_counter = 0
-        flag_start_neural_it = 0
+        last_train_it = 0
+        originalike_counter = 0
 
         # Check whether we're starting fresh or continuing a previous run.
         if self.it == 1:
@@ -830,11 +831,15 @@ class Sampler(object):
                     print("\nneural calls: {} | neuralikes: {} | neural trains: {}".format(ncalls_neural,
                                                                                            n_neuralikes,
                                                                                            train_counter))
-                    neural_it = self.it - flag_start_neural_it
-                    flag_train = (neural_it % self.updInt == 0)
+                    # number of iteration after the last training
+                    aft_train_it = self.it - last_train_it
+                    originalike_flag = originalike_counter >= self.updInt or originalike_counter == 0
+                    flag_train = (aft_train_it % self.updInt == 0 and originalike_flag)
+                    # flag_train = (self.it % self.updInt == 0)
                     if self.trained_net is False and (flag_train or train_counter == 0):
                         from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-                        flag_start_neural_it = self.it
+                        last_train_it = self.it
+                        originalike_counter = 0
                         net = NeuralManager(loglikelihood=self.loglikelihood_control,
                                             min_live_logL=np.min(self.live_logl),
                                             max_live_logL=np.max(self.live_logl),
@@ -857,8 +862,9 @@ class Sampler(object):
                     ncalls_neural += nc
                     if nc > 200:
                         self.trained_net = False
+                        originalike_counter += 1
                         print("\nExcesive number of calls, neuralike disabled")
-                    if n_neuralikes % (self.updInt//2) == 0:
+                    elif n_neuralikes % (self.updInt//2) == 0:
                         print("\nTesting neuralike predictions...")
                         samples_test = np.array(self.saved_v)[-self.updInt:, :]
                         neuralikes_test = np.array(self.saved_logl)[-self.updInt:]
@@ -874,8 +880,10 @@ class Sampler(object):
                         #     print("\nLower than worst")
                         if self.trained_net is False:
                             print("\nBad neuralike predictions")
+                            originalike_counter += 1
                 else:
                     print("\nUsing original logL function.")
+                    originalike_counter += 1
                     # self.trained_net = False
                     self.loglikelihood = self.loglikelihood_control
                     # print("original like")

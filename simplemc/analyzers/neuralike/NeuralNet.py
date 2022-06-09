@@ -205,19 +205,16 @@ class MLP(nn.Module):
     def __init__(self, ncols, noutput):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(ncols, 200),
+            nn.Linear(ncols, 100),
             nn.SELU(),
-            nn.Dropout(0.5),
-            nn.Linear(200, 200),
+            nn.Dropout(0.1),
+            # nn.Linear(100, 100),
+            # nn.SELU(),
+            # nn.Dropout(0.1),
+            nn.Linear(100, 100),
             nn.SELU(),
-            nn.Dropout(0.5),
-            nn.Linear(200, 200),
-            nn.SELU(),
-            nn.Dropout(0.5),
-            nn.Linear(200, 200),
-            nn.SELU(),
-            nn.Dropout(0.5),
-            nn.Linear(200, noutput)
+            nn.Dropout(0.1),
+            nn.Linear(100, noutput)
         )
 
     def forward(self, x):

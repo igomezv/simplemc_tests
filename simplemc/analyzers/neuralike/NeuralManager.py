@@ -179,8 +179,8 @@ class NeuralManager:
         # diff_mean = np.mean(np.abs(y_real - y_pred))
         print("MSE sqrt in test set: {:.8f}".format(mse_mean_sqrt))
         # print("diff mean in test set: {:.8f}".format(diff_mean))
-        print("mse criterion", self.rmse_criterion)
-        if mse_mean_sqrt < self.rmse_criterion:
+        print("mse criterion", self.rmse_criterion*100)
+        if mse_mean_sqrt < self.rmse_criterion*100:
             return True
         else:
             return False
