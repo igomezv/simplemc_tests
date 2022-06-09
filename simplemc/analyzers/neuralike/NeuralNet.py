@@ -43,14 +43,14 @@ class NeuralNet:
 
             percentage = 0.05
             nrows, ncols = X.shape
-            noise_x = np.zeros(X.shape)
-            for col in range(ncols):
-                noise_x[:, col] = np.random.normal(0, X[:, col].std(), nrows) * percentage
-            noise_y = np.random.normal(0, Y.std(), Y.shape) * percentage
-            X_r = X + noise_x
-            Y_r = Y + noise_y
-            X = np.concatenate((X_r, X), axis=0)
-            Y = np.concatenate((Y_r, Y), axis=0)
+            # noise_x = np.zeros(X.shape)
+            # for col in range(ncols):
+            #     noise_x[:, col] = np.random.normal(0, X[:, col].std(), nrows) * percentage
+            # noise_y = np.random.normal(0, Y.std(), Y.shape) * percentage
+            # X_r = X + noise_x
+            # Y_r = Y + noise_y
+            # X = np.concatenate((X_r, X), axis=0)
+            # Y = np.concatenate((Y_r, Y), axis=0)
             ntrain = int(psplit * len(X))
             indx = [ntrain]
             shuffle = np.random.permutation(len(X))
@@ -176,6 +176,8 @@ class NeuralNet:
         mse = ((self.Y_test - y_pred) ** 2).mean()
         return mse
 
+    # def tunning(self):
+
 
 class LoadDataSet:
     '''
@@ -202,19 +204,22 @@ class MLP(nn.Module):
     Multilayer Perceptron for regression.
     '''
 
-    def __init__(self, ncols, noutput):
+    def __init__(self, ncols, noutput, dropout=0.5):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(ncols, 100),
+            nn.Linear(ncols, 50),
             nn.SELU(),
-            nn.Dropout(0.1),
-            # nn.Linear(100, 100),
-            # nn.SELU(),
-            # nn.Dropout(0.1),
-            nn.Linear(100, 100),
+            nn.Dropout(dropout),
+            nn.Linear(50, 50),
             nn.SELU(),
-            nn.Dropout(0.1),
-            nn.Linear(100, noutput)
+            nn.Dropout(dropout),
+            nn.Linear(50, 50),
+            nn.SELU(),
+            nn.Dropout(dropout),
+            nn.Linear(50, 50),
+            nn.SELU(),
+            nn.Dropout(dropout),
+            nn.Linear(50, noutput)
         )
 
     def forward(self, x):

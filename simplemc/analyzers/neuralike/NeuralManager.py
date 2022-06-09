@@ -1,10 +1,7 @@
 """neuralike management object.
 Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
-Date: Dec 2021
+Date: Jun 2022
 """
-import sys
-import math
-
 from .NeuralNet import NeuralNet
 from .RandomSampling import RandomSampling
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -57,7 +54,7 @@ class NeuralManager:
             self.plot = True
             self.valid_loss = 0.5
             self.nrand = 5
-        self.rmse_criterion = self.valid_loss
+        self.mse_criterion = self.valid_loss
 
         # self.model_path = '{}.h5'.format(rootname)
         # if not self.modelChecker():
@@ -84,11 +81,14 @@ class NeuralManager:
         # rsampling = RandomSampling(self.loglikelihood_fn, means=means,
         #                            cov=np.cov(samples.T),
         #                            nrand=self.nrand, pool=self.pool)
+        rsampling = RandomSampling(self.loglikelihood_fn, mins=np.min(samples, axis=0),
+                                   maxs=np.max(samples, axis=0),
+                                   nrand=self.nrand, pool=self.pool)
         #
-        # rsamples, rlikes = rsampling.make_dataset()
-        # print("Training dataset created!")
-        # likes = np.append(rlikes, likes)
-        # samples = np.append(rsamples, samples, axis=0)
+        rsamples, rlikes = rsampling.make_dataset()
+        print("Training dataset created!")
+        likes = np.append(rlikes, likes)
+        samples = np.append(rsamples, samples, axis=0)
         print("\nGenerating test set...")
         # rsampling_test = RandomSampling(self.loglikelihood_fn,
         #                                 means=means,
@@ -98,7 +98,8 @@ class NeuralManager:
         print("Test dataset created!")
 
         ## scale params
-        self.samples_scaler = MinMaxScaler(feature_range=(0.5, 1))
+        # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 0.9))
+        self.samples_scaler = StandardScaler(with_mean=False)
         self.samples_scaler.fit(samples)
         sc_samples = self.samples_scaler.transform(samples)
         print(sc_samples)
@@ -125,10 +126,10 @@ class NeuralManager:
         # y_pred_test = self.likes_scaler.inverse_transform(y_pred_test.reshape(-1, 1))
         # test_set_test = self.test_neural(y_pred=y_pred_test, y_real=rlikes_test, nfrac=1)
         test_mse = self.neural_model.test_mse()
-        test_rmse = np.sqrt(test_mse)
+        # test_rmse = np.sqrt(test_mse)
         # criterion = float(self.likes_scaler.transform(np.array([self.rmse_criterion]).reshape(1, 1)))
-        print("Test RMSE: {:.4f} | Criterion: {:.4f}".format(test_rmse, self.rmse_criterion))
-        if test_rmse < self.rmse_criterion:
+        print("Test MSE: {:.4f} | Criterion: {:.4f}".format(test_mse, self.mse_criterion))
+        if test_mse < self.mse_criterion:
             self.valid = True
             print("\nValid Neural net | Train loss: {:.4f} | "
                   "Val loss: {:.4f}\n".format(lasttrain, lastval))
@@ -162,46 +163,23 @@ class NeuralManager:
         likes = np.array(likes)
         return likes
 
-    def test_neural(self, y_pred, y_real, nfrac=10):
+    def test_neural(self, y_pred, y_real, nsize=10, absdiff_criterion=5):
         nlen = len(y_pred)
         # if y_pred.shape != y_real.shape:
         y_pred = y_pred.reshape(nlen, 1)
         y_real = y_real.reshape(nlen, 1)
 
         shuffle = np.random.permutation(nlen)
-        nsize = int(len(y_pred)//nfrac)
 
         y_pred = y_pred[shuffle][-nsize:]
         y_real = y_real[shuffle][-nsize:]
 
-        mse = ((y_real - y_pred) ** 2).mean(axis=1)
-        mse_mean_sqrt = np.sqrt(mse.mean())
+        absdiff = np.mean((np.abs(y_real - y_pred)))
         # diff_mean = np.mean(np.abs(y_real - y_pred))
-        print("MSE sqrt in test set: {:.8f}".format(mse_mean_sqrt))
+        print("Abs diff in test set: {:.8f}".format(absdiff))
         # print("diff mean in test set: {:.8f}".format(diff_mean))
-        print("mse criterion", self.rmse_criterion*100)
-        if mse_mean_sqrt < self.rmse_criterion*100:
+        print("abs diff criterion", absdiff_criterion)
+        if absdiff < absdiff_criterion:
             return True
         else:
             return False
-
-    def orderOfMagnitude(self, number):
-        return math.floor(math.log(number, 10))
-
-    # def scaler_by_cols(self, dataset, fitted=False):
-    #     ## scaling column by column
-    #     print(np.shape(dataset), type(dataset))
-    #     if fitted is False:
-    #         self.scalers_list = []
-    #         for c in range(self.dims):
-    #             scaler = MinMaxScaler(feature_range=(0, 1))
-    #             scaler.fit(dataset[:, c].reshape(-1, 1))
-    #             self.scalers_list.append(scaler)
-    #             # datacol = scaler.transform(datacol.reshape(-1, 1))
-    #             # print(np.shape(datacol), type(datacol))
-    #             # sc_data[:, c] = datacol.reshape(rows,)
-    #             fitted = True
-    #     if fitted:
-    #         for c, scaler in enumerate(self.scalers_list):
-    #             dataset[:, c] = scaler.transform(dataset[:, c].reshape(-1, 1))
-    #     return dataset

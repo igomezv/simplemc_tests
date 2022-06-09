@@ -882,7 +882,7 @@ class Sampler(object):
                             print("\nBad neuralike predictions")
                             originalike_counter += 1
                 else:
-                    print("\nUsing original logL function.")
+                    print("\nUsing original logL function. | Original logL count: ", originalike_counter)
                     originalike_counter += 1
                     # self.trained_net = False
                     self.loglikelihood = self.loglikelihood_control
