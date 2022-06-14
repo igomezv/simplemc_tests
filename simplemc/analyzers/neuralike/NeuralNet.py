@@ -12,6 +12,7 @@ import math
 import torch
 from torch import nn
 from torchinfo import summary
+from torch_optimizer import AdaBound
 # from pytorchtools import EarlyStopping
 
 
@@ -79,8 +80,11 @@ class NeuralNet:
         # Define the loss function and optimizer
         # loss_function = nn.L1Loss()
         loss_function = nn.MSELoss()
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        # optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         # optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
+        optimizer = AdaBound(self.model.parameters(), lr=self.learning_rate)
+        # optimizer = torch.optim.Adagrad(self.model.parameters(), lr=self.learning_rate,
+        #                                 lr_decay=0, weight_decay=0, initial_accumulator_value=0, eps=1e-10)
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
         # try:
         summary(self.model)
@@ -144,7 +148,7 @@ class NeuralNet:
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
         # Process is complete.
         tf = time() - t0
-        print('Training process has finished in {:.3f} minutes.'.format(tf/60))
+        print('\nTraining process has finished in {:.3f} minutes.'.format(tf/60))
         self.history = {'loss': history_train, 'val_loss': history_val}
         self.loss_val = history_val[-5:]
         self.loss_train = history_train[-5:]
@@ -210,19 +214,23 @@ class MLP(nn.Module):
     def __init__(self, ncols, noutput, dropout=0.5):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(ncols, 200),
-            nn.SELU(),
+            nn.Linear(ncols, 100),
+            # nn.SELU(),
+            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(200, 200),
-            nn.SELU(),
+            nn.Linear(100, 100),
+            # nn.SELU(),
+            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(200, 200),
-            nn.SELU(),
+            nn.Linear(100, 100),
+            # nn.SELU(),
+            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(200, 200),
-            nn.SELU(),
+            nn.Linear(100, 100),
+            # nn.SELU(),
+            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(200, noutput)
+            nn.Linear(100, noutput)
         )
 
     def forward(self, x):
