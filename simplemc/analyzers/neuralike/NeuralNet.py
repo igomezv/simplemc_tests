@@ -79,7 +79,7 @@ class NeuralNet:
         # loss_function = nn.L1Loss()
         loss_function = nn.MSELoss()
         # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, weight_decay=1e-5)
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=1e-4, momentum=0.9, weight_decay=1e-5)
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
         # try:
         summary(self.model)
@@ -142,7 +142,8 @@ class NeuralNet:
             print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
         # Process is complete.
-        print('Training process has finished.')
+        tf = t0 - time()
+        print('Training process has finished in {:.3f} minutes.'.format(tf/60))
         self.history = {'loss': history_train, 'val_loss': history_val}
         self.loss_val = history_val[-5:]
         self.loss_train = history_train[-5:]
@@ -158,12 +159,13 @@ class NeuralNet:
         plt.plot(self.history['val_loss'], label='validation set')
         if ylogscale:
             plt.yscale('log')
-        plt.title('RMSE train: {:.4f} | RMSE val: {:.4f} | '
-                  'RMSE test: {:.4f}'.format(np.sqrt(self.loss_train[-1]),
-                                             np.sqrt(self.loss_val[-1]),
-                                             np.sqrt(self.test_mse())))
+        plt.title('MSE train: {:.4f} | MSE val: {:.4f} | '
+                  'MSE test: {:.4f}'.format(self.loss_train[-1],
+                                             self.loss_val[-1],
+                                             self.test_mse()))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
+        plt.xlim(0, self.epochs)
         plt.legend(['train', 'val'], loc='upper left')
         if save and figname:
             plt.savefig(figname)
@@ -207,19 +209,19 @@ class MLP(nn.Module):
     def __init__(self, ncols, noutput, dropout=0.5):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(ncols, 50),
+            nn.Linear(ncols, 200),
             nn.SELU(),
             nn.Dropout(dropout),
-            nn.Linear(50, 50),
+            nn.Linear(200, 200),
             nn.SELU(),
             nn.Dropout(dropout),
-            nn.Linear(50, 50),
+            nn.Linear(200, 200),
             nn.SELU(),
             nn.Dropout(dropout),
-            nn.Linear(50, 50),
+            nn.Linear(200, 200),
             nn.SELU(),
             nn.Dropout(dropout),
-            nn.Linear(50, noutput)
+            nn.Linear(200, noutput)
         )
 
     def forward(self, x):
