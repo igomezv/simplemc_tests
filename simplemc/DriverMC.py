@@ -384,7 +384,7 @@ class DriverMC:
 
         else:
             sampler = NestedSampler(self.logLike, self.priorTransform, self.dims,
-                        bound=nestedType, sample = 'unif', nlive = nlivepoints,
+                        bound=nestedType, sample = 'auto', nlive = nlivepoints,
                         pool = pool, queue_size=nprocess,
                         neuralike=self.useNeuralike, live_points=self.live_points)
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
