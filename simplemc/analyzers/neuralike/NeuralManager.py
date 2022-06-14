@@ -57,6 +57,7 @@ class NeuralManager:
 
         _, self.dims = np.shape(self.samples)
         self.topology = [self.dims] + self.hidden_layers_neurons + [1]
+        self.perc_tolerance = 5
         self.mse_criterion = self.valid_loss
 
 
@@ -85,7 +86,8 @@ class NeuralManager:
         sc_samples = self.samples_scaler.transform(samples)
         # print(sc_samples)
         # # create scaler
-        self.likes_scaler = MinMaxScaler(feature_range=(0.5, 1))
+        self.likes_scaler = StandardScaler(with_mean=False)
+            # MinMaxScaler(feature_range=(0.5, 1))
         self.likes_scaler.fit(likes.reshape(-1, 1))
         # # # apply transforms
         sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
@@ -138,7 +140,7 @@ class NeuralManager:
 
     def test_neural(self, y_pred, y_real, nsize=10, absdiff_criterion=None):
         if absdiff_criterion is None:
-            absdiff_criterion = 0.1*np.abs(np.max(self.likes))
+            absdiff_criterion = (1/self.perc_tolerance)*np.min(np.abs(self.likes))
         nlen = len(y_pred)
         # if y_pred.shape != y_real.shape:
         y_pred = y_pred.reshape(nlen, 1)
