@@ -41,7 +41,7 @@ class NeuralNet:
             self.model.summary()
         else:
 
-            percentage = 0.05
+            # percentage = 0.05
             nrows, ncols = X.shape
             # noise_x = np.zeros(X.shape)
             # for col in range(ncols):
