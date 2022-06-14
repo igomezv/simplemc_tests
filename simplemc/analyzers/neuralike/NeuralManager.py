@@ -67,7 +67,6 @@ class NeuralManager:
         #     self.neural_model = self.load()
 
     def training(self):
-
         ml_idx = np.argmax(self.likes)
         means = self.samples[ml_idx, :]
         print("\nGenerating training set...")
@@ -137,7 +136,9 @@ class NeuralManager:
         likes = np.array(likes)
         return likes
 
-    def test_neural(self, y_pred, y_real, nsize=10, absdiff_criterion=5):
+    def test_neural(self, y_pred, y_real, nsize=10, absdiff_criterion=None):
+        if absdiff_criterion is None:
+            absdiff_criterion = 0.1*np.abs(np.max(self.likes))
         nlen = len(y_pred)
         # if y_pred.shape != y_real.shape:
         y_pred = y_pred.reshape(nlen, 1)
@@ -150,10 +151,10 @@ class NeuralManager:
 
         absdiff = np.mean((np.abs(y_real - y_pred)))
         # diff_mean = np.mean(np.abs(y_real - y_pred))
-        print("Abs diff in test set: {:.8f}".format(absdiff))
+        print("Absolute difference in the test set: {:.4f}".format(absdiff))
         # print("diff mean in test set: {:.8f}".format(diff_mean))
-        print("abs diff criterion", absdiff_criterion)
-        if absdiff < absdiff_criterion:
+        print("Absolute difference criterion: {:.4f}".format(absdiff_criterion))
+        if absdiff <= absdiff_criterion:
             return True
         else:
             return False
