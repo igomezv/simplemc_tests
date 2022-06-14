@@ -67,6 +67,7 @@ class NeuralNet:
             self.model = MLP(self.dims, self.topology[-1])
             self.model.float()
         print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X.shape, Y.shape))
+        print("Neuralike: Shape of X_val dataset: {} | Shape of X_test dataset: {}".format(self.X_val.shape, self.X_test.shape))
 
     def train(self):
         dataset_train = LoadDataSet(self.X_train, self.Y_train)
@@ -78,9 +79,9 @@ class NeuralNet:
         # Define the loss function and optimizer
         # loss_function = nn.L1Loss()
         loss_function = nn.MSELoss()
-        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, weight_decay=1e-5)
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        # optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
         # try:
         summary(self.model)
         t0 = time()
@@ -136,13 +137,13 @@ class NeuralNet:
                 output_val = self.model(inputs)
                 valid_loss = loss_function(output_val, targets)
                 valid_loss += loss.item()
-                scheduler.step(valid_loss)
+                # scheduler.step(valid_loss)
 
             history_val = np.append(history_val, valid_loss.item())
             print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
         # Process is complete.
-        tf = t0 - time()
+        tf = time() - t0
         print('Training process has finished in {:.3f} minutes.'.format(tf/60))
         self.history = {'loss': history_train, 'val_loss': history_val}
         self.loss_val = history_val[-5:]
