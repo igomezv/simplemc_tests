@@ -25,13 +25,13 @@ class NeuralManager:
 
     # def __init__(self, loglikelihood, samples, likes,
     #              rootname='neural', neuralike_settings=None):
-    def __init__(self, loglikelihood, min_live_logL, max_live_logL, rootname='neural',
+    def __init__(self, loglikelihood, samples, likes, rootname='neural',
                  pool=None, neuralike_settings=None):
         self.loglikelihood_fn = loglikelihood
         self.valid = False
         self.fig_path = '{}.png'.format(rootname)
-        self.min_live_logL = min_live_logL
-        self.max_live_logL = max_live_logL
+        self.samples = samples
+        self.likes = likes
         self.pool = pool
         if neuralike_settings:
             self.learning_rate = neuralike_settings['learning_rate']
@@ -54,7 +54,11 @@ class NeuralManager:
             self.plot = True
             self.valid_loss = 0.5
             self.nrand = 5
+
+        _, self.dims = np.shape(self.samples)
+        self.topology = [self.dims] + self.hidden_layers_neurons + [1]
         self.mse_criterion = self.valid_loss
+
 
         # self.model_path = '{}.h5'.format(rootname)
         # if not self.modelChecker():
@@ -62,47 +66,25 @@ class NeuralManager:
         # else:
         #     self.neural_model = self.load()
 
-    def training(self, samples, likes):
-        _, self.dims = np.shape(samples)
-        self.topology = [self.dims] + self.hidden_layers_neurons + [1]
-        # print(likes)
-        # print("minl, maxl", self.min_live_logL, self.max_live_logL)
-        # idx_val_logL1 = np.argwhere(likes > self.min_live_logL)
-        # idx_val_logL2 = np.argwhere(likes < self.max_live_logL)
-        # idx_val_logL = np.intersect1d(idx_val_logL1, idx_val_logL2)
+    def training(self):
 
-        # likes = likes[idx_val_logL]
-        # samples = samples[idx_val_logL]
-        print(np.shape(likes), np.shape(samples), type(likes), type(samples))
-
-        ml_idx = np.argmax(likes)
-        means = samples[ml_idx, :]
+        ml_idx = np.argmax(self.likes)
+        means = self.samples[ml_idx, :]
         print("\nGenerating training set...")
-        # rsampling = RandomSampling(self.loglikelihood_fn, means=means,
-        #                            cov=np.cov(samples.T),
-        #                            nrand=self.nrand, pool=self.pool)
-        rsampling = RandomSampling(self.loglikelihood_fn, mins=np.min(samples, axis=0),
-                                   maxs=np.max(samples, axis=0),
+        rsampling = RandomSampling(self.loglikelihood_fn, means=means, mins=np.max(self.samples, axis=0),
+                                   maxs=np.max(self.samples, axis=0),
                                    nrand=self.nrand, pool=self.pool)
-        #
         rsamples, rlikes = rsampling.make_dataset()
         print("Training dataset created!")
-        likes = np.append(rlikes, likes)
-        samples = np.append(rsamples, samples, axis=0)
-        print("\nGenerating test set...")
-        # rsampling_test = RandomSampling(self.loglikelihood_fn,
-        #                                 means=means,
-        #                                 cov=np.cov(samples.T),
-        #                                 nrand=int(0.1*len(likes)))
-        # rsamples_test, rlikes_test = rsampling_test.make_dataset()
-        print("Test dataset created!")
+        likes = np.append(rlikes, self.likes)
+        samples = np.append(rsamples, self.samples, axis=0)
 
         ## scale params
         # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 0.9))
         self.samples_scaler = StandardScaler(with_mean=False)
         self.samples_scaler.fit(samples)
         sc_samples = self.samples_scaler.transform(samples)
-        print(sc_samples)
+        # print(sc_samples)
         # # create scaler
         self.likes_scaler = MinMaxScaler(feature_range=(0.5, 1))
         self.likes_scaler.fit(likes.reshape(-1, 1))
@@ -122,12 +104,7 @@ class NeuralManager:
         lastval = self.neural_model.loss_val[-1]
         lasttrain = self.neural_model.loss_train[-1]
         ## preparing for testing
-        # y_pred_test = self.neural_model.predict(rsamples_test)
-        # y_pred_test = self.likes_scaler.inverse_transform(y_pred_test.reshape(-1, 1))
-        # test_set_test = self.test_neural(y_pred=y_pred_test, y_real=rlikes_test, nfrac=1)
         test_mse = self.neural_model.test_mse()
-        # test_rmse = np.sqrt(test_mse)
-        # criterion = float(self.likes_scaler.transform(np.array([self.rmse_criterion]).reshape(1, 1)))
         print("Test MSE: {:.4f} | Criterion: {:.4f}".format(test_mse, self.mse_criterion))
         if test_mse < self.mse_criterion:
             self.valid = True
@@ -153,12 +130,9 @@ class NeuralManager:
 
     def neuralike(self, params):
         # loglikelihood only can work if trainning was executed
-        # sc_params = self.samples_scaler.transform(np.array(params).reshape(len(params), self.dims))
-        # print(params.shape)
         sc_params = self.samples_scaler.transform(np.array(params).reshape(1, self.dims))
         # pred = self.neural_model.predict(sc_params)
         pred = self.neural_model.predict(sc_params)
-        # likes = np.array(pred)
         likes = self.likes_scaler.inverse_transform(pred.reshape(-1, 1))
         likes = np.array(likes)
         return likes

@@ -841,17 +841,11 @@ class Sampler(object):
                         last_train_it = self.it
                         originalike_counter = 0
                         net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                            min_live_logL=np.min(self.live_logl),
-                                            max_live_logL=np.max(self.live_logl),
+                                            samples=np.array(self.live_v),
+                                            likes=np.array(self.live_logl),
                                             rootname=self.outputname,
-
-                                                 # likes=np.array(self.saved_logl),
-                                                 # samples=np.array(self.saved_v),
-                                                 # likes=np.array(self.saved_logl)[-self.it//2:],
-                                                 # samples=np.array(self.saved_v)[-self.it//2:,:],
                                             neuralike_settings=self.neuralike_settings)
-                        net.training(samples=np.array(self.live_v),
-                                     likes=np.array(self.live_logl))
+                        net.training()
                         train_counter += 1
                         self.trained_net = net.valid
                         print("valid", net.valid)
