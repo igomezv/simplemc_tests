@@ -29,7 +29,7 @@ class NeuraLike:
         self.n_neuralikes = 0
         self.train_counter = 0
         self.last_train_it = 0
-        self.aft_train_it = 1
+        self.aft_train_it = 0
         self.loglikelihood_control = loglikelihood_control
         self.rootname = rootname
         self.neuralike_settings = neuralike_settings
@@ -55,7 +55,8 @@ class NeuraLike:
         if self.trained_net:
             print(info+' Neural')
         else:
-            self.originalike_counter += 1
+            if self.train_counter > 0:
+                self.originalike_counter += 1
             print(info+' Original {}-aft'.format(self.originalike_counter))
         return None
 
@@ -66,12 +67,13 @@ class NeuraLike:
             return False
 
     def training_flag(self, it):
-        # number of iteration after the last training
-        originalike_flag = self.originalike_counter >= self.updInt
-        flag_train = (self.aft_train_it % self.updInt == 0 or originalike_flag)
+        # Number of iterations after last train
         self.aft_train_it = it - self.last_train_it
-        # flag_train = (self.it % self.updInt == 0)
-        if (self.trained_net is False and flag_train) or self.train_counter == 0:
+        # setting the conditions to train or retrain
+        check = (self.aft_train_it % self.updInt == 0)
+        retrain = (self.originalike_counter >= self.updInt)
+        first = (self.train_counter == 0)
+        if (check and first) or retrain:
             self.last_train_it = it
             return True
         else:
@@ -113,7 +115,14 @@ class NeuraLike:
                     print("\nBad neuralike predictions")
         return None
 
-    def test_predictions(self, x, y_pred, y_real, nsize=10, absdiff_criterion=None, perc_tolerance=5):
+    def likelihood(self, params):
+        if self.trained_net:
+            return self.net.neuralike(params)
+        else:
+            return self.loglikelihood_control(params)
+
+    @staticmethod
+    def test_predictions(x, y_pred, y_real, nsize=10, absdiff_criterion=None, perc_tolerance=5):
         if absdiff_criterion is None:
             absdiff_criterion = (1 / perc_tolerance) * np.min(np.abs(x))
         nlen = len(y_pred)
@@ -135,9 +144,3 @@ class NeuraLike:
             return True
         else:
             return False
-
-    def likelihood(self, params):
-        if self.trained_net:
-            return self.net.neuralike(params)
-        else:
-            return self.loglikelihood_control(params)
