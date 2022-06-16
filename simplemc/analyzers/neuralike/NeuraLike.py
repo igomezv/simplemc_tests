@@ -33,23 +33,23 @@ class NeuraLike:
         self.neuralike_settings = neuralike_settings
 
     def run(self, delta_logz, it, nc, samples, likes, nsize=10,
-            absdiff_criterion=None, map_fn=map, perc_tolerance=5):
+            absdiff_criterion=None, map_fn=map, logl_tolerance=0.1):
         if self.training_flag(delta_logz, it):
             self.train(samples, likes)
         if self.trained_net:
             self.neural_switch(nc, samples, likes, nsize=nsize,
                                absdiff_criterion=absdiff_criterion, map_fn=map_fn,
-                               perc_tolerance=perc_tolerance)
+                               logl_tolerance=logl_tolerance)
 
         info = "\nneural calls: {} | neuralikes: {} | "\
                "neural trains: {} | Using: ".format(self.ncalls_neural, self.n_neuralikes,
                                                     self.train_counter)
         if self.trained_net:
-            print(info+' Neural')
+            print(info+'Neural')
         else:
             if self.train_counter > 0:
                 self.originalike_counter += 1
-            print(info+' Original {}-aft'.format(self.originalike_counter))
+            print(info+'Original {}-aft'.format(self.originalike_counter))
         return None
 
     def training_flag(self, delta_logz, it):
@@ -81,7 +81,7 @@ class NeuraLike:
         return None
 
     def neural_switch(self, nc, samples, likes, nsize=10, absdiff_criterion=None,
-                      map_fn=map, perc_tolerance=5):
+                      map_fn=map, logl_tolerance=0.1):
         if self.trained_net:  # validar dentro de nested
             self.n_neuralikes += 1
             self.ncalls_neural += nc
@@ -89,16 +89,15 @@ class NeuraLike:
                 self.trained_net = False
                 print("\nExcesive number of calls, neuralike disabled")
             elif self.n_neuralikes % (self.updInt // 2) == 0:
-                print("\nTesting neuralike predictions...")
                 samples_test = samples[-self.updInt:, :]
                 neuralikes_test = likes[-self.updInt:]
 
                 real_logl = np.array(list(map_fn(self.loglikelihood_control,
                                                  samples_test)))
-                ref_val = np.min(abs(samples))
-                flag_test = self.test_predictions(ref_val, neuralikes_test, real_logl,
+
+                flag_test = self.test_predictions(neuralikes_test, real_logl,
                                                   nsize=nsize, absdiff_criterion=absdiff_criterion,
-                                                  perc_tolerance=perc_tolerance)
+                                                  logl_tolerance=logl_tolerance)
                 self.trained_net = False
                 if flag_test is False:
                     print("\nBad neuralike predictions")
@@ -111,11 +110,8 @@ class NeuraLike:
             return self.loglikelihood_control(params)
 
     @staticmethod
-    def test_predictions(ref_val, y_pred, y_real, nsize=10, absdiff_criterion=None, perc_tolerance=5):
-
-        if absdiff_criterion is None:
-            absdiff_criterion = (1 / perc_tolerance) * ref_val
-
+    def test_predictions(y_pred, y_real, nsize=10, absdiff_criterion=None, logl_tolerance=0.1):
+        print("\nTesting neuralike predictions...")
         nlen = len(y_pred)
         y_pred = y_pred.reshape(nlen, 1)
         y_real = y_real.reshape(nlen, 1)
@@ -123,6 +119,10 @@ class NeuraLike:
         y_pred = y_pred[shuffle][-nsize:]
         y_real = y_real[shuffle][-nsize:]
         absdiff = np.mean((np.abs(y_real - y_pred)))
+
+        if absdiff_criterion is None:
+            ref_val = np.min(abs(y_real))
+            absdiff_criterion = logl_tolerance * ref_val
 
         print("Absolute difference in the test set: {:.4f}".format(absdiff))
         print("Absolute difference criterion: {:.4f}".format(absdiff_criterion))
