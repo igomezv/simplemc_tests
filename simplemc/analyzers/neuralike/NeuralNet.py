@@ -81,11 +81,12 @@ class NeuralNet:
         # loss_function = nn.L1Loss()
         loss_function = nn.MSELoss()
         # optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        # optimizer = torch.optim.Adadelta(self.model.parameters(), lr=self.learning_rate, weight_decay=0.05)
         # optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
-        optimizer = AdaBound(self.model.parameters(), lr=self.learning_rate)
+        optimizer = AdaBound(self.model.parameters(), lr=self.learning_rate, final_lr=0.01, weight_decay=1e-10)
         # optimizer = torch.optim.Adagrad(self.model.parameters(), lr=self.learning_rate,
         #                                 lr_decay=0, weight_decay=0, initial_accumulator_value=0, eps=1e-10)
-        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=10)
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=5)
         # try:
         summary(self.model)
         t0 = time()
@@ -211,26 +212,22 @@ class MLP(nn.Module):
     Multilayer Perceptron for regression.
     '''
 
-    def __init__(self, ncols, noutput, dropout=0.5):
+    def __init__(self, ncols, noutput, numneurons=200, dropout=0.1):
         super().__init__()
         self.layers = nn.Sequential(
-            nn.Linear(ncols, 100),
+            nn.Linear(ncols, numneurons),
             # nn.SELU(),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(100, 100),
+            nn.Linear(numneurons, numneurons),
             # nn.SELU(),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(100, 100),
+            nn.Linear(numneurons, numneurons),
             # nn.SELU(),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(100, 100),
-            # nn.SELU(),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(100, noutput)
+            nn.Linear(numneurons, noutput)
         )
 
     def forward(self, x):
