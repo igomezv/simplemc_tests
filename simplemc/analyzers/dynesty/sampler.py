@@ -672,7 +672,7 @@ class Sampler(object):
         self.save_bounds = save_bounds
         ncall = 0
         # simplemc: neuralike
-        neural_flag = False
+        neural_on = False
 
         # Check whether we're starting fresh or continuing a previous run.
         if self.it == 1:
@@ -821,12 +821,12 @@ class Sampler(object):
             # simplemc
             # starts neuralike
             if self.neuralike:
-                if neural_flag is False:
+                if neural_on is False:
                     from simplemc.analyzers.neuralike.NeuraLike import NeuraLike
                     neuralike = NeuraLike(loglikelihood_control=self.loglikelihood_control,
                                           rootname=self.outputname,
                                           neuralike_settings=self.neuralike_settings)
-                    neural_flag = True
+                    neural_on = True
                 neuralike.run(delta_logz, it, nc, samples=np.array(self.live_v),
                               likes=np.array(self.live_logl), map_fn=self.M)
                 self.loglikelihood = neuralike.likelihood
