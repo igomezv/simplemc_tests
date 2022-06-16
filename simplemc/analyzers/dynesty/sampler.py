@@ -672,13 +672,7 @@ class Sampler(object):
         self.save_bounds = save_bounds
         ncall = 0
         # simplemc: neuralike
-        niter_after_net = 0
-        # Counter of neuralikes
-        n_neuralikes = 0
-        ncalls_neural = 0
-        train_counter = 0
-        last_train_it = 0
-        originalike_counter = 0
+        neural_flag = False
 
         # Check whether we're starting fresh or continuing a previous run.
         if self.it == 1:
@@ -826,61 +820,17 @@ class Sampler(object):
             self.since_update += nc
             # simplemc
             # starts neuralike
-            if self.neuralike:
-                if (self.it >= self.nstart_samples) or (delta_logz <= self.nstart_stop_criterion):
-                    print("\nneural calls: {} | neuralikes: {} | neural trains: {}".format(ncalls_neural,
-                                                                                           n_neuralikes,
-                                                                                           train_counter))
-                    # number of iteration after the last training
-                    aft_train_it = self.it - last_train_it
-                    originalike_flag = originalike_counter >= self.updInt
-                    flag_train = (aft_train_it % self.updInt == 0 or originalike_flag)
-                    # flag_train = (self.it % self.updInt == 0)
-                    if self.trained_net is False and flag_train:
-                        from simplemc.analyzers.neuralike.NeuralManager import NeuralManager
-                        last_train_it = self.it
-                        originalike_counter = 0
-                        net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                            samples=np.array(self.live_v),
-                                            likes=np.array(self.live_logl),
-                                            rootname=self.outputname,
-                                            neuralike_settings=self.neuralike_settings)
-                        net.training()
-                        train_counter += 1
-                        self.trained_net = net.valid
-                        print("valid", net.valid)
+            if self.neuralike and delta_logz < 200:
+                if neural_flag is False:
+                    from simplemc.analyzers.neuralike.NeuraLike import NeuraLike
+                    neuralike = NeuraLike(loglikelihood_control=self.loglikelihood_control,
+                                          rootname=self.outputname,
+                                          neuralike_settings=self.neuralike_settings)
+                    neural_flag = True
+                neuralike.run(delta_logz, it, nc, samples=np.array(self.live_v),
+                              likes=np.array(self.live_logl), map_fn=self.M)
+                self.loglikelihood = neuralike.likelihood
 
-                if self.trained_net: #validar dentro de nested
-                    self.loglikelihood = net.neuralike
-                    n_neuralikes += 1
-                    ncalls_neural += nc
-                    if nc > 200:
-                        self.trained_net = False
-                        # originalike_counter += 1
-                        print("\nExcesive number of calls, neuralike disabled")
-                    elif n_neuralikes % (self.updInt//2) == 0:
-                        print("\nTesting neuralike predictions...")
-                        samples_test = np.array(self.live_v)[-self.updInt:, :]
-                        neuralikes_test = np.array(self.live_logl)[-self.updInt:]
-                        if self.use_pool_logl:
-                            real_logl = np.array(list(self.M(self.loglikelihood_control,
-                                                                 samples_test)))
-                        else:
-                            real_logl = np.array(list(map(self.loglikelihood_control,
-                                                             samples_test)))
-                        self.trained_net = net.test_neural(y_pred=neuralikes_test, y_real=real_logl)
-                        # if self.live_logl[-1] < worst:
-                        #     self.trained_net = False
-                        #     print("\nLower than worst")
-                        if self.trained_net is False:
-                            print("\nBad neuralike predictions")
-                            # originalike_counter += 1
-                else:
-                    print("\nUsing original logL function. | Original logL count: ", originalike_counter)
-                    originalike_counter += 1
-                    # self.trained_net = False
-                    self.loglikelihood = self.loglikelihood_control
-                    # print("original like")
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
             lzterm = (math.exp(loglstar - logz_new) * loglstar +
@@ -1011,11 +961,11 @@ class Sampler(object):
         else:
             self.composite = False
 
-        # simplemc: reading neuralike settings
-        self.nstart_samples = self.neuralike_settings['nstart_samples']
-        self.nstart_stop_criterion = self.neuralike_settings['nstart_stop_criterion']
-        self.ncalls_excess = self.neuralike_settings['ncalls_excess']
-        self.updInt = self.neuralike_settings['updInt']
+        # # simplemc: reading neuralike settings
+        # self.nstart_samples = self.neuralike_settings['nstart_samples']
+        # self.nstart_stop_criterion = self.neuralike_settings['nstart_stop_criterion']
+        # self.ncalls_excess = self.neuralike_settings['ncalls_excess']
+        # self.updInt = self.neuralike_settings['updInt']
 
         # Define our stopping criteria.
         if dlogz is None:

@@ -57,7 +57,6 @@ class NeuralManager:
 
         _, self.dims = np.shape(self.samples)
         self.topology = [self.dims] + self.hidden_layers_neurons + [1]
-        self.perc_tolerance = 5
         self.mse_criterion = self.valid_loss
 
 
@@ -138,25 +137,25 @@ class NeuralManager:
         likes = np.array(likes)
         return likes
 
-    def test_neural(self, y_pred, y_real, nsize=10, absdiff_criterion=None):
-        if absdiff_criterion is None:
-            absdiff_criterion = (1/self.perc_tolerance)*np.min(np.abs(self.likes))
-        nlen = len(y_pred)
-        # if y_pred.shape != y_real.shape:
-        y_pred = y_pred.reshape(nlen, 1)
-        y_real = y_real.reshape(nlen, 1)
-
-        shuffle = np.random.permutation(nlen)
-
-        y_pred = y_pred[shuffle][-nsize:]
-        y_real = y_real[shuffle][-nsize:]
-
-        absdiff = np.mean((np.abs(y_real - y_pred)))
-        # diff_mean = np.mean(np.abs(y_real - y_pred))
-        print("Absolute difference in the test set: {:.4f}".format(absdiff))
-        # print("diff mean in test set: {:.8f}".format(diff_mean))
-        print("Absolute difference criterion: {:.4f}".format(absdiff_criterion))
-        if absdiff <= absdiff_criterion:
-            return True
-        else:
-            return False
+    # def test_neural(self, y_pred, y_real, nsize=10, absdiff_criterion=None):
+    #     if absdiff_criterion is None:
+    #         absdiff_criterion = (1/self.perc_tolerance)*np.min(np.abs(self.likes))
+    #     nlen = len(y_pred)
+    #     # if y_pred.shape != y_real.shape:
+    #     y_pred = y_pred.reshape(nlen, 1)
+    #     y_real = y_real.reshape(nlen, 1)
+    #
+    #     shuffle = np.random.permutation(nlen)
+    #
+    #     y_pred = y_pred[shuffle][-nsize:]
+    #     y_real = y_real[shuffle][-nsize:]
+    #
+    #     absdiff = np.mean((np.abs(y_real - y_pred)))
+    #     # diff_mean = np.mean(np.abs(y_real - y_pred))
+    #     print("Absolute difference in the test set: {:.4f}".format(absdiff))
+    #     # print("diff mean in test set: {:.8f}".format(diff_mean))
+    #     print("Absolute difference criterion: {:.4f}".format(absdiff_criterion))
+    #     if absdiff <= absdiff_criterion:
+    #         return True
+    #     else:
+    #         return False
