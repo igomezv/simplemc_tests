@@ -820,7 +820,7 @@ class Sampler(object):
             self.since_update += nc
             # simplemc
             # starts neuralike
-            if self.neuralike and delta_logz < 200:
+            if self.neuralike:
                 if neural_flag is False:
                     from simplemc.analyzers.neuralike.NeuraLike import NeuraLike
                     neuralike = NeuraLike(loglikelihood_control=self.loglikelihood_control,
