@@ -83,7 +83,6 @@ class DriverMC:
             self.datasets     = kwargs.pop('datasets','HD')
             self.analyzername = kwargs.pop('analyzername', None)
             self.addDerived   = kwargs.pop('addDerived', False)
-            self.useNeuralike = kwargs.pop('useNeuralike', False)
             self.mcevidence = kwargs.pop('mcevidence', False)
             self.mcevidence_k = kwargs.pop('mcevidence_k', 4)
             self.overwrite = kwargs.pop('overwrite', True)
@@ -141,8 +140,6 @@ class DriverMC:
                                     self.datasets)
         self.outputpath = "{}/{}".format(self.chainsdir, self.root)
 
-        self.neuralike_settings = self.neuralike_dict(iniFile=self.iniFile)
-
 
     def executer(self, **kwargs):
         """
@@ -154,15 +151,18 @@ class DriverMC:
         if self.analyzername == 'mcmc':
             self.mcmcRunner(iniFile=self.iniFile, **kwargs)
         elif self.analyzername == 'nested':
-            if self.useNeuralike:
-                genopt = self.geneticdeap(iniFile=self.iniFile, **kwargs)
-                book = genopt['book']
-                u, v, logl = self.points_GeNNeS(book, map)
-                self.live_points = [u, v, logl]
-                self.nestedRunner(iniFile=self.iniFile, **kwargs)
-            else:
-                self.live_points = None
-                self.nestedRunner(iniFile=self.iniFile, **kwargs)
+            # if self.iniFile:
+            #     useGenetic = self.config.getboolean('nested', 'useGenetic', fallback=True)
+            # else:
+            #     useGenetic = kwargs.pop('useGenetic', True)
+            # if useGenetic:
+            #     genopt = self.geneticdeap(iniFile=self.iniFile, **kwargs)
+            #     book = genopt['book']
+            #     u, v, logl = self.points_GeNNeS(book, map)
+            #     self.live_points = [u, v, logl]
+            # else:
+            #     self.live_points = None
+            self.nestedRunner(iniFile=self.iniFile, **kwargs)
 
         elif self.analyzername == 'emcee':
             self.emceeRunner(iniFile=self.iniFile, **kwargs)
@@ -200,7 +200,6 @@ class DriverMC:
         self.analyzername = self.config.get(        'custom', 'analyzername', fallback=None)
         self.varys8       = self.config.getboolean( 'custom', 'varys8',       fallback=False)
         self.addDerived   = self.config.getboolean( 'custom', 'addDerived',   fallback=False)
-        self.useNeuralike = self.config.getboolean('custom', 'useNeuralike', fallback=False)
         self.mcevidence = self.config.getboolean('custom', 'mcevidence', fallback=False)
         self.mcevidence_k = self.config.getint('custom', 'mcevidence_k', fallback=4)
         self.overwrite = self.config.getboolean('custom', 'overwrite', fallback=True)
@@ -335,6 +334,8 @@ class DriverMC:
             self.priortype = self.config.get('nested', 'priortype', fallback='u')
             #nsigma is the default value for sigma in gaussian priors
             self.nsigma = self.config.get('nested', 'sigma', fallback=2)
+            self.useNeuralike = self.config.getboolean('nested', 'useNeuralike', fallback=False)
+            useGenetic = self.config.getboolean('nested', 'useGenetic', fallback=False)
 
         else:
             dynamic     = kwargs.pop('dynamic',    False)
@@ -345,6 +346,8 @@ class DriverMC:
 
             self.priortype = kwargs.pop('priortype', 'u')
             self.nsigma = kwargs.pop('sigma', 2)
+            self.useNeuralike = kwargs.pop('useNeuralike', False)
+            useGenetic = kwargs.pop('useGenetic', False)
 
             if kwargs:
                 logger.critical('Unexpected **kwargs for nested sampler: {}'.format(kwargs))
@@ -368,6 +371,19 @@ class DriverMC:
                     "\tnested type: {}".format(nlivepoints, accuracy, nestedType))
 
         ti = time.time()
+        if useGenetic:
+            if pool is None:
+                map_fn = map
+            else:
+                map_fn = pool.map
+            genopt = self.geneticdeap(iniFile=self.iniFile, **kwargs)
+            book = genopt['book']
+            u, v, logl = self.points_GeNNeS(book, map_fn=map_fn)
+            self.live_points = [u, v, logl]
+        else:
+            self.live_points = None
+
+        neuralike_settings = self.neuralike_dict(iniFile=self.iniFile)
 
         if dynamic:
             logger.info("\nUsing dynamic nested sampling...")
@@ -378,7 +394,7 @@ class DriverMC:
             sampler.run_nested(nlive_init=nlivepoints, dlogz_init=0.05, nlive_batch=100,
                             maxiter_init=10000, maxiter_batch=1000, maxbatch=10,
                             outputname=self.outputpath, addDerived=self.addDerived, simpleLike=self.L,
-                            neuralike_settings=self.neuralike_settings)
+                            neuralike_settings=neuralike_settings)
             M = sampler.results
 
 
@@ -389,7 +405,7 @@ class DriverMC:
                         neuralike=self.useNeuralike, live_points=self.live_points)
             sampler.run_nested(dlogz=accuracy, outputname=self.outputpath,
                                addDerived=self.addDerived, simpleLike=self.L,
-                               neuralike_settings=self.neuralike_settings)
+                               neuralike_settings=neuralike_settings)
             M = sampler.results
 
         try:
