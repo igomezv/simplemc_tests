@@ -71,6 +71,7 @@ class PostProcessing:
                 stdevs = np.zeros(self.N)
             param_fits = self.result['param_fit']
 
+        print("\n---")
         for i, parname in enumerate(self.paramList):
             param_fit = param_fits[i]
             std = stdevs[i]

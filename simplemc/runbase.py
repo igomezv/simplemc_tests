@@ -29,6 +29,9 @@ from .models import CompressPantheon
 #Generic model
 from .models.SimpleModel import SimpleModel, SimpleCosmoModel
 
+# Toy models
+from .tools.ToyModels import ToyModels
+
 # Composite Likelihood
 from .likelihoods.CompositeLikelihood import CompositeLikelihood
 
@@ -171,6 +174,17 @@ def ParseModel(model, **kwargs):
         T = SimpleModel(custom_parameters, custom_function)
     elif model == 'simple_cosmo':
         T = SimpleCosmoModel(custom_parameters, RHSquared=custom_function)
+    elif model == 'eggbox':
+        # 'eggbox', 'ring', 'gaussian', 'square', 'himmel'
+        T = ToyModels(model='eggbox')
+    elif model == 'ring':
+        T = ToyModels(model='ring')
+    elif model == 'square':
+        T = ToyModels(model='square')
+    elif model == 'gaussian':
+        T = ToyModels(model='gaussian')
+    elif model == 'himmel':
+        T = ToyModels(model='himmel')
     else:
         print("Cannot recognize model", model)
         sys.exit(1)
