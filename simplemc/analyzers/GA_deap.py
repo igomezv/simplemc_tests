@@ -136,8 +136,9 @@ class GA_deap:
         self.cov = la.inv(hess)
         print('Covariance matrix \n', self.cov)
 
-        with open('{}.'.format(self.outputname), 'w') as f:
-            np.savetxt(f, best_params, fmt='%.4e', delimiter=',')
+        # This is not necessary because it is contained in the summary output.
+        # with open('{}.bestparams'.format(self.outputname), 'w') as f:
+        #     np.savetxt(f, best_params, fmt='%.4e', delimiter=',')
 
         with open('{}.cov'.format(self.outputname), 'w') as f:
             np.savetxt(f, self.cov, fmt='%.4e', delimiter=',')

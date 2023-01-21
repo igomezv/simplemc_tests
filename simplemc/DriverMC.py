@@ -362,7 +362,10 @@ class DriverMC:
         #stored output files
         if self.analyzername is None: self.analyzername = 'nested'
         self.outputpath = '{}_{}_{}'.format(self.outputpath, self.analyzername, nestedType)
-        self.outputChecker()
+        if self.useNeuralike:
+            self.outputpath = '{}_{}'.format(self.outputpath, 'neuralike')
+        if not useGenetic:
+            self.outputChecker()
 
         #paralel run
         pool, nprocess = self.mppool(nproc)
@@ -566,7 +569,10 @@ class DriverMC:
 
         """
         if self.analyzername is None: self.analyzername = 'ga_deap'
-        self.outputpath = '{}_{}'.format(self.outputpath, self.analyzername)
+        if self.analyzername == 'nested':
+            self.outputpath = '{}_{}'.format(self.outputpath, 'genetic')
+        else:
+            self.outputpath = '{}_{}'.format(self.outputpath, self.analyzername)
         self.outputChecker()
         if iniFile:
             plot_fitness = self.config.getboolean('ga_deap', 'plot_fitness', fallback=False)
@@ -867,8 +873,8 @@ class DriverMC:
         Under construction.
         This method trains a neural network in order to learn the likelihood function.
         """
-        if self.useNeuralike:
-            self.outputpath = '{}_neuralike'.format(self.outputpath)
+        # if self.useNeuralike:
+        #     self.outputpath = '{}_neuralike'.format(self.outputpath)
 
         if iniFile:
             epochs = self.config.getint('neuralike', 'epochs', fallback=100)
