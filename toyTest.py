@@ -5,7 +5,7 @@ import time
 
 """
 This script calls toy distributions from the ToyModel class and make a sampling 
-for these models through dynesty with and without a neural network (based on pybambi).
+for these models through dynesty with and without a neural network (geneuralike based on pybambi).
 """
 np.random.seed(0)
 
@@ -21,7 +21,7 @@ nlive = 100
 sampler1 = DriverMC(analyzername='nested', model='eggbox')
 
 ti = time.time()
-res1 = sampler1.executer(nlivepoints=100)
+res1 = sampler1.executer(nlivepoints=100, useNeuralike=True, useGenetic=True)
 # resultnested = sampler1.results
 
 samplesnested = res1['result']['samples']
@@ -50,16 +50,7 @@ tfnested = time.time() - ti
 
 # ### Plot results if you aren't in a server
 if show_plots:
-    # bambidata = np.loadtxt(modelname+'_bambi_1.txt', usecols=(2, 3))
     znest = np.zeros(len(samplesnested))
-
-    # for i, row in enumerate(nestdata):
-    #     znest[i] = tm.loglike(row)
-
-    # zbambi = np.zeros(len(bambidata))
-    #
-    # for i, row in enumerate(bambidata):
-    #     zbambi[i] = tm.loglike(row)
     fig = plt.figure()
 
     # 3D plots
