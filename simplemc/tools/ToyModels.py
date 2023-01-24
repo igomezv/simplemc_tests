@@ -1,5 +1,5 @@
 import numpy as np
-
+from simplemc.cosmo.Parameter import Parameter
 class ToyModels:
     def __init__(self, model):
         """
@@ -52,7 +52,9 @@ class ToyModels:
         return sq
 
     def freeParameters(self):
-        return ['x', 'y']
+        x = Parameter('x', 0.5,  0.5,   (0.1, 1.0),    'x')
+        y = Parameter('y', 0.5, 0.5, (0.1, 1.0), 'y')
+        return [x, y]
 
     def printFreeParameters(self):
         print("Free parameters:")
@@ -63,6 +65,20 @@ class ToyModels:
             print(p.name, '=', p.value, '+/-', p.error)
             l.append("{}: {} = +/- {}".format(p.name, p.value, p.error))
         return l
+
+    def updateParams(self, pars):
+        for p in pars:
+            if p.name == "x":
+                self.x = p.value
+            elif p.name == "y":
+                self.y = p.value
+        return True
+
+    def loglike_wprior(self, cube):
+        return self.loglike(cube) + self.theory_.prior_loglike(cube)
+
+    def theory_loglike_prior(self, cube):
+        return cube*0
     def name(self):
         return "toy model"
     # def priorTransform(self, theta):
