@@ -353,7 +353,7 @@ class DriverMC:
             self.nsigma = self.config.get('nested', 'sigma', fallback=2)
             self.useNeuralike = self.config.getboolean('nested', 'useNeuralike', fallback=False)
             useGenetic = self.config.getboolean('nested', 'useGenetic', fallback=False)
-
+            neuralike_settings = self.neuralike_dict(iniFile=self.iniFile)
         else:
             dynamic     = kwargs.pop('dynamic',    False)
             nestedType  = kwargs.pop('nestedType', 'multi')
@@ -366,6 +366,25 @@ class DriverMC:
             self.useNeuralike = kwargs.pop('useNeuralike', False)
             useGenetic = kwargs.pop('useGenetic', False)
 
+            # neuralike
+            epochs = kwargs.pop('epochs', 100)
+            learning_rate = kwargs.pop('learning_rate', 5e-4)
+            batch_size = kwargs.pop('batch_size', 32)
+            psplit = kwargs.pop('psplit', 0.8)
+            hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
+            plot = kwargs.pop('plot', True)
+            patience = kwargs.pop('patience', 10)
+            nrand = kwargs.pop('nrand', 5)
+            nstart_samples = kwargs.pop('nstart_samples', 500)
+            nstart_stop_criterion = kwargs.pop('nstart_stop_criterion', 1.0)
+            updInt = kwargs.pop('updInt', 100)
+            ncalls_excess = kwargs.pop('ncalls_excess', 40)
+            valid_loss = kwargs.pop('valid_loss', 0.01)
+
+            neuralike_settings = self.neuralike_dict(iniFile=self.iniFile, epochs=epochs, learning_rate=learning_rate, batch_size=batch_size,
+                                                     psplit=psplit, hidden_layers_neurons=hidden_layers_neurons, plot=plot, patience=patience,
+                                                     nrand=nrand, nstart_samples=nstart_samples, nstart_stop_criterion=nstart_stop_criterion,
+                                                     updInt=updInt, ncalls_excess=ncalls_excess, valid_loss=valid_loss)
             if kwargs:
                 logger.critical('Unexpected **kwargs for nested sampler: {}'.format(kwargs))
                 logger.info('You can skip writing any option and SimpleMC will use the default value.\n'
@@ -402,8 +421,6 @@ class DriverMC:
             self.live_points = [u, v, logl]
         else:
             self.live_points = None
-
-        neuralike_settings = self.neuralike_dict(iniFile=self.iniFile)
 
         if dynamic:
             logger.info("\nUsing dynamic nested sampling...")
