@@ -99,11 +99,6 @@ class DriverMC:
             self.path_to_cov  = kwargs.pop('path_to_cov', None)
             self.fn = kwargs.pop("fn", "generic")
 
-            if self.model in ['eggbox', 'ring', 'gaussian', 'square', 'himmel']:
-                self.toymodel = True
-            else:
-                self.toymodel = False
-
             if os.path.exists(os.path.join(self.chainsdir)):
                 self.chainsdir = os.path.join(self.chainsdir)
             else:
@@ -118,6 +113,10 @@ class DriverMC:
                             '\n\tchainsdir Default: SimpleMC_chains\n\t')
                 sys.exit(1)
 
+        if self.model in ['eggbox', 'ring', 'gaussian', 'square', 'himmel']:
+            self.toymodel = True
+        else:
+            self.toymodel = False
         # Initialize the Theory/Model
         T = ParseModel(self.model, custom_parameters=self.custom_parameters,
                        custom_function=self.custom_function)
