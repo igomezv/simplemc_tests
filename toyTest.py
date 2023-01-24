@@ -21,8 +21,24 @@ nlive = 100
 sampler1 = DriverMC(analyzername='nested', model='eggbox')
 
 ti = time.time()
-res1 = sampler1.executer(nlivepoints=100, useNeuralike=True, useGenetic=True)
-# resultnested = sampler1.results
+res1 = sampler1.executer(nlivepoints=100, useNeuralike=True, useGenetic=True, nrand=5000,
+                         valid_loss=0.001, nstart_samples=200000, nstart_stop_criterion=50, updInt=1000, ncalls_excess=200,
+                         epochs=200, batch_size=128, patience=100)
+# learning_rate = 0.0001
+# batch_size = 8
+# psplit = 0.7
+# ;hidden_layers_neurons: number of nodes per layer separated by commas
+# hidden_layers_neurons = 200, 200, 200
+# plot = True
+# patience = 50
+# nrand = 100
+# valid_loss = 0.01
+# nstart_samples = 500
+# ;nstart_stop_criterion = 100
+# nstart_stop_criterion = 10
+# updInt = 1000
+# ncalls_excess = 1000
+
 
 samplesnested = res1['result']['samples']
 tfnested = time.time() - ti
