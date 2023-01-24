@@ -49,7 +49,7 @@ class GA_deap:
                  mutation=0.3, max_generation=20, hof_size=1,
                  crowding_factor=1, plot_fitness=False,
                  compute_errors=False, show_contours=False,
-                 plot_param1=None, plot_param2=None):
+                 plot_param1=None, plot_param2=None, toymodel=False):
         self.like = like
         self.model = model
         self.outputname = outputname
@@ -65,6 +65,8 @@ class GA_deap:
         self.show_contours = show_contours
         self.plot_param1 = plot_param1
         self.plot_param2 = plot_param2
+
+        self.toymodel = toymodel
 
         # Genetic Algorithm constants:
         self.POPULATION_SIZE = population  # 10-20
@@ -130,42 +132,42 @@ class GA_deap:
         if self.plot_fitness:
             self.plotting(population, logbook, hof)
 
-        hess = nd.Hessian(self.negloglike2, step=self.sigma * 0.01)(best_params)
-        eigvl, eigvc = la.eig(hess)
-        print('Hessian', hess, eigvl)
-        self.cov = la.inv(hess)
-        print('Covariance matrix \n', self.cov)
+        if self.toymodel is False:
+            hess = nd.Hessian(self.negloglike2, step=self.sigma * 0.01)(best_params)
+            eigvl, eigvc = la.eig(hess)
+            print('Hessian', hess, eigvl)
+            self.cov = la.inv(hess)
+            print('Covariance matrix \n', self.cov)
 
-        # This is not necessary because it is contained in the summary output.
-        # with open('{}.bestparams'.format(self.outputname), 'w') as f:
-        #     np.savetxt(f, best_params, fmt='%.4e', delimiter=',')
+            with open('{}.maxlike'.format(self.outputname), 'w') as f:
+                np.savetxt(f, best_params, fmt='%.4e', delimiter=',')
 
-        with open('{}.cov'.format(self.outputname), 'w') as f:
-            np.savetxt(f, self.cov, fmt='%.4e', delimiter=',')
+            with open('{}.cov'.format(self.outputname), 'w') as f:
+                np.savetxt(f, self.cov, fmt='%.4e', delimiter=',')
 
-        # if self.compute_errors:
+            # if self.compute_errors:
 
-        # set errors:
-        # for i, pars in enumerate(self.params):
-        #    pars.setError(sp.sqrt(self.cov[i, i]))
-        # update with the final result
-        # self.result(self.negloglike(self.res.x))
+            # set errors:
+            # for i, pars in enumerate(self.params):
+            #    pars.setError(sp.sqrt(self.cov[i, i]))
+            # update with the final result
+            # self.result(self.negloglike(self.res.x))
 
-        if self.show_contours and self.compute_errors:
-            param_names = [par.name for par in self.params]
-            param_Ltx_names = [par.Ltxname for par in self.params]
-            if (self.plot_param1 in param_names) and (self.plot_param2 in param_names):
-                idx_param1 = param_names.index(self.plot_param1)
-                idx_param2 = param_names.index(self.plot_param2)
-                param_Ltx1 = param_Ltx_names[idx_param1]
-                param_Ltx2 = param_Ltx_names[idx_param2]
-            else:
-                sys.exit('\n Not a base parameter, derived-errors still on construction')
+            if self.show_contours and self.compute_errors:
+                param_names = [par.name for par in self.params]
+                param_Ltx_names = [par.Ltxname for par in self.params]
+                if (self.plot_param1 in param_names) and (self.plot_param2 in param_names):
+                    idx_param1 = param_names.index(self.plot_param1)
+                    idx_param2 = param_names.index(self.plot_param2)
+                    param_Ltx1 = param_Ltx_names[idx_param1]
+                    param_Ltx2 = param_Ltx_names[idx_param2]
+                else:
+                    sys.exit('\n Not a base parameter, derived-errors still on construction')
 
-            fig = plt.figure(figsize=(6, 6))
-            ax = fig.add_subplot(111)
-            # plot_elipses(best_params, self.cov, idx_param1, idx_param2, param_Ltx1, param_Ltx2, ax=ax)
-            # plt.show()
+                fig = plt.figure(figsize=(6, 6))
+                ax = fig.add_subplot(111)
+                plot_elipses(best_params, self.cov, idx_param1, idx_param2, param_Ltx1, param_Ltx2, ax=ax)
+                plt.show()
 
         return {'population': len(population), 'no_generations': gens, 'param_fit': best_params, 'book': book,
                 'best_fitness': best.fitness.values[0], 'cov': self.cov, 'maxlike': best.fitness.values[0]}
@@ -268,7 +270,11 @@ class GA_deap:
             new_par = self.change_prior(i, x[i])
             pars.setValue(new_par)
         self.like.updateParams(self.params)
-        loglike = self.like.loglike_wprior()
+        if self.toymodel:
+            loglike = self.like.updateParams(self.params)
+        else:
+            loglike = self.like.loglike_wprior()
+
 
         if self.sharing:
             loglike = -loglike
@@ -284,7 +290,10 @@ class GA_deap:
         for i, pars in enumerate(self.params):
             pars.setValue(x[i])
         self.like.updateParams(self.params)
-        loglike = self.like.loglike_wprior()
+        if self.toymodel:
+            loglike = self.like.updateParams(self.params)
+        else:
+            loglike = self.like.loglike_wprior()
 
         if self.sharing:
             loglike = -loglike

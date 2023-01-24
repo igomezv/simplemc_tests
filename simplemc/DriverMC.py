@@ -625,7 +625,7 @@ class DriverMC:
                     hof_size=hof_size, crowding_factor=crowding_factor,
                     plot_fitness=plot_fitness, compute_errors=compute_errors,
                     show_contours=show_contours, plot_param1=plot_param1,
-                    plot_param2=plot_param2)
+                    plot_param2=plot_param2, toymodel=self.toymodel)
         res = M.main()
         self.ttime = time.time() - ti
         #M.plotting()
