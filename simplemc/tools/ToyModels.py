@@ -26,7 +26,7 @@ class ToyModels:
                 self.dims = 2
             elif model == 'himmel':
                 self.loglike = self.himmelLoglike
-                self.dims = 3
+                self.dims = 2
             elif model == 'square':
                 self.loglike = self.squareLoglike
                 self.dims = 2
@@ -54,7 +54,11 @@ class ToyModels:
     def freeParameters(self):
         x = Parameter('x', 0.5,  0.5,   (0.1, 1.0),    'x')
         y = Parameter('y', 0.5, 0.5, (0.1, 1.0), 'y')
-        return [x, y]
+        z = Parameter('z', 0.5, 0.5, (0.1, 1.0), 'z')
+        if self.dims == 3:
+            return [x, y, z]
+        else:
+            return [x, y]
 
     def printFreeParameters(self):
         print("Free parameters:")
