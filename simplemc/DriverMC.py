@@ -453,7 +453,7 @@ class DriverMC:
 
         res = {'samples': M.samples, 'logwt': M.logwt, 'nlive': M.nlive, 'niter': M.niter,
                'ncall': sum(M.ncall), '%eff': M.eff, 'logz': M.logz[-1], 'logzerr': M.logzerr[-1],
-               'weights': np.exp(M.logwt - M.logz[-1])}
+               'weights': np.exp(M.logwt - M.logz[-1]), 'loglikes': M.logl}
 
         self.dict_result = {'analyzer': 'nested',  'nested_algorithm': nestedType,
                            'dynamic': dynamic,
@@ -628,10 +628,10 @@ class DriverMC:
             plot_param1 = kwargs.pop('plot_param1', None)
             plot_param2 = kwargs.pop('plot_param2', None)
 
-            population = kwargs.pop('population', 20)
-            crossover = kwargs.pop('crossover', 0.7)
-            mutation = kwargs.pop('mutation', 0.3)
-            max_generation = kwargs.pop('max_generation', 100)
+            population = kwargs.pop('population', 50)
+            crossover = kwargs.pop('crossover', 0.5)
+            mutation = kwargs.pop('mutation', 0.8)
+            max_generation = kwargs.pop('max_generation', 10)
             hof_size = kwargs.pop('hof_size', 1)
             crowding_factor = kwargs.pop('crowding_factor', 1)
 
