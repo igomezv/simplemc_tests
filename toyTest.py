@@ -1,6 +1,8 @@
 from simplemc.DriverMC import DriverMC
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use( 'tkagg')
 import time
 
 """
@@ -10,7 +12,6 @@ for these models through dynesty with and without a neural network (geneuralike 
 np.random.seed(0)
 
 # ##### SETTINGS ###########
-# modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
 show_plots = True  # choose False if you are in a server
 dims = 2
 nlive = 100
@@ -18,12 +19,14 @@ nlive = 100
 
 # ###### FIRST SAMPLING WITH ONLY DYNESTY
 # sampler1 = DriverMC(analyzername='nested', model='LCDM', datasets='HD')
-sampler1 = DriverMC(analyzername='nested', model='eggbox')
+# modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
+sampler1 = DriverMC(analyzername='nested', model='gaussian')
 
 ti = time.time()
-res1 = sampler1.executer(nlivepoints=100, useNeuralike=True, useGenetic=True, nrand=5000,
-                         valid_loss=0.001, nstart_samples=200000, nstart_stop_criterion=50, updInt=1000, ncalls_excess=200,
-                         epochs=200, batch_size=128, patience=100)
+res1 = sampler1.executer(useNeuralike=True, useGenetic=True, nrand=10,
+                         valid_loss=0.001, nstart_samples=200000, nstart_stop_criterion=5,
+                         updInt=1000, ncalls_excess=200, learning_rate = 0.0001,
+                         epochs=100, batch_size=8, patience=50)
 # learning_rate = 0.0001
 # batch_size = 8
 # psplit = 0.7
@@ -41,6 +44,7 @@ res1 = sampler1.executer(nlivepoints=100, useNeuralike=True, useGenetic=True, nr
 
 
 samplesnested = res1['result']['samples']
+loglikes = res1['result']['loglikes']
 tfnested = time.time() - ti
 
 # ###### SECOND SAMPLING WITH DYNESTY + NEURAL NETWORK
@@ -72,7 +76,7 @@ if show_plots:
     # 3D plots
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.scatter(samplesnested[:, 0],samplesnested[:, 1],  znest, c='red', alpha=0.5)
+    ax.scatter(samplesnested[:, 0],samplesnested[:, 1],  loglikes, c='red', alpha=0.5)
     # ax.scatter(bambidata[:, 0], bambidata[:, 1], zbambi, c='green', alpha=0.5)
     # plt.legend(["dynesty", "dynesty + neural net"],  loc="upper right")
 
