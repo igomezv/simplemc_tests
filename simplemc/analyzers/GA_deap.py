@@ -3,6 +3,7 @@
 
 import scipy as sp
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import multiprocessing
 
@@ -49,7 +50,7 @@ class GA_deap:
                  mutation=0.3, max_generation=20, hof_size=1,
                  crowding_factor=1, plot_fitness=False,
                  compute_errors=False, show_contours=False,
-                 plot_param1=None, plot_param2=None, toymodel=False):
+                 plot_param1=None, plot_param2=None, toymodel=False, sharing=True):
         self.like = like
         self.model = model
         self.outputname = outputname
@@ -81,11 +82,11 @@ class GA_deap:
         self.DIMENSIONS = len(self.params)  # number of dimensions
         self.BOUND_LOW, self.BOUND_UP = 0.0, 1.0  # boundaries for all dimensions
 
-        self.sharing = False
+        self.sharing = sharing
         if self.sharing:
             # sharing constants:
-            DISTANCE_THRESHOLD = 0.1
-            SHARING_EXTENT = 5.0
+            self.DISTANCE_THRESHOLD = 0.1
+            self.SHARING_EXTENT = 5.0
 
     def main(self):
         toolbox = self.GA()
@@ -195,8 +196,8 @@ class GA_deap:
                     distance = math.sqrt(
                         ((individuals[i][0] - individuals[j][0]) ** 2) + ((individuals[i][1] - individuals[j][1]) ** 2))
 
-                    if distance < DISTANCE_THRESHOLD:
-                        sharingSum += (1 - distance / (SHARING_EXTENT * DISTANCE_THRESHOLD))
+                    if distance < self.DISTANCE_THRESHOLD:
+                        sharingSum += (1 - distance / (self.SHARING_EXTENT * self.DISTANCE_THRESHOLD))
 
             # reduce fitness accordingly:
             individuals[i].fitness.values = origFitnesses[i] / sharingSum,
@@ -238,7 +239,7 @@ class GA_deap:
 
         # genetic operators:
         if self.sharing:
-            toolbox.register("select", selTournamentWithSharing, tournsize=2)
+            toolbox.register("select", self.selTournamentWithSharing, tournsize=2)
         else:
             toolbox.register("select", tools.selTournament, tournsize=2)
 
