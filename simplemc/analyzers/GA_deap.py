@@ -50,7 +50,7 @@ class GA_deap:
                  mutation=0.3, max_generation=20, hof_size=1,
                  crowding_factor=1, plot_fitness=False,
                  compute_errors=False, show_contours=False,
-                 plot_param1=None, plot_param2=None, toymodel=False, sharing=True):
+                 plot_param1=None, plot_param2=None, toymodel=False, sharing=False):
         self.like = like
         self.model = model
         self.outputname = outputname
