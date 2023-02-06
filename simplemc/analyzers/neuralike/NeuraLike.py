@@ -111,7 +111,7 @@ class NeuraLike:
             return self.loglikelihood_control(params)
 
     # @staticmethod
-    def test_predictions(self, samples_test, y_pred, perctest=0.1, logl_tolerance=0.5, fractrues=0.5, map_fn=map):
+    def test_predictions(self, samples_test, y_pred, perctest=0.1, logl_tolerance=0.5, fractrues=0.8, map_fn=map):
         print("\n\nTesting neuralike predictions...")
         nlen = len(y_pred)
         nsize = int(perctest*nlen)
