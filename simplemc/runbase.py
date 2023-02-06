@@ -24,10 +24,13 @@ from .models import SplineLCDMCosmology
 from .models import StepCDMCosmology
 from .models import BinnedWCosmology
 from .models import CompressPantheon
-from .models import TanhCosmology
+
 
 #Generic model
 from .models.SimpleModel import SimpleModel, SimpleCosmoModel
+
+# Toy models
+from .tools.ToyModels import ToyModels
 
 # Composite Likelihood
 from .likelihoods.CompositeLikelihood import CompositeLikelihood
@@ -40,9 +43,9 @@ from .likelihoods.BAOLikelihoods import DR11LOWZ, DR11CMASS, DR14LyaAuto, DR14Ly
                                         SixdFGS, SDSSMGS, DR11LyaAuto, DR11LyaCross, eBOSS, \
                                         DR12Consensus
 from .likelihoods.SimpleCMBLikelihood import PlanckLikelihood, PlanckLikelihood_15, WMAP9Likelihood
-from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN
+from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN, BinnedPantheon, NeuralSN
 from .likelihoods.SNLikelihood import JLASN_Full
-from .likelihoods.PantheonSNLikelihood import PantheonSN, BinnedPantheon
+from .likelihoods.PantheonSNLikelihood import PantheonSNLikelihood
 from .likelihoods.CompressedHDLikelihood import HubbleDiagram
 from .likelihoods.Compressedfs8Likelihood import fs8Diagram
 from .likelihoods.HubbleParameterLikelihood import RiessH0
@@ -104,7 +107,7 @@ def ParseModel(model, **kwargs):
     elif model == "nuwCDM":
         T = wCDMCosmology()
         T.setVaryMnu()
-    elif model == "wa2CDM":
+    elif model == "waCDM":
         T = owa0CDMCosmology(varyOk=False)
     elif model == "owCDM":
         T = owa0CDMCosmology(varywa=False)
@@ -151,8 +154,6 @@ def ParseModel(model, **kwargs):
         T.setVaryMnu()
     elif model == "Binned":
         T = BinnedWCosmology()
-    elif model == "Tanh":
-        T = TanhCosmology()
     elif model == 'CPantheon':
         T = CompressPantheon()
     elif model == 'DGP':
@@ -173,6 +174,17 @@ def ParseModel(model, **kwargs):
         T = SimpleModel(custom_parameters, custom_function)
     elif model == 'simple_cosmo':
         T = SimpleCosmoModel(custom_parameters, RHSquared=custom_function)
+    elif model == 'eggbox':
+        # 'eggbox', 'ring', 'gaussian', 'square', 'himmel'
+        T = ToyModels(model='eggbox')
+    elif model == 'ring':
+        T = ToyModels(model='ring')
+    elif model == 'square':
+        T = ToyModels(model='square')
+    elif model == 'gaussian':
+        T = ToyModels(model='gaussian')
+    elif model == 'himmel':
+        T = ToyModels(model='himmel')
     else:
         print("Cannot recognize model", model)
         sys.exit(1)
@@ -285,13 +297,15 @@ def ParseDataset(datasets, **kwargs):
         elif name == 'CMBW':
             L.addLikelihood(WMAP9Likelihood())
         elif name == 'Pantheon':
-            L.addLikelihood(PantheonSN())
+            L.addLikelihood(PantheonSNLikelihood())
         elif name == 'BPantheon':
             L.addLikelihood(BinnedPantheon())
         elif name == 'JLA':
             L.addLikelihood(JLASN_Full())
         elif name == 'SN':
             L.addLikelihood(BetouleSN())
+        elif name == 'NeuralSN':
+            L.addLikelihood(NeuralSN())
         elif name == 'SNx10':
             L.addLikelihood(LikelihoodMultiplier(BetouleSN(), 100.0))
         elif name == 'UnionSN':
