@@ -2,8 +2,10 @@ from simplemc.cosmo.Derivedparam import AllDerived
 from simplemc.analyzers.dynesty import utils as dyfunc
 from simplemc import logger
 import numpy as np
+import re
 import sys
 from .analyzers import MCEvidence
+
 
 class PostProcessing:
     """
@@ -27,21 +29,16 @@ class PostProcessing:
                  skip=0.1, addDerived=True):
         self.dict_result = dict_result
         self.analyzername = dict_result['analyzer']
-        self.result = dict_result['result']
+        self.result    = dict_result['result']
         self.time = dict_result['time']
         self.paramList = paramList
         self.N = len(paramList)
-        self.filename = filename
-        self.skip = skip
-        self.derived = addDerived
+        self.filename  = filename
+        self.skip      = skip
+        self.derived   = addDerived
         self.args = []
         if addDerived:
             self.AD = AllDerived()
-
-        if self.analyzername in ['mcmc', 'nested', 'emcee']:
-            self.maxlogl = np.max(-self.result['loglikes'])
-        else:
-            self.maxlogl = self.result['maxlike']
 
     def writeSummary(self):
         file = open(self.filename + "_Summary" + ".txt", 'w')
@@ -52,7 +49,7 @@ class PostProcessing:
                 file.write('{}: {}\n'.format(key, self.dict_result[key]))
 
         for key in self.result:
-            if key not in ['param_fit', 'samples', 'cov', 'logwt', 'logzerr', 'weights', 'loglikes']:
+            if key not in ['param_fit', 'samples', 'cov', 'logwt', 'logzerr', 'weights']:
                 if isinstance(self.result[key], float):
                     if key == 'logz':
                         file.write('{}: {:.4f} +/- {:.4f}\n'.format(key, self.result[key], self.result['logzerr']))
@@ -61,20 +58,12 @@ class PostProcessing:
                 else:
                     file.write('{}: {}\n'.format(key, self.result[key]))
 
+        samples, weights = self.result['samples'], self.result['weights']
+
         if self.analyzername in ['mcmc', 'nested', 'emcee']:
-            loglikes, samples, weights = self.result['loglikes'], self.result['samples'], self.result['weights']
-            means, cov_dy = dyfunc.mean_and_cov(samples, weights)
-            stdevs = np.sqrt(np.diag(cov_dy))
+            means, cov = dyfunc.mean_and_cov(samples, weights)
+            stdevs = np.sqrt(np.diag(cov))
             param_fits = means
-            print("\nCovariance matrix saved in .covmat file\n {} \n".format(cov_dy))
-            np.savetxt(self.filename + ".covmat", cov_dy, delimiter=',')
-            try:
-                from getdist import mcsamples
-                getdistsamples = mcsamples.loadMCSamples(self.filename)
-                cov_getdist = getdistsamples.cov(self.paramList)
-                print("\ngetdist cov\n {} \n".format(cov_getdist))
-            except:
-                pass
         else:
             try:
                 stdevs = np.sqrt(np.diag(self.result['cov']))
@@ -82,27 +71,17 @@ class PostProcessing:
                 stdevs = np.zeros(self.N)
             param_fits = self.result['param_fit']
 
+        print("\n---")
         for i, parname in enumerate(self.paramList):
             param_fit = param_fits[i]
             std = stdevs[i]
             print("{}: {:.4f} +/- {:.4f}".format(parname, param_fit, std))
             file.write("{}: {:.4f} +/- {:.4f}\n".format(parname, param_fit, std))
 
-        print("\nInformation criterions:\n")
-        print("\tAIC: {:.4f}".format(self.aic_criterion()))
-
         logger.info("\nElapsed time: {:.3f} minutes = {:.3f} seconds".format(self.time / 60, self.time))
         file.write('\nElapsed time: {:.3f} minutes = {:.3f} seconds \n'.format(self.time / 60, self.time))
         file.close()
 
-    def writeMaxlike(self):
-        file = open(self.filename + ".maxlike", 'w')
-        maxlogl_idx = np.argmax(-self.result['loglikes'])
-
-        maxsamp = str(self.result['samples'][maxlogl_idx]).lstrip('[').rstrip(']')
-
-        file.write('# -maxlogL\n{} {}'.format(-self.maxlogl, maxsamp))
-        file.close()
 
     def mcevidence(self, k):
         if self.analyzername not in ['mcmc', 'nested', 'emcee']:
@@ -132,13 +111,6 @@ class PostProcessing:
 
         return '\nlog-Evidence with mcevidence: {}\n' \
                    'Burn-in fraction: {:.1}\n'.format(mcevres, burn_frac)
-
-    def aic_criterion(self):
-        aic = -2*self.maxlogl + 2*(len(self.paramList))
-        return aic
-
-    def bic_criterion(self):
-        pass
 
     def plot(self, chainsdir, show=False):
         """
