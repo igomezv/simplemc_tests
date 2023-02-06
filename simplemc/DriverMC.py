@@ -8,7 +8,7 @@ from .analyzers import DynamicNestedSampler, NestedSampler
 from .analyzers import EnsembleSampler
 from .cosmo.Derivedparam import AllDerived
 from . import ParseDataset, ParseModel
-from . import PostProcessing
+from .PostProcessing import PostProcessing
 from scipy.special import ndtri
 from simplemc import logger
 import numpy as np
@@ -300,8 +300,9 @@ class DriverMC:
 
         self.ttime = time.time() - ti
 
-        res = {'samples': M.get_results()[0], 'weights': M.get_results()[1],
-               'maxlike': M.maxloglike, 'gr_diagnostic': M.get_results()[2]}
+        res = {'samples': M.get_results()['samples'], 'weights': M.get_results()['weights'],
+               'maxlike': -M.maxloglike, 'loglikes': M.get_results()['loglikes'],
+               'gr_diagnostic': M.get_results()['gr_diagnostic']}
 
         self.dict_result = {'analyzer': 'mcmc', 'result': res}
 
