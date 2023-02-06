@@ -1,5 +1,5 @@
 import numpy as np
-
+from simplemc.cosmo.Parameter import Parameter
 class ToyModels:
     def __init__(self, model):
         """
@@ -8,23 +8,28 @@ class ToyModels:
         Parameters
         ----------
         model : str
-            {'egg', 'ring', 'gaussian', 'square', 'himmel'}
+            {'eggbox', 'ring', 'gaussian', 'square', 'himmel'}
         """
         # self.bounds contains x and y bounds.
-        if model == 'egg':
-            self.bounds = [[0., 10*np.pi], [0., 10*np.pi]]
+        if model == 'eggbox':
+            self.bounds = [(0., np.round(10*np.pi, 4)), (0., np.round(10*np.pi, 4))]
             self.loglike = self.eggLoglike
+            self.dims = 2
 
         elif model in ['ring', 'gaussian', 'himmel', 'square']:
-            self.bounds = [[-5., 5.], [-5., 5.]]
+            self.bounds = [(-5., 5.), (-5., 5.)]
             if model == 'ring':
                 self.loglike = self.ringLoglike
+                self.dims = 2
             elif model == 'gaussian':
                 self.loglike = self.gaussLoglike
+                self.dims = 2
             elif model == 'himmel':
                 self.loglike = self.himmelLoglike
+                self.dims = 2
             elif model == 'square':
                 self.loglike = self.squareLoglike
+                self.dims = 2
 
     def eggLoglike(self, cube):
         x, y = cube
@@ -46,11 +51,45 @@ class ToyModels:
             sq = 0.
         return sq
 
-    def priorTransform(self, theta):
-        priors = []
-        for c, bound in enumerate(self.bounds):
-            priors.append(theta[c] * (bound[1] - bound[0]) + bound[0])
-        return np.array(priors)
+    def freeParameters(self):
+        x = Parameter('x', 0.5,  0.5,   (0.1, 1.0),    'x')
+        y = Parameter('y', 0.5, 0.5, (0.1, 1.0), 'y')
+        z = Parameter('z', 0.5, 0.5, (0.1, 1.0), 'z')
+        if self.dims == 3:
+            return [x, y, z]
+        else:
+            return [x, y]
+
+    def printFreeParameters(self):
+        print("Free parameters:")
+        self.printParameters(self.freeParameters())
+    def printParameters(self, params):
+        l = []
+        for p in params:
+            print(p.name, '=', p.value, '+/-', p.error)
+            l.append("{}: {} = +/- {}".format(p.name, p.value, p.error))
+        return l
+
+    def updateParams(self, pars):
+        for p in pars:
+            if p.name == "x":
+                self.x = p.value
+            elif p.name == "y":
+                self.y = p.value
+        return True
+
+    def loglike_wprior(self, cube):
+        return self.loglike(cube) + self.theory_.prior_loglike(cube)
+
+    def theory_loglike_prior(self, cube):
+        return cube*0
+    def name(self):
+        return "toy model"
+    # def priorTransform(self, theta):
+    #     priors = []
+    #     for c, bound in enumerate(self.bounds):
+    #         priors.append(theta[c] * (bound[1] - bound[0]) + bound[0])
+    #     return np.array(priors)
 
 
 
