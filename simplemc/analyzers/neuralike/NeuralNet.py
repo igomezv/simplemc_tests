@@ -1,11 +1,8 @@
-"""neural networks to neuralike.
-Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
-Date: Dec 2021
-"""
+# Temporarily unavailable. Neuralike in development.
 
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from time import time
 
 
 class NeuralNet:
@@ -28,9 +25,8 @@ class NeuralNet:
         self.epochs = kwargs.pop('epochs', 50)
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
-        self.patience = kwargs.pop('patience', 5)
+        self.early_tol = kwargs.pop('early_tol', 100)
         psplit = kwargs.pop('psplit', 0.8)
-        # self.valid_delta_mse = kwargs.pop('valid_delta_ms', 0.1)
 
         if load:
             self.model = self.load_model()
@@ -45,63 +41,39 @@ class NeuralNet:
             self.Y_train, self.Y_test = np.split(Y, indx)
             self.model = self.model()
 
-        # self.mse = np.min(self.history.history['val_loss'])
+    # def model(self):
+    #     # Red neuronal
+    #     model = K.models.Sequential()
+    #     # Hidden layers
+    #
+    #     for i, nodes in enumerate(self.topology):
+    #         if i == 0:
+    #             model.add(K.layers.Dense(self.topology[1], input_dim=self.topology[0], activation='relu'))
+    #         elif 1 < i < len(self.topology) - 1:
+    #             model.add(K.layers.Dense(self.topology[i], activation='relu'))
+    #         elif i == len(self.topology) - 1:
+    #             model.add(K.layers.Dense(self.topology[i], activation='linear'))
+    #     # Adam recommendations from arxiv:1412.6980
+    #     optimizer = K.optimizers.Adam(learning_rate=self.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-3)
+    #     model.compile(optimizer=optimizer, loss='mean_squared_error')
+    #
+    #     return model
 
-    def model(self):
-        try:
-            import tensorflow as tf
-            import tensorflow.keras as K
-        except:
-            import warnings
-            warnings.warn("Please install tensorflow library if you want to use neural networks")
-        # Red neuronal
-        model = K.models.Sequential()
-        # Hidden layers
-
-        for i, nodes in enumerate(self.topology):
-            if i == 0:
-                model.add(K.layers.Dense(self.topology[1], input_dim=self.topology[0], activation='relu'))
-            elif 1 < i < len(self.topology) - 1:
-                model.add(K.layers.Dense(self.topology[i], activation='relu'))
-            elif i == len(self.topology) - 1:
-                model.add(K.layers.Dense(self.topology[i], activation='linear'))
-        # Adam recommendations from arxiv:1412.6980
-        optimizer = K.optimizers.Adam(learning_rate=self.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-3)
-        # optimizer = K.optimizers.RMSprop(learning_rate=self.learning_rate)
-        model.compile(optimizer=optimizer, loss='mean_squared_error')
-
-        return model
-
-    def train(self):
-        try:
-            import tensorflow as tf
-            import tensorflow.keras as K
-        except:
-            import warnings
-            warnings.warn("Please install tensorflow library if you want to use neural networks")
-
-        print("Training neural network...")
-        callbacks = [tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='min',
-                                                      min_delta=0.0,
-                                                      patience=self.patience,
-                                                      restore_best_weights=True)]
-        t0 = time()
-        self.history = self.model.fit(self.X_train,
-                                      self.Y_train,
-                                      validation_data=(self.X_test,
-                                                       self.Y_test),
-                                      epochs=self.epochs,
-                                      batch_size=self.batch_size,
-                                      shuffle=True,
-                                      verbose=1,
-                                      callbacks=callbacks,
-                                      use_multiprocessing=True)
-        tt = time() - t0
-        nepochs = len(self.history.history['val_loss'])
-        self.mse_val = np.array(self.history.history['val_loss'][-nepochs//5:])
-        self.mse_train = np.array(self.history.history['loss'][-nepochs//5:])
-        print("Training complete! Time training: {:.3f} min".format(tt/60.))
-        return self.history
+    # def train(self):
+    #     print("Training neural network...")
+    #     callbacks = [tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='min',
+    #                                                   min_delta=0.0,
+    #                                                   patience=100,
+    #                                                   restore_best_weights=True)]
+    #
+    #     self.history = self.model.fit(self.X_train,
+    #                                   self.Y_train,
+    #                                   validation_data=(self.X_test,
+    #                                                    self.Y_test),
+    #                                   epochs=self.epochs, batch_size=self.batch_size,
+    #                                   verbose=1, callbacks=callbacks)
+    #     print("Training complete!")
+    #     return self.history
 
     def get_w_and_b(self, nlayer):
         weights, biases = self.model.layers[nlayer].get_weights()
@@ -111,43 +83,31 @@ class NeuralNet:
         self.model.save(filename)
         print('Neural net model {} saved!'.format(filename))
 
-    def load_model(self):
-        try:
-            import tensorflow as tf
-            import tensorflow.keras as K
-        except:
-            import warnings
-            warnings.warn("Please install tensorflow library if you want to use neural networks")
-        neural_model = tf.keras.models.load_model('{}'.format(self.model_path))
-        self.history = neural_model.history
-        return neural_model
+    # def load_model(self):
+    #     neural_model = tf.keras.models.load_model('{}'.format(self.model_path))
+    #     return neural_model
 
     def predict(self, x):
         if type(x) == type([1]):
             x = np.array(x)
-        elif type(x) == type(1):
+        if type(x) == type(1):
             x = np.array([x])
+
         prediction = self.model.predict(x)
+
         return prediction
 
-    def delta_mse(self):
-        delta_mse = np.abs(self.mse_val - self.mse_train)
-        return np.mean(delta_mse)
-        # if np.all(delta_mse <= self.valid_delta_mse):
-        #     return True
-        # else:
-        #     return False
-
-    def plot(self, save=False, figname=False, ylogscale=False, show=False):
-        plt.plot(self.history.history['loss'], label='training set')
-        plt.plot(self.history.history['val_loss'], label='validation set')
-        if ylogscale:
-            plt.yscale('log')
-        plt.title('MSE: {:.4f}'.format(np.min(self.mse_val)))
-        plt.ylabel('loss function')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'val'], loc='upper left')
-        if save and figname:
-            plt.savefig(figname)
-        if show:
-            plt.show()
+    # def plot(self, save=False, figname=False, ylogscale=False, show=False):
+    #     plt.plot(self.history.history['loss'], label='training set')
+    #     plt.plot(self.history.history['val_loss'], label='validation set')
+    #     if ylogscale:
+    #         plt.yscale('log')
+    #     mse = np.min(self.history.history['val_loss'])
+    #     plt.title('MSE: {} Uncertainty: {}'.format(mse, np.sqrt(mse)))
+    #     plt.ylabel('loss function')
+    #     plt.xlabel('epoch')
+    #     plt.legend(['train', 'val'], loc='upper left')
+    #     if save and figname:
+    #         plt.savefig(figname)
+    #     if show:
+    #         plt.show()

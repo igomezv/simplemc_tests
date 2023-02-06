@@ -1,14 +1,8 @@
-"""neuralike management object.
-Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
-Date: Dec 2021
-"""
+# Temporarily unavailable. Neuralike in development.
+## TODO: usar modelChecker once it is trained, and flag for overige
 
+from .GridLikes import GridLikes
 from .NeuralNet import NeuralNet
-from .RandomSampling import RandomSampling
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import numpy as np
-import multiprocessing as mp
-
 import os
 
 
@@ -26,93 +20,42 @@ class NeuralManager:
         plot
     """
 
-    def __init__(self, loglikelihood, samples, likes,
-                 rootname='neural', neuralike_settings=None):
-
-        if neuralike_settings:
-            self.learning_rate = neuralike_settings['learning_rate']
-            self.batch_size = neuralike_settings['batch_size']
-            self.epochs = neuralike_settings['epochs']
-            self.patience = neuralike_settings['patience']
-            self.psplit = neuralike_settings['psplit']
-            hidden_layers_neurons = neuralike_settings['hidden_layers_neurons']
-            self.plot = neuralike_settings['plot']
-            self.valid_delta_mse = neuralike_settings['valid_delta_mse']
-            self.nrand = neuralike_settings['nrand']
-        else:
-            self.learning_rate = 5e-4
-            self.batch_size = 32
-            self.epochs = 100
-            self.patience = self.epochs//2
-            self.psplit = 0.8
+    def __init__(self, loglikelihood, pars_bounds, rootname, ndivsgrid=5, hidden_layers_neurons=None,
+                 epochs=100, plot=True, **kwargs):
+        if hidden_layers_neurons is None:
             hidden_layers_neurons = [100, 100, 100]
-            self.plot = True
-            self.valid_delta_mse = 0.05
-            self.nrand = 5
+        self.loglikelihood = loglikelihood
+        self.pars_bounds = pars_bounds
+        self.ndivsgrid = ndivsgrid
+        self.epochs = epochs
+        self.plot = plot
+        self.grid_path = 'simplemc/analyzers/neuralike/neural_models/{}'.format(rootname)
+        self.model_path = 'simplemc/analyzers/neuralike/neural_models/{}.h5'.format(rootname)
+        self.fig_path = 'simplemc/analyzers/neuralike/neural_models/{}.png'.format(rootname)
 
-        self.loglikelihood_fn = loglikelihood
-        _, self.dims = np.shape(samples)
-        ml_idx = np.argmax(likes)
-        means = samples[ml_idx, :]
-
-        self.model_path = '{}.h5'.format(rootname)
-        self.fig_path = '{}.png'.format(rootname)
-
-        rsampling = RandomSampling(self.loglikelihood_fn, means=means,
-                                   cov=np.cov(samples.T),
-                                   nrand=self.nrand)
-                                   # files_path=self.model_path)
-        rsamples, rlikes = rsampling.make_dataset()
-
-        self.original_likes = likes
-        self.likes = np.append(rlikes, likes)
-        self.samples = np.append(rsamples, samples, axis=0)
-        self.valid = False
-        # self.likes = likes
-        # self.samples = samples
-        self.maxl = np.max(self.original_likes)
-        self.minl = np.min(self.original_likes)
-        self.dev = np.std(self.original_likes[-len(self.original_likes)//10:])
-
-
-
-        self.topology = [self.dims] + hidden_layers_neurons + [1]
+        self.learning_rate = kwargs.pop('learning_rate', 5e-4)
+        self.batch_size = kwargs.pop('batch_size', 32)
+        self.early_tol = kwargs.pop('early_tol', 100)
+        self.psplit = kwargs.pop('psplit', 0.8)
+        self.topology = [len(pars_bounds)] + hidden_layers_neurons + [1]
 
         if not self.modelChecker():
             self.training()
-        else:
-            self.neural_model = self.load()
+        self.neural_model = self.load()
+
 
     def training(self):
-        # create scaler
-        scaler = StandardScaler()
-        # fit scaler on data
-        scaler.fit(self.samples)
-        # apply transform
-        self.samples = scaler.transform(self.samples)
-        likes_scaler = StandardScaler()
-        likes_scaler.fit(self.likes.reshape(-1, 1))
-        sc_likes = likes_scaler.transform(self.likes.reshape(-1, 1))
+        grid = GridLikes(self.loglikelihood, self.pars_bounds, ndivs=self.ndivsgrid, files_path=self.grid_path)
+        samples, likes = grid.make_dataset()
+        neural_model = NeuralNet(X=samples, Y=likes, topology=self.topology, epochs=self.epochs,
+                                 batch_size=self.batch_size, learrning_rate=self.learning_rate)
 
-        self.neural_model = NeuralNet(X=self.samples, Y=sc_likes, topology=self.topology,
-                                      epochs=self.epochs, batch_size=self.batch_size,
-                                      learrning_rate=self.learning_rate,
-                                      patience=self.patience,
-                                      valid_delta_mse=self.valid_delta_mse)
-
-        self.neural_model.train()
-        # neural_model.save_model('{}'.format(self.model_path))
+        neural_model.train()
+        neural_model.save_model('{}'.format(self.model_path))
         if self.plot:
-            self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
+            neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
 
-        delta_mse = np.abs(self.neural_model.mse_val - self.neural_model.mse_train)
-        if self.neural_model.delta_mse() < self.valid_delta_mse:
-            self.valid = True
-            print("\nValid Neural net: delta_mse={}".format(self.neural_model.delta_mse()))
-        else:
-            self.valid = False
-            print("\nNOT valid neural net. Delta_mse: {}".format(delta_mse))
-
+        return True
 
     def load(self):
         neural_model = NeuralNet(load=True, model_path=self.model_path)
@@ -129,23 +72,7 @@ class NeuralManager:
             return False
 
     def loglikelihood(self, params):
-        likes_scaler = StandardScaler()
-        likes_scaler.fit(self.likes.reshape(-1, 1))
-        pred = self.neural_model.predict(np.array(params).reshape(1, -1))
+        return self.neural_model.predict(params)
 
-        likes = likes_scaler.inverse_transform(pred)
-        likes = np.array(likes)
-        if self.like_valid(likes):
-            return likes
-        else:
-            print("Using original like")
-            self.valid = False
-            return self.loglikelihood_fn(params)
 
-    def like_valid(self, loglike):
-        first_cond = (loglike < (self.maxl + 1.5*self.neural_model.delta_mse()))
-        second_cond = (loglike > (self.minl - 0.5*self.neural_model.delta_mse()))
-        if first_cond and second_cond:
-            return True
-        else:
-            return False
+

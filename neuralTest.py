@@ -8,11 +8,10 @@ np.random.seed(1234)
 # outputs = tf.keras.layers.Dense(1, activation=tf.nn.relu)(x)      
 # model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
-analyzer = DriverMC(analyzername="nested", model="LCDM", 
-					datasets="SN+HD+fs8+Planck", chainsdir="chains/",
-					varys8=True)
+analyzer = DriverMC(analyzername="nested", model="LCDM", datasets="HD+SN+BBAO+Planck", chainsdir="chains")
 
-analyzer.nestedRunner(nlivepoints=100, nproc=3, accuracy=0.01)
-# analyzer.nestedRunner(neuralNetwork=True, nlivepoints=500, proxy_tolerance=0.3, dlogz_start=10,	
-#                       numNeurons=50, failure_tolerance=0.2, epochs=100)
+# analyzer.nestedRunner(nlivepoints=500)
+analyzer.nestedRunner(neuralNetwork=True, nlivepoints=500, proxy_tolerance=0.3, dlogz_start=10,
+                      numNeurons=50, failure_tolerance=0.2, epochs=100)
 analyzer.postprocess()
+

@@ -18,14 +18,13 @@ from .models import AnisotropicCosmology
 from .models import GraduatedCosmology
 from .models import QuintomCosmology
 from .models import RotationCurves
-from .models import NLEDCosmology
 
 #Non-parametric functions
 from .models import SplineLCDMCosmology
 from .models import StepCDMCosmology
 from .models import BinnedWCosmology
 from .models import CompressPantheon
-
+from .models import TanhCosmology
 
 #Generic model
 from .models.SimpleModel import SimpleModel, SimpleCosmoModel
@@ -105,7 +104,7 @@ def ParseModel(model, **kwargs):
     elif model == "nuwCDM":
         T = wCDMCosmology()
         T.setVaryMnu()
-    elif model == "waCDM":
+    elif model == "wa2CDM":
         T = owa0CDMCosmology(varyOk=False)
     elif model == "owCDM":
         T = owa0CDMCosmology(varywa=False)
@@ -152,6 +151,8 @@ def ParseModel(model, **kwargs):
         T.setVaryMnu()
     elif model == "Binned":
         T = BinnedWCosmology()
+    elif model == "Tanh":
+        T = TanhCosmology()
     elif model == 'CPantheon':
         T = CompressPantheon()
     elif model == 'DGP':
@@ -168,8 +169,6 @@ def ParseModel(model, **kwargs):
         T = QuintomCosmology(vary_mquin=True, vary_mphan=True, vary_coupling=True)
     elif model == "Rotation":
         T = RotationCurves()
-    elif model == "NLED":
-        T = NLEDCosmology()
     elif model == 'simple':
         T = SimpleModel(custom_parameters, custom_function)
     elif model == 'simple_cosmo':

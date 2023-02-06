@@ -50,7 +50,6 @@ class QuintomCosmology(LCDMCosmology):
         l = LCDMCosmology.freeParameters(self)
         if self.vary_mquin: l.append(mquin_par)
         if self.vary_mphan: l.append(mphan_par)
-        #vary_iniphi is not used
         if self.vary_iniphi: l.append(iniphi_par)
         if self.vary_coupling: l.append(coupling_par)
         if self.vary_Ok: l.append(Ok_par)
@@ -128,7 +127,7 @@ class QuintomCosmology(LCDMCosmology):
         variables : list , optional
             Array [phi, dotPhi, psi, dotPhi]. Defaults to ``None`` or LCDM model.
         use_sf : Boolean , optional
-            Defaults to ``True`` for SFDE model, otherwise use LCDM.
+            Defaults to ``True`` or SFDE model, otherwise use LCDM.
 
         Returns
         -------

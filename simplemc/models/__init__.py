@@ -1,3 +1,6 @@
+
+
+
 from .AnisotropicCosmology import AnisotropicCosmology
 from .BinnedWCosmology import BinnedWCosmology
 from .CompressPantheon import CompressPantheon
@@ -26,6 +29,6 @@ from .TiredLightDecorator import TiredLightDecorator
 from .wCDMCosmology import wCDMCosmology
 from .WeirdCDMCosmology import WeirdCDMCosmology
 from .wFourierCosmology import wFourierCosmology
-from .NLEDCosmology import NLEDCosmology
+from .TanhCosmology import TanhCosmology 
 
 #from .ePhiCDMCosmology import ePhiCosmology

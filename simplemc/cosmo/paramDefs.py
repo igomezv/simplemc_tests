@@ -13,7 +13,7 @@ from simplemc.cosmo.Parameter import Parameter
 
 # Parameters are value, variation, bounds.
 # Base parameters.
-Om_par = Parameter("Om", 0.3038, 0.05, (0.05, 0.5), "\Omega_m")
+Om_par = Parameter("Om", 0.3038, 0.05, (0.1, 0.5), "\Omega_m")
 Obh2_par = Parameter("Obh2", 0.02234, 0.001, (0.02, 0.025), "\Omega_{b}h^2")
 h_par = Parameter("h", 0.6821, 0.05, (0.4, 0.9), "h")
 
@@ -23,13 +23,13 @@ Nnu_par = Parameter("Nnu", 3.046, 0.5, (3.0, 3.1), "N_{\\rm eff}")
 
 # Curvature and DE equation of state.
 Ok_par = Parameter("Ok", 0.0, 0.01, (-0.02, 0.02), "\Omega_k")
-w_par = Parameter("w", -1., 0.1, (-2.0, 2.0), "w_0")
+w_par = Parameter("w", -1., 0.1, (-2.0, 0.0), "w_0")
 wa_par = Parameter("wa", 0.0, 0.1, (-2.0, 2.0), "w_a")
 wb_par = Parameter("wb", 0.7, 0.2, (-2., 3.0), "w_b")
 wc_par = Parameter("wc", 0.7, 0.2, (-3., 5.0), "w_c")
 
 # Sigma 8 parameter.
-s8_par = Parameter("s8", 0.8, 0.01, (0.6, 1.0), "s8")
+s8_par = Parameter("s8", 0.8, 0.01, (0.5, 1.0), "s8")
 
 # This is the prefactor parameter c/rdH0.
 Pr_par = Parameter("Pr", 28.6, 4, (5, 70), "c/(H_0r_d)")
@@ -168,6 +168,4 @@ wcpl_par = Parameter("wcpl", 0.0, 0.03, (0, 0.5), "w_{cpl}")
 
 LMBD_par = Parameter("LMBD", 0.65, 0.02, (0, 1), "w_{cpl}")
 
-# NLED Cosmology
-b_par = Parameter("b", 0.5*108/343, 0.01, (0, 108/343), "b")
 
