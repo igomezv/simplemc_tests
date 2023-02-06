@@ -199,7 +199,7 @@ class LoadDataSet:
 
 
 class MLP(nn.Module):
-    def __init__(self, ncols, noutput, numneurons=200, dropout=0.1):
+    def __init__(self, ncols, noutput, numneurons=200, dropout=0.5):
         """
             Multilayer Perceptron for regression.
         """
