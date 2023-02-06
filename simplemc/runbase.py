@@ -24,6 +24,7 @@ from .models import SplineLCDMCosmology
 from .models import StepCDMCosmology
 from .models import BinnedWCosmology
 from .models import CompressPantheon
+from .models import TanhCosmology
 
 
 #Generic model
@@ -43,9 +44,9 @@ from .likelihoods.BAOLikelihoods import DR11LOWZ, DR11CMASS, DR14LyaAuto, DR14Ly
                                         SixdFGS, SDSSMGS, DR11LyaAuto, DR11LyaCross, eBOSS, \
                                         DR12Consensus
 from .likelihoods.SimpleCMBLikelihood import PlanckLikelihood, PlanckLikelihood_15, WMAP9Likelihood
-from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN, BinnedPantheon, NeuralSN
+from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN
 from .likelihoods.SNLikelihood import JLASN_Full
-from .likelihoods.PantheonSNLikelihood import PantheonSNLikelihood
+from .likelihoods.PantheonSNLikelihood import PantheonSN, BinnedPantheon
 from .likelihoods.CompressedHDLikelihood import HubbleDiagram
 from .likelihoods.Compressedfs8Likelihood import fs8Diagram
 from .likelihoods.HubbleParameterLikelihood import RiessH0
@@ -154,6 +155,8 @@ def ParseModel(model, **kwargs):
         T.setVaryMnu()
     elif model == "Binned":
         T = BinnedWCosmology()
+    elif model == "Tanh":
+        T = TanhCosmology()
     elif model == 'CPantheon':
         T = CompressPantheon()
     elif model == 'DGP':
@@ -297,15 +300,15 @@ def ParseDataset(datasets, **kwargs):
         elif name == 'CMBW':
             L.addLikelihood(WMAP9Likelihood())
         elif name == 'Pantheon':
-            L.addLikelihood(PantheonSNLikelihood())
+            L.addLikelihood(PantheonSN())
         elif name == 'BPantheon':
             L.addLikelihood(BinnedPantheon())
         elif name == 'JLA':
             L.addLikelihood(JLASN_Full())
         elif name == 'SN':
             L.addLikelihood(BetouleSN())
-        elif name == 'NeuralSN':
-            L.addLikelihood(NeuralSN())
+        # elif name == 'NeuralSN':
+        #     L.addLikelihood(NeuralSN())
         elif name == 'SNx10':
             L.addLikelihood(LikelihoodMultiplier(BetouleSN(), 100.0))
         elif name == 'UnionSN':
