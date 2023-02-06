@@ -20,13 +20,13 @@ nlive = 100
 # ###### FIRST SAMPLING WITH ONLY DYNESTY
 # sampler1 = DriverMC(analyzername='nested', model='LCDM', datasets='HD')
 # modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
-sampler1 = DriverMC(analyzername='nested', model='gaussian')
+sampler1 = DriverMC(analyzername='nested', model='eggbox')
 
 ti = time.time()
-res1 = sampler1.executer(useNeuralike=True, useGenetic=True, nrand=10,
-                         valid_loss=0.001, nstart_samples=200000, nstart_stop_criterion=5,
+res1 = sampler1.executer(useNeuralike=True, useGenetic=True, nrand=1000,
+                         valid_loss=0.01, nstart_samples=200000, nstart_stop_criterion=50,
                          updInt=1000, ncalls_excess=200, learning_rate = 0.0001,
-                         epochs=100, batch_size=8, patience=50)
+                         epochs=100, batch_size=128, patience=10)
 # learning_rate = 0.0001
 # batch_size = 8
 # psplit = 0.7
