@@ -112,7 +112,8 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
                   compute_jac=False,
                   enlarge=None, bootstrap=0, vol_dec=0.5, vol_check=2.0,
                   walks=25, facc=0.5, slices=5, fmove=0.9, max_move=100,
-                  update_func=None, **kwargs):
+                  update_func=None, neuralike=False,
+                  **kwargs):
     """
     Initializes and returns a sampler object for Static Nested Sampling.
 
@@ -502,6 +503,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
     if live_points is None:
         # If no live points are provided, propose them by randomly sampling
         # from the unit cube.
+        print("Generating live points...")
         for attempt in range(100):
             live_u = rstate.rand(nlive, npdim)  # positions in unit cube
             if use_pool.get('prior_transform', True):
@@ -527,7 +529,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
                     else:
                         #jav
                         live_points[2][i] = -1e3
-                        #raise ValueError("The log-likelihood ({0}) of live "
+                        # raise ValueError("The log-likelihood ({0}) of live "
                         #                 "point {1} located at u={2} v={3} "
                         #                 "is invalid."
                         #                 .format(logl, i, live_points[0][i],
@@ -545,18 +547,19 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
     else:
         # If live points were provided, convert the log-likelihoods and then
         # run a quick safety check.
+        print("Using provided live points.")
         for i, logl in enumerate(live_points[2]):
             if not np.isfinite(logl):
                 if np.sign(logl) < 0:
                     live_points[2][i] = -1e300
                 else:
                     #jav
-                    live_points[2][i] = -1e3
-                    #raise ValueError("The log-likelihood ({0}) of live "
-                    #                 "point {1} located at u={2} v={3} "
-                    #                 "is invalid."
-                    #                 .format(logl, i, live_points[0][i],
-                    #                         live_points[1][i]))
+                    # live_points[2][i] = -1e3
+                    raise ValueError("The log-likelihood ({0}) of live "
+                                    "point {1} located at u={2} v={3} "
+                                    "is invalid."
+                                    .format(logl, i, live_points[0][i],
+                                            live_points[1][i]))
         if all(live_points[2] == -1e300):
             raise ValueError("Not a single provided live point has a valid "
                              "log-likelihood!")
@@ -565,7 +568,7 @@ def NestedSampler(loglikelihood, prior_transform, ndim, nlive=500,
     sampler = _SAMPLERS[bound](loglike, ptform, npdim,
                                live_points, sample, update_interval,
                                first_update, rstate, queue_size, pool,
-                               use_pool, kwargs)
+                               use_pool, neuralike, kwargs)
 
     return sampler
 
