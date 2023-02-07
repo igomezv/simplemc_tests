@@ -16,32 +16,17 @@ show_plots = True  # choose False if you are in a server
 dims = 2
 nlive = 100
 
-
+modelname = 'eggbox'
 # ###### FIRST SAMPLING WITH ONLY DYNESTY
 # sampler1 = DriverMC(analyzername='nested', model='LCDM', datasets='HD')
 # modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
-sampler1 = DriverMC(analyzername='nested', model='eggbox')
+sampler1 = DriverMC(analyzername='nested', model=modelname)
 
 ti = time.time()
-res1 = sampler1.executer(useNeuralike=True, useGenetic=True, nrand=1000,
-                         valid_loss=0.01, nstart_samples=200000, nstart_stop_criterion=50,
-                         updInt=1000, ncalls_excess=200, learning_rate = 0.0001,
-                         epochs=100, batch_size=128, patience=10)
-# learning_rate = 0.0001
-# batch_size = 8
-# psplit = 0.7
-# ;hidden_layers_neurons: number of nodes per layer separated by commas
-# hidden_layers_neurons = 200, 200, 200
-# plot = True
-# patience = 50
-# nrand = 100
-# valid_loss = 0.01
-# nstart_samples = 500
-# ;nstart_stop_criterion = 100
-# nstart_stop_criterion = 10
-# updInt = 1000
-# ncalls_excess = 1000
-
+res1 = sampler1.executer(useNeuralike=True, useGenetic=True, nrand=10,
+                         valid_loss=0.001, nstart_samples=200000, nstart_stop_criterion=100,
+                         updInt=1000, ncalls_excess=1000, learning_rate = 0.0001,
+                         epochs=500, batch_size=64, patience=20)
 
 samplesnested = res1['result']['samples']
 loglikes = res1['result']['loglikes']
@@ -80,7 +65,7 @@ if show_plots:
     # ax.scatter(bambidata[:, 0], bambidata[:, 1], zbambi, c='green', alpha=0.5)
     # plt.legend(["dynesty", "dynesty + neural net"],  loc="upper right")
 
-    # plt.savefig(modelname+"_bambi3D.png")
+    plt.savefig(modelname+"_bambi3D.png")
     plt.show()
 
     # 2D plots
