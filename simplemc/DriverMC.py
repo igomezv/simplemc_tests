@@ -616,11 +616,11 @@ class DriverMC:
             plot_param1 = self.config.get('ga_deap', 'plot_param1', fallback=None)
             plot_param2 = self.config.get('ga_deap', 'plot_param2', fallback=None)
 
-            population = self.config.getint('ga_deap','population', fallback=20)
-            crossover = self.config.getfloat('ga_deap', 'crossover', fallback=0.7)
-            mutation = self.config.getfloat('ga_deap', 'mutation', fallback=0.3)
-            max_generation = self.config.getint('ga_deap', 'max_generation', fallback=100)
-            hof_size = self.config.getint('ga_deap','hof_size', fallback=1)
+            population = self.config.getint('ga_deap','population', fallback=52)
+            crossover = self.config.getfloat('ga_deap', 'crossover', fallback=0.5)
+            mutation = self.config.getfloat('ga_deap', 'mutation', fallback=0.2)
+            max_generation = self.config.getint('ga_deap', 'max_generation', fallback=20)
+            hof_size = self.config.getint('ga_deap','hof_size', fallback=2)
             crowding_factor = self.config.getfloat('ga_deap', 'crowding_factor',fallback=1)
         else:
             plot_fitness = kwargs.pop('plot_fitness', False)
@@ -629,11 +629,11 @@ class DriverMC:
             plot_param1 = kwargs.pop('plot_param1', None)
             plot_param2 = kwargs.pop('plot_param2', None)
 
-            population = kwargs.pop('population', 50)
+            population = kwargs.pop('population', 52)
             crossover = kwargs.pop('crossover', 0.5)
-            mutation = kwargs.pop('mutation', 0.8)
-            max_generation = kwargs.pop('max_generation', 10)
-            hof_size = kwargs.pop('hof_size', 1)
+            mutation = kwargs.pop('mutation', 0.2)
+            max_generation = kwargs.pop('max_generation', 20)
+            hof_size = kwargs.pop('hof_size', 2)
             crowding_factor = kwargs.pop('crowding_factor', 1)
 
         ti = time.time()
