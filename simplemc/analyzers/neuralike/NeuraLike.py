@@ -13,9 +13,8 @@ class NeuraLike:
         loglikelihood
         rootname
     """
-    def __init__(self, loglikelihood_control, priorTransform, rootname='neural',
+    def __init__(self, loglikelihood_control, rootname='neural',
                  neuralike_settings=None):
-        self.priorTransform = priorTransform
         # simplemc: reading neuralike settings
         self.nstart_samples = neuralike_settings['nstart_samples']
         self.nstart_stop_criterion = neuralike_settings['nstart_stop_criterion']
@@ -33,12 +32,12 @@ class NeuraLike:
         self.rootname = rootname
         self.neuralike_settings = neuralike_settings
 
-    def run(self, delta_logz, it, nc, usamples, likes,
+    def run(self, delta_logz, it, nc, samples, likes,
             perctest=0.1, logl_tolerance=0.05, map_fn=map):
         if self.training_flag(delta_logz, it):
-            self.train(usamples, likes, map_fn=map_fn)
+            self.train(samples, likes, map_fn=map_fn)
         if self.trained_net:
-            self.neural_switch(nc, usamples, likes,
+            self.neural_switch(nc, samples, likes,
                                map_fn=map_fn,
                                perctest=perctest,
                                logl_tolerance=logl_tolerance)
@@ -70,9 +69,9 @@ class NeuraLike:
         else:
             return False
 
-    def train(self, usamples, likes, map_fn=map):
+    def train(self, samples, likes, map_fn=map):
         self.net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                 samples=usamples,
+                                 samples=samples,
                                  likes=likes,
                                  rootname=self.rootname,
                                  neuralike_settings=self.neuralike_settings)
@@ -82,21 +81,21 @@ class NeuraLike:
         self.originalike_counter = 0
         return None
 
-    def neural_switch(self, nc, usamples, likes, map_fn=map,
-                      perctest=0.1, logl_tolerance=0.05):
+    def neural_switch(self, nc, samples, likes, map_fn=map,
+                      perctest=0.1, logl_tolerance=10):
         self.n_neuralikes += 1
         self.ncalls_neural += nc
         if nc > 1000:
             self.trained_net = False
             print("\nExcesive number of calls, neuralike disabled")
         elif self.n_neuralikes % (self.updInt // 2) == 0:
-            usamples_test = usamples[-self.updInt:, :]
+            samples_test = samples[-self.updInt:, :]
             neuralikes_test = likes[-self.updInt:]
 
             # real_logl = np.array(list(map_fn(self.loglikelihood_control,
             #                                  samples_test)))
 
-            pred_test = self.test_predictions(usamples_test, neuralikes_test,
+            pred_test = self.test_predictions(samples_test, neuralikes_test,
                                              perctest=perctest,
                                              logl_tolerance=logl_tolerance, map_fn=map_fn)
             if pred_test:
@@ -107,8 +106,10 @@ class NeuraLike:
 
     def likelihood(self, params):
         if self.trained_net:
+            print("\rUsing ann")
             return self.net.neuralike(params)
         else:
+            print("\r WITHOUT ANN")
             return self.loglikelihood_control(params)
 
     # @staticmethod
@@ -121,9 +122,9 @@ class NeuraLike:
         idx_shuffle = np.random.permutation(nlen)
         idx_red = idx_shuffle[:nsize]
         y_pred = y_pred[idx_red]
-        samples_test = samples_test[    idx_red]
-        vsamples_test = np.array(list(map_fn(self.priorTransform, samples_test)))
-        y_real = np.array(list(map_fn(self.loglikelihood_control, vsamples_test)))
+        samples_test = samples_test[idx_red]
+        # vsamples_test = np.array(list(map_fn(self.priorTransform, samples_test)))
+        y_real = np.array(list(map_fn(self.loglikelihood_control, samples_test)))
         y_real = y_real.reshape(-1, 1)
         absdiff = np.abs(y_real - y_pred)
         absdiff_criterion = np.abs(logl_tolerance * y_real)
