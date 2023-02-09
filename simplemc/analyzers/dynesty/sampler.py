@@ -824,10 +824,10 @@ class Sampler(object):
                 if neural_on is False:
                     from simplemc.analyzers.neuralike.NeuraLike import NeuraLike
                     neuralike = NeuraLike(loglikelihood_control=self.loglikelihood_control,
-                                          rootname=self.outputname, priorTransform=self.prior_transform,
+                                          rootname=self.outputname,
                                           neuralike_settings=self.neuralike_settings)
                     neural_on = True
-                neuralike.run(delta_logz, it, nc, usamples=np.array(self.live_u),
+                neuralike.run(delta_logz, it, nc, samples=np.array(self.live_v),
                               likes=np.array(self.live_logl), map_fn=self.M)
                 self.loglikelihood = neuralike.likelihood
 
