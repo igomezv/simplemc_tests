@@ -40,7 +40,9 @@ class RandomSampling:
         -------
         Random samples in the parameter space and their respectives likelihoods.
         """
-        samples = self.make_sample()
+        # samples = self.make_sample()
+        i, j = np.shape(self.samples)
+        samples = self.samples + 0.05 * np.random.rand(i, j)
         t1 = time.time()
         # if not self.filesChecker():
         print("Evaluating likelihoods...")
