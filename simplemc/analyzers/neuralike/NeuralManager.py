@@ -24,6 +24,7 @@ class NeuralManager:
     """
     def __init__(self, loglikelihood, samples, likes, rootname='neural',
                  neuralike_settings=None):
+        # samples usample
         self.loglikelihood_fn = loglikelihood
         self.valid = False
         self.fig_path = '{}.png'.format(rootname)
@@ -66,32 +67,32 @@ class NeuralManager:
         ml_idx = np.argmax(self.likes)
         means = self.samples[ml_idx, :]
         print("\nGenerating training set...")
-        rsampling = RandomSampling(self.loglikelihood_fn, samples=self.samples, means=means, mins=np.max(self.samples, axis=0),
-                                   maxs=np.max(self.samples, axis=0),
-                                   nrand=self.nrand)
-        rsamples, rlikes = rsampling.make_dataset(map_fn=map_fn)
-        print("Training dataset created!")
-        likes = np.append(rlikes, self.likes)
-        samples = np.append(rsamples, self.samples, axis=0)
+        # rsampling = RandomSampling(self.loglikelihood_fn, samples=self.samples, means=means, mins=np.max(self.samples, axis=0),
+        #                            maxs=np.max(self.samples, axis=0),
+        #                            nrand=self.nrand)
+        # rsamples, rlikes = rsampling.make_dataset(map_fn=map_fn)
+        # print("Training dataset created!")
+        # likes = np.append(rlikes, self.likes)
+        # samples = np.append(rsamples, self.samples, axis=0)
 
         ## scale params
-        self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
-        # self.samples_scaler = StandardScaler(with_mean=False)
-        self.samples_scaler.fit(samples)
-        sc_samples = self.samples_scaler.transform(samples)
+        # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
+        # # self.samples_scaler = StandardScaler(with_mean=False)
+        # self.samples_scaler.fit(samples)
+        # sc_samples = self.samples_scaler.transform(samples)
         # print(sc_samples)
         # # create scaler
-        # self.likes_scaler = StandardScaler(with_mean=False)
-        self.likes_scaler = MinMaxScaler(feature_range=(0.1, 1))
-        self.likes_scaler.fit(likes.reshape(-1, 1))
+        self.likes_scaler = StandardScaler(with_mean=False)
+        # self.likes_scaler = MinMaxScaler(feature_range=(0.1, 1))
+        self.likes_scaler.fit(self.likes.reshape(-1, 1))
         # # # apply transforms
-        sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
+        sc_likes = self.likes_scaler.transform(self.likes.reshape(-1, 1))
 
-        self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, topology=self.topology,
+        self.neural_model = NeuralNet(X=self.samples, Y=sc_likes, topology=self.topology,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience,
-                                      minsample=np.min(np.abs(samples)))
+                                      minsample=np.min(np.abs(self.samples)))
 
         self.neural_model.train()
         # neural_model.save_model('{}'.format(self.model_path))
@@ -126,9 +127,10 @@ class NeuralManager:
 
     def neuralike(self, params):
         # loglikelihood only can work if trainning was executed
-        sc_params = self.samples_scaler.transform(np.array(params).reshape(1, self.dims))
+        # sc_params = self.samples_scaler.transform(np.array(params).reshape(1, self.dims))
         # pred = self.neural_model.predict(sc_params)
-        pred = self.neural_model.predict(sc_params)
+        # pred = self.neural_model.predict(sc_params)
+        pred = self.neural_model.predict(params)
         likes = self.likes_scaler.inverse_transform(pred.reshape(-1, 1))
         likes = np.array(likes)
         return likes
