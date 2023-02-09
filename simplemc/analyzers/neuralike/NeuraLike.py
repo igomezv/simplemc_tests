@@ -13,8 +13,9 @@ class NeuraLike:
         loglikelihood
         rootname
     """
-    def __init__(self, loglikelihood_control, rootname='neural',
+    def __init__(self, loglikelihood_control, priorTransform, rootname='neural',
                  neuralike_settings=None):
+        self.priorTransform = priorTransform
         # simplemc: reading neuralike settings
         self.nstart_samples = neuralike_settings['nstart_samples']
         self.nstart_stop_criterion = neuralike_settings['nstart_stop_criterion']
@@ -32,12 +33,12 @@ class NeuraLike:
         self.rootname = rootname
         self.neuralike_settings = neuralike_settings
 
-    def run(self, delta_logz, it, nc, samples, likes,
-            map_fn=None, perctest=0.1, logl_tolerance=0.05):
+    def run(self, delta_logz, it, nc, usamples, likes,
+            perctest=0.1, logl_tolerance=0.05, map_fn=map):
         if self.training_flag(delta_logz, it):
-            self.train(samples, likes, map_fn=map_fn)
+            self.train(usamples, likes, map_fn=map_fn)
         if self.trained_net:
-            self.neural_switch(nc, samples, likes,
+            self.neural_switch(nc, usamples, likes,
                                map_fn=map_fn,
                                perctest=perctest,
                                logl_tolerance=logl_tolerance)
@@ -69,9 +70,9 @@ class NeuraLike:
         else:
             return False
 
-    def train(self, samples, likes, map_fn=map):
+    def train(self, usamples, likes, map_fn=map):
         self.net = NeuralManager(loglikelihood=self.loglikelihood_control,
-                                 samples=samples,
+                                 samples=usamples,
                                  likes=likes,
                                  rootname=self.rootname,
                                  neuralike_settings=self.neuralike_settings)
@@ -81,7 +82,7 @@ class NeuraLike:
         self.originalike_counter = 0
         return None
 
-    def neural_switch(self, nc, samples, likes, map_fn=map,
+    def neural_switch(self, nc, usamples, likes, map_fn=map,
                       perctest=0.1, logl_tolerance=0.05):
         self.n_neuralikes += 1
         self.ncalls_neural += nc
@@ -89,13 +90,13 @@ class NeuraLike:
             self.trained_net = False
             print("\nExcesive number of calls, neuralike disabled")
         elif self.n_neuralikes % (self.updInt // 2) == 0:
-            samples_test = samples[-self.updInt:, :]
+            usamples_test = usamples[-self.updInt:, :]
             neuralikes_test = likes[-self.updInt:]
 
             # real_logl = np.array(list(map_fn(self.loglikelihood_control,
             #                                  samples_test)))
 
-            pred_test = self.test_predictions(samples_test, neuralikes_test,
+            pred_test = self.test_predictions(usamples_test, neuralikes_test,
                                              perctest=perctest,
                                              logl_tolerance=logl_tolerance, map_fn=map_fn)
             if pred_test:
@@ -111,7 +112,7 @@ class NeuraLike:
             return self.loglikelihood_control(params)
 
     # @staticmethod
-    def test_predictions(self, samples_test, y_pred, perctest=0.1, logl_tolerance=0.5, fractrues=0.8, map_fn=map):
+    def test_predictions(self, samples_test, y_pred, perctest=0.1, logl_tolerance=0.5, fractrues=0., map_fn=map):
         print("\n\nTesting neuralike predictions...")
         nlen = len(y_pred)
         nsize = int(perctest*nlen)
@@ -121,7 +122,8 @@ class NeuraLike:
         idx_red = idx_shuffle[:nsize]
         y_pred = y_pred[idx_red]
         samples_test = samples_test[    idx_red]
-        y_real = np.array(list(map_fn(self.loglikelihood_control, samples_test)))
+        vsamples_test = np.array(list(map_fn(self.priorTransform, samples_test)))
+        y_real = np.array(list(map_fn(self.loglikelihood_control, vsamples_test)))
         y_real = y_real.reshape(-1, 1)
         absdiff = np.abs(y_real - y_pred)
         absdiff_criterion = np.abs(logl_tolerance * y_real)
