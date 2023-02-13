@@ -58,7 +58,7 @@ class NeuraLike:
         startlogz = (delta_logz <= self.nstart_stop_criterion)
         if start_it or startlogz:
             # setting the conditions to train or retrain
-            retrain = (self.originalike_counter >= self.updInt) and (self.n_neuralikes > 0)
+            retrain = (self.originalike_counter >= self.updInt) and (self.train_counter > 0)
             first = (self.train_counter == 0)
             # if first or retrain:
             if retrain or first:
