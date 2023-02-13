@@ -82,7 +82,7 @@ class NeuraLike:
         return None
 
     def neural_switch(self, nc, samples, likes, map_fn=map,
-                      perctest=0.1, logl_tolerance=10):
+                      perctest=0.1, logl_tolerance=0.5):
         self.n_neuralikes += 1
         self.ncalls_neural += nc
         if nc > 1000:
@@ -106,14 +106,12 @@ class NeuraLike:
 
     def likelihood(self, params):
         if self.trained_net:
-            print("\rUsing ann")
             return self.net.neuralike(params)
         else:
-            print("\r WITHOUT ANN")
             return self.loglikelihood_control(params)
 
     # @staticmethod
-    def test_predictions(self, samples_test, y_pred, perctest=0.1, logl_tolerance=0.5, fractrues=0., map_fn=map):
+    def test_predictions(self, samples_test, y_pred, perctest=0.1, logl_tolerance=0.5, fractrues=0.7, map_fn=map):
         print("\n\nTesting neuralike predictions...")
         nlen = len(y_pred)
         nsize = int(perctest*nlen)
