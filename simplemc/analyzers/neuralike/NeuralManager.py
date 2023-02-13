@@ -67,26 +67,26 @@ class NeuralManager:
         ml_idx = np.argmax(self.likes)
         means = self.samples[ml_idx, :]
         print("\nGenerating training set...")
-        # rsampling = RandomSampling(self.loglikelihood_fn, samples=self.samples, means=means, mins=np.max(self.samples, axis=0),
-        #                            maxs=np.max(self.samples, axis=0),
-        #                            nrand=self.nrand)
-        # rsamples, rlikes = rsampling.make_dataset(map_fn=map_fn)
-        # print("Training dataset created!")
-        # likes = np.append(rlikes, self.likes)
-        # samples = np.append(rsamples, self.samples, axis=0)
+        rsampling = RandomSampling(self.loglikelihood_fn, samples=self.samples, means=means, mins=np.max(self.samples, axis=0),
+                                   maxs=np.max(self.samples, axis=0),
+                                   nrand=self.nrand)
+        rsamples, rlikes = rsampling.make_dataset(map_fn=map_fn)
+        print("Training dataset created!")
+        likes = np.append(rlikes, self.likes)
+        samples = np.append(rsamples, self.samples, axis=0)
 
         ## scale params
         # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
         self.samples_scaler = StandardScaler(with_mean=False)
-        self.samples_scaler.fit(self.samples)
-        sc_samples = self.samples_scaler.transform(self.samples)
+        self.samples_scaler.fit(samples)
+        sc_samples = self.samples_scaler.transform(samples)
         # print(sc_samples)
         # # create scaler
         self.likes_scaler = StandardScaler(with_mean=False)
         # self.likes_scaler = MinMaxScaler(feature_range=(0.1, 1))
-        self.likes_scaler.fit(self.likes.reshape(-1, 1))
+        self.likes_scaler.fit(likes.reshape(-1, 1))
         # # # apply transforms
-        sc_likes = self.likes_scaler.transform(self.likes.reshape(-1, 1))
+        sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
 
         self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, topology=self.topology,
                                       epochs=self.epochs, batch_size=self.batch_size,

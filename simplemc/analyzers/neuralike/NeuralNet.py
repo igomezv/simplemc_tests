@@ -46,18 +46,18 @@ class NeuralNet:
             shuffle = np.random.permutation(len(X))
             X = X[shuffle]
             Y = Y[shuffle]
-            self.X_train, self.X_test = np.split(X, indx)
-            self.Y_train, self.Y_test = np.split(Y, indx)
+            self.X_train, self.X_val = np.split(X, indx)
+            self.Y_train, self.Y_val = np.split(Y, indx)
 
-            ntrain_valtest = int(0.5 * len(self.Y_test))
+            ntrain_valtest = int(0.5 * len(self.Y_val))
             indx_valtest = [ntrain_valtest]
-            self.X_val, self.X_test = np.split(self.X_test, indx_valtest)
-            self.Y_val, self.Y_test = np.split(self.Y_test, indx_valtest)
+            self.X_val, self.X_test = np.split(self.X_val, indx_valtest)
+            self.Y_val, self.Y_test = np.split(self.Y_val, indx_valtest)
             # Initialize the MLP
             self.model = MLP(self.dims, self.topology[-1])
             self.model.float()
         print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X.shape, Y.shape))
-        print("Neuralike: Shape of X_val dataset: {} | Shape of X_test dataset: {}".format(self.X_val.shape, self.X_test.shape))
+        print("Neuralike: Shape of X_val dataset: {} | Shape of Y_test dataset: {}".format(self.X_val.shape, self.Y_val.shape))
 
     def train(self):
         dataset_train = LoadDataSet(self.X_train, self.Y_train)
@@ -75,7 +75,7 @@ class NeuralNet:
         # optimizer = AdaBound(self.model.parameters(), lr=self.learning_rate, final_lr=0.01, weight_decay=1e-10, gamma=0.1)
         # optimizer = torch.optim.Adagrad(self.model.parameters(), lr=self.learning_rate,
         #                                 lr_decay=0, weight_decay=0, initial_accumulator_value=0, eps=1e-10)
-        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.05, patience=5)
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=5)
         # it needs pytorch utilities
         summary(self.model)
         t0 = time()

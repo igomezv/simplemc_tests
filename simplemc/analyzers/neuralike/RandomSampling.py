@@ -18,7 +18,7 @@ class RandomSampling:
         self.like = like_fn
         self.samples = samples
         self.means = means
-        # self.dims = len(means)
+        self.dims = len(means)
         self.mins = mins
         self.maxs = maxs
         self.dims = len(mins)
@@ -28,7 +28,7 @@ class RandomSampling:
         print("\nGenerating a random sample of points in the parameter space...")
 
     def make_sample(self):
-        std = np.std(self.samples, axis=0)/4
+        std = 0.5*np.std(self.samples, axis=0)
         samples = np.random.normal(loc=self.means, scale=std, size=(self.nrand, self.dims))
         print("Random samples in the parameter space generated!")
         return samples
@@ -40,9 +40,7 @@ class RandomSampling:
         -------
         Random samples in the parameter space and their respectives likelihoods.
         """
-        # samples = self.make_sample()
-        i, j = np.shape(self.samples)
-        samples = self.samples + 0.05 * np.random.rand(i, j)
+        samples = self.make_sample()
         t1 = time.time()
         # if not self.filesChecker():
         print("Evaluating likelihoods...")
