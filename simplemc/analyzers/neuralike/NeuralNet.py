@@ -61,7 +61,7 @@ class NeuralNet:
                 population_size = 5  # max of individuals per generation
                 max_generations = 4  # number of generations
                 gene_length = 4  # lenght of the gene, depends on how many hiperparameters are tested
-                k = 1  # num. of finalist individuals
+                k = 1  # num. of finralist individuals
 
                 t = time()
                 # Define the hyperparameters for the search
@@ -82,7 +82,7 @@ class NeuralNet:
                 self.learning_rate = net_fit.best['learning_rate']
                 # print("best individual", net_fit.best)
                 print("Best number of nodes:", net_fit.best['num_units'])
-                print("Best number of layers:", net_fit.best['deep'])
+                print("Best number of learning rate:", net_fit.best['learning_rate'])
                 print("Best number of batch_size:", net_fit.best['batch_size'])
                 print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
