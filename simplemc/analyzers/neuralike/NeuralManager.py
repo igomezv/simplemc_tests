@@ -53,7 +53,7 @@ class NeuralManager:
             self.nrand = 5
 
         _, self.dims = np.shape(self.samples)
-        self.topology = [self.dims] + self.hidden_layers_neurons + [1]
+        # self.topology = [self.dims] + self.hidden_layers_neurons + [1]
         self.mse_criterion = self.valid_loss
 
 
@@ -88,7 +88,8 @@ class NeuralManager:
         # # # apply transforms
         sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
 
-        self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, topology=self.topology,
+        self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, n_input=self.dims,
+                                      n_output=1, hidden_layers_neurons=self.hidden_layers_neurons,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience,

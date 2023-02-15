@@ -14,10 +14,12 @@ from torch import nn
 from torchinfo import summary
 from torch_optimizer import AdaBound
 from .pytorchtools import EarlyStopping
+from .nnogada.Nnogada import Nnogada
 
 
 class NeuralNet:
-    def __init__(self, load=False, model_path=None, X=None, Y=None, topology=None, **kwargs):
+    def __init__(self, X, Y, n_input, n_output, hidden_layers_neurons=200,
+                 load=False, model_path=None, hyp_tunning='manual', **kwargs):
         """
         Read the network params
         Parameters
@@ -28,10 +30,12 @@ class NeuralNet:
             Data to train
 
         """
+        hyp_tunning = 'auto'
         self.load = load
         self.model_path = model_path
-        self.topology = topology
-        self.dims = topology[0]
+        self.hidden_layers_neurons = hidden_layers_neurons
+        self.dims = n_input
+        self.n_output = n_output
         self.epochs = kwargs.pop('epochs', 50)
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
@@ -53,11 +57,40 @@ class NeuralNet:
             indx_valtest = [ntrain_valtest]
             self.X_val, self.X_test = np.split(self.X_val, indx_valtest)
             self.Y_val, self.Y_test = np.split(self.Y_val, indx_valtest)
+            if hyp_tunning == 'auto':
+                population_size = 5  # max of individuals per generation
+                max_generations = 4  # number of generations
+                gene_length = 4  # lenght of the gene, depends on how many hiperparameters are tested
+                k = 1  # num. of finalist individuals
+
+                t = time()
+                # Define the hyperparameters for the search
+                #
+                hyperparams = {'num_units': [100, 200], 'batch_size': [16, 64], 'learning_rate': [0.001, 0.0005]}
+
+                # generate a Nnogada instance
+                net_fit = Nnogada(hyp_to_find=hyperparams, X_train=self.X_train, Y_train=self.Y_train, X_val=self.X_val, Y_val=self.Y_val,
+                                  neural_library='torch')
+                # Set the possible values of hyperparameters and not use the default values from hyperparameters.py
+                net_fit.set_hyperparameters()
+
+                # Find best solutions
+                net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
+                # best solution
+                self.hidden_layers_neurons = net_fit.best['num_units']
+                self.batch_size = net_fit.best['batch_size']
+                self.learning_rate = net_fit.best['learning_rate']
+                # print("best individual", net_fit.best)
+                print("Best number of nodes:", net_fit.best['num_units'])
+                print("Best number of layers:", net_fit.best['deep'])
+                print("Best number of batch_size:", net_fit.best['batch_size'])
+                print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
-            self.model = MLP(self.dims, self.topology[-1])
+            self.model = MLP(self.dims, self.n_output, hidden_layers_neurons=self.hidden_layers_neurons)
             self.model.float()
         print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X.shape, Y.shape))
         print("Neuralike: Shape of X_val dataset: {} | Shape of Y_test dataset: {}".format(self.X_val.shape, self.Y_val.shape))
+
 
     def train(self):
         dataset_train = LoadDataSet(self.X_train, self.Y_train)
@@ -199,25 +232,28 @@ class LoadDataSet:
 
 
 class MLP(nn.Module):
-    def __init__(self, ncols, noutput, numneurons=200, dropout=0.5):
+    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5):
         """
-            Multilayer Perceptron for regression.
+            Multilayer Perceptron for regression. 3 hidden layers
         """
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(ncols, numneurons),
+            nn.Linear(ncols, hidden_layers_neurons),
             # nn.SELU(),
             nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(numneurons, numneurons),
+            # nn.Dropout(dropout),
+            nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
             # nn.SELU(),
             nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(numneurons, numneurons),
+            # nn.Dropout(dropout),
+            nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
             # nn.SELU(),
             nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(numneurons, noutput)
+            nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
+            # nn.SELU(),
+            nn.ReLU(),
+            # nn.Dropout(dropout),
+            nn.Linear(hidden_layers_neurons, noutput)
         )
         # use the modules apply function to recursively apply the initialization
         self.model.apply(self.init_weights)
