@@ -827,9 +827,19 @@ class Sampler(object):
                                           rootname=self.outputname,
                                           neuralike_settings=self.neuralike_settings)
                     neural_on = True
-                neuralike.run(delta_logz, it, nc, samples=np.array(self.live_v),
-                              likes=np.array(self.live_logl), map_fn=self.M)
+                if ncall >= 2*self.nlive:
+                    samples_to_neuralike = np.array(self.saved_v)[-self.nlive:]
+                    samples_to_neuralike = np.concatenate((samples_to_neuralike, np.array(self.live_v)), axis=0)
+                    loglikes_to_neuralike = np.array(self.saved_logl)[-self.nlive:]
+                    loglikes_to_neuralike = np.concatenate((loglikes_to_neuralike, np.array(self.live_logl)))
+                else:
+                    samples_to_neuralike = np.array(self.live_v)
+                    loglikes_to_neuralike = np.array(self.live_logl)
+
+                neuralike.run(delta_logz, it, nc, samples=samples_to_neuralike,
+                              likes=loglikes_to_neuralike, map_fn=self.M)
                 self.loglikelihood = neuralike.likelihood
+
 
             # Update evidence `logz` and information `h`.
             logz_new = np.logaddexp(logz, logwt)
