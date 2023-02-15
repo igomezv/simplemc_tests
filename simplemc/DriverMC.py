@@ -372,7 +372,7 @@ class DriverMC:
             learning_rate = kwargs.pop('learning_rate', 5e-4)
             batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
-            hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
+            hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', 100)
             plot = kwargs.pop('plot', True)
             patience = kwargs.pop('patience', 10)
             nrand = kwargs.pop('nrand', 5)
@@ -920,8 +920,9 @@ class DriverMC:
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
             psplit = self.config.getfloat('neuralike', 'psplit', fallback=0.8)
-            hidden_layers_neurons = [int(x) for x in self.config.get('neuralike', 'hidden_layers_neurons',
-                                                                     fallback=[100, 100, 200]).split(',')]
+            hidden_layers_neurons = self.config.getint('neuralike', 'hidden_layers_neurons', fallback=100)
+                # [int(x) for x in self.config.get('neuralike', 'hidden_layers_neurons',
+                #                                                      fallback=[100, 100, 200]).split(',')]
             plot = self.config.getboolean('neuralike', 'plot', fallback=True)
             patience = self.config.getfloat('neuralike', 'patience', fallback=10)
             nrand = self.config.getint('neuralike', 'nrand', fallback=5)
@@ -935,7 +936,8 @@ class DriverMC:
             learning_rate = kwargs.pop('learning_rate', 5e-4)
             batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
-            hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
+            # hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
+            hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', 100)
             plot = kwargs.pop('plot', True)
             patience = kwargs.pop('patience', 10)
             nrand = kwargs.pop('nrand', 5)
