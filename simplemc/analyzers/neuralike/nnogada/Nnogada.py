@@ -302,8 +302,6 @@ class Nnogada:
 
         # Begin the generational process
         for gen in range(1, ngen + 1):
-            if pbar:
-                pbar.update(1)
 
             # Select the next generation individuals
             offspring = toolbox.select(population, len(population) - hof_size)
@@ -330,6 +328,8 @@ class Nnogada:
             logbook.record(gen=gen, nevals=len(invalid_ind), **record)
             if self.verbose:
                 print(logbook.stream)
+            if pbar:
+                pbar.update(1)
 
         return population, logbook
 

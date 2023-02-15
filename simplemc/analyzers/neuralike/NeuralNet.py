@@ -66,7 +66,7 @@ class NeuralNet:
                 t = time()
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'num_units': [100, 200], 'batch_size': [16, 64], 'learning_rate': [0.001, 0.0005]}
+                hyperparams = {'num_units': [5, 2], 'batch_size': [164, 256], 'learning_rate': [0.1, 0.01]}
 
                 # generate a Nnogada instance
                 net_fit = Nnogada(hyp_to_find=hyperparams, X_train=self.X_train, Y_train=self.Y_train, X_val=self.X_val, Y_val=self.Y_val,
@@ -77,21 +77,20 @@ class NeuralNet:
                 # Find best solutions
                 net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
                 # best solution
-                self.hidden_layers_neurons = net_fit.best['num_units']
-                self.batch_size = net_fit.best['batch_size']
-                self.learning_rate = net_fit.best['learning_rate']
+                self.hidden_layers_neurons = np.int(net_fit.best['num_units'])
+                self.batch_size = np.int(net_fit.best['batch_size'])
+                self.learning_rate = np.float(net_fit.best['learning_rate'])
                 # print("best individual", net_fit.best)
-                print("Best number of nodes:", net_fit.best['num_units'])
-                print("Best number of learning rate:", net_fit.best['learning_rate'])
-                print("Best number of batch_size:", net_fit.best['batch_size'])
+                print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
+                print("Best number of learning rate:", net_fit.best['learning_rate'],type(self.learning_rate))
+                print("Best number of batch_size:", net_fit.best['batch_size'], type(self.batch_size))
                 print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
-            self.model = MLP(self.dims, self.n_output, hidden_layers_neurons=self.hidden_layers_neurons)
+            self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons)
+            self.model.apply(self.model.init_weights)
             self.model.float()
         print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X.shape, Y.shape))
         print("Neuralike: Shape of X_val dataset: {} | Shape of Y_test dataset: {}".format(self.X_val.shape, self.Y_val.shape))
-
-
     def train(self):
         dataset_train = LoadDataSet(self.X_train, self.Y_train)
         dataset_val = LoadDataSet(self.X_val, self.Y_val)
@@ -231,38 +230,67 @@ class LoadDataSet:
         return self.X[i], self.y[i]
 
 
+# class MLP(nn.Module):
+#     def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5):
+#         """
+#             Multilayer Perceptron for regression. 3 hidden layers
+#         """
+#         super().__init__()
+#         self.model = nn.Sequential(
+#             nn.Linear(ncols, hidden_layers_neurons),
+#             # nn.SELU(),
+#             nn.ReLU(),
+#             # nn.Dropout(dropout),
+#             nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
+#             # nn.SELU(),
+#             nn.ReLU(),
+#             # nn.Dropout(dropout),
+#             nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
+#             # nn.SELU(),
+#             nn.ReLU(),
+#             nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
+#             # nn.SELU(),
+#             nn.ReLU(),
+#             # nn.Dropout(dropout),
+#             nn.Linear(hidden_layers_neurons, noutput)
+#         )
+#         # use the modules apply function to recursively apply the initialization
+#         self.model.apply(self.init_weights)
 class MLP(nn.Module):
-    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5):
+    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5, nlayers=3):
         """
-            Multilayer Perceptron for regression. 3 hidden layers
+            Multilayer Perceptron for regression.
         """
         super().__init__()
-        self.model = nn.Sequential(
-            nn.Linear(ncols, hidden_layers_neurons),
-            # nn.SELU(),
-            nn.ReLU(),
-            # nn.Dropout(dropout),
-            nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
-            # nn.SELU(),
-            nn.ReLU(),
-            # nn.Dropout(dropout),
-            nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
-            # nn.SELU(),
-            nn.ReLU(),
-            nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
-            # nn.SELU(),
-            nn.ReLU(),
-            # nn.Dropout(dropout),
-            nn.Linear(hidden_layers_neurons, noutput)
-        )
-        # use the modules apply function to recursively apply the initialization
-        self.model.apply(self.init_weights)
+        ncols = np.int(ncols)
+        hidden_layers_neurons = np.int(hidden_layers_neurons)
+        noutput = np.int(noutput)
+
+        l_input = nn.Linear(ncols, hidden_layers_neurons)
+        a_input = nn.ReLU()
+
+        l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
+        a_hidden = nn.ReLU()
+
+        l_output = nn.Linear(hidden_layers_neurons, noutput)
+
+        l = [l_input, a_input]
+        for _ in range(nlayers):
+            l.append(l_hidden)
+            l.append(a_hidden)
+        l.append(l_output)
+        self.module_list = nn.ModuleList(l)
 
     def forward(self, x):
-        '''
-          Forward pass
-        '''
-        return self.model(x)
+        for f in self.module_list:
+            x = f(x)
+        return x
+
+    # def forward(self, x):
+    #     '''
+    #       Forward pass
+    #     '''
+    #     return self.model(x)
 
     def init_weights(self, m):
         if type(m) == nn.Linear:
