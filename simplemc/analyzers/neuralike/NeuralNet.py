@@ -52,11 +52,13 @@ class NeuralNet:
             Y = Y[shuffle]
             self.X_train, self.X_val = np.split(X, indx)
             self.Y_train, self.Y_val = np.split(Y, indx)
-
             ntrain_valtest = int(0.5 * len(self.Y_val))
             indx_valtest = [ntrain_valtest]
             self.X_val, self.X_test = np.split(self.X_val, indx_valtest)
             self.Y_val, self.Y_test = np.split(self.Y_val, indx_valtest)
+            print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(self.X_train.shape, self.Y_train.shape))
+            print("Neuralike: Shape of X_val dataset: {} | Shape of Y_val dataset: {}".format(self.X_val.shape,
+                                                                                               self.Y_val.shape))
             if hyp_tunning == 'auto':
                 population_size = 5  # max of individuals per generation
                 max_generations = 4  # number of generations
@@ -66,7 +68,7 @@ class NeuralNet:
                 t = time()
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'num_units': [5, 2], 'batch_size': [164, 256], 'learning_rate': [0.1, 0.01]}
+                hyperparams = {'num_units': [100, 200], 'batch_size': [16, 64], 'learning_rate': [0.001, 0.0001]}
 
                 # generate a Nnogada instance
                 net_fit = Nnogada(hyp_to_find=hyperparams, X_train=self.X_train, Y_train=self.Y_train, X_val=self.X_val, Y_val=self.Y_val,
@@ -89,8 +91,6 @@ class NeuralNet:
             self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons)
             self.model.apply(self.model.init_weights)
             self.model.float()
-        print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X.shape, Y.shape))
-        print("Neuralike: Shape of X_val dataset: {} | Shape of Y_test dataset: {}".format(self.X_val.shape, self.Y_val.shape))
     def train(self):
         dataset_train = LoadDataSet(self.X_train, self.Y_train)
         dataset_val = LoadDataSet(self.X_val, self.Y_val)

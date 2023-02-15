@@ -92,7 +92,7 @@ class NeuralManager:
                                       n_output=1, hidden_layers_neurons=self.hidden_layers_neurons,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
-                                      patience=self.patience,
+                                      patience=self.patience, psplit=self.psplit,
                                       minsample=np.min(np.abs(self.samples)))
 
         self.neural_model.train()
