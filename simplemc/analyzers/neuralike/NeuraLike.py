@@ -88,9 +88,9 @@ class NeuraLike:
         if nc > 1000:
             self.trained_net = False
             print("\nExcesive number of calls, neuralike disabled")
-        elif self.n_neuralikes % (self.updInt // 2) == 0:
-            samples_test = samples[-self.updInt:, :]
-            neuralikes_test = likes[-self.updInt:]
+        elif self.n_neuralikes % (self.updInt // 10) == 0:
+            samples_test = samples[-self.updInt//10:, :]
+            neuralikes_test = likes[-self.updInt//10:]
 
             # real_logl = np.array(list(map_fn(self.loglikelihood_control,
             #                                  samples_test)))
