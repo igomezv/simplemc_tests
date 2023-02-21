@@ -3,7 +3,6 @@ Author: Isidro Gómez-Vargas (igomez@icf.unam.mx)
 Date: Jun 2022
 """
 from .NeuralNet import NeuralNet
-from .RandomSampling import RandomSampling
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 import os
@@ -64,16 +63,8 @@ class NeuralManager:
         #     self.neural_model = self.load()
 
     def training(self, map_fn=map):
-        ml_idx = np.argmax(self.likes)
-        means = self.samples[ml_idx, :]
-        print("\nGenerating training set...")
-        rsampling = RandomSampling(self.loglikelihood_fn, samples=self.samples, means=means, mins=np.max(self.samples, axis=0),
-                                   maxs=np.max(self.samples, axis=0),
-                                   nrand=self.nrand)
-        rsamples, rlikes = rsampling.make_dataset(map_fn=map_fn)
-        print("Training dataset created!")
-        likes = np.append(rlikes, self.likes)
-        samples = np.append(rsamples, self.samples, axis=0)
+        likes = self.likes
+        samples = self.samples
 
         ## scale params
         # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
