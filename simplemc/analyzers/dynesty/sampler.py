@@ -837,7 +837,7 @@ class Sampler(object):
                     loglikes_to_neuralike = np.array(self.live_logl)
 
                 neuralike.run(delta_logz, it, nc, samples=samples_to_neuralike,
-                              likes=loglikes_to_neuralike, map_fn=self.M)
+                              likes=loglikes_to_neuralike)
                 self.loglikelihood = neuralike.likelihood
 
 
