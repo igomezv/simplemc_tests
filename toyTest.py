@@ -15,18 +15,17 @@ np.random.seed(0)
 show_plots = True  # choose False if you are in a server
 dims = 2
 nlive = 100
-
-modelname = 'eggbox'
+# modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
+modelname = 'gaussian'
 # ###### FIRST SAMPLING WITH ONLY DYNESTY
 # sampler1 = DriverMC(analyzername='nested', model='LCDM', datasets='HD')
-# modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
 sampler1 = DriverMC(analyzername='nested', model=modelname)
 
 ti = time.time()
-res1 = sampler1.executer(useNeuralike=True, useGenetic=True, nrand=10,
+res1 = sampler1.executer(useNeuralike=False, useGenetic=False, nlivepoints=1000,
                          valid_loss=0.001, nstart_samples=200000, nstart_stop_criterion=100,
                          updInt=1000, ncalls_excess=1000, learning_rate = 0.0001,
-                         epochs=500, batch_size=64, patience=20)
+                         epochs=50, batch_size=64, patience=20)
 
 samplesnested = res1['result']['samples']
 loglikes = res1['result']['loglikes']
