@@ -21,9 +21,10 @@ class NeuralManager:
         epochs
         plot
     """
-    def __init__(self, loglikelihood, samples, likes, rootname='neural',
+    def __init__(self, loglikelihood, samples, likes, n_train,
+                 rootname='neural',
                  neuralike_settings=None):
-        # samples usample
+        self.n_train = n_train
         self.loglikelihood_fn = loglikelihood
         self.valid = False
         self.fig_path = '{}.png'.format(rootname)
@@ -55,6 +56,31 @@ class NeuralManager:
         # self.topology = [self.dims] + self.hidden_layers_neurons + [1]
         self.mse_criterion = self.valid_loss
 
+        likes = self.likes
+        samples = self.samples
+
+        ## scale params
+        # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
+        # self.samples_scaler = StandardScaler(with_mean=False)
+        # self.samples_scaler.fit(samples)
+        # sc_samples = self.samples_scaler.transform(samples)
+        # # print(sc_samples)
+        # # # create scaler
+        # self.likes_scaler = StandardScaler(with_mean=False)
+        # # self.likes_scaler = MinMaxScaler(feature_range=(0.1, 1))
+        # self.likes_scaler.fit(likes.reshape(-1, 1))
+        # # # # apply transforms
+        # sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
+        # if self.n_train == 0:
+        sc_samples, sc_likes = self.datascaler(samples, likes)
+        self.neural_model = NeuralNet(n_train=self.n_train, X=sc_samples, Y=sc_likes, n_input=self.dims,
+                                      n_output=1, hidden_layers_neurons=self.hidden_layers_neurons,
+                                      epochs=self.epochs, batch_size=self.batch_size,
+                                      learrning_rate=self.learning_rate,
+                                      patience=self.patience, psplit=self.psplit,
+                                      minsample=np.min(np.abs(self.samples)))
+
+
 
         # self.model_path = '{}.h5'.format(rootname)
         # if not self.modelChecker():
@@ -62,12 +88,30 @@ class NeuralManager:
         # else:
         #     self.neural_model = self.load()
 
-    def training(self, map_fn=map):
-        likes = self.likes
-        samples = self.samples
+    def training(self, samples, likes):
+        sc_samples, sc_likes = self.datascaler(samples, likes)
+        self.neural_model.train(X=sc_samples, Y=sc_likes)
+        # neural_model.save_model('{}'.format(self.model_path))
+        if self.plot:
+            self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
+        lastval = self.neural_model.loss_val[-1]
+        lasttrain = self.neural_model.loss_train[-1]
+        ## preparing for testing
+        # test_mse = self.neural_model.test_mse()
+        # print("Test MSE: {:.4f} | Criterion: {:.4f}".format(test_mse, self.mse_criterion))
+        if lastval < self.mse_criterion:
+            self.valid = True
+            print("\nTrain loss: {:.4f} | "
+                      "Val loss: {:.4f}\n".format(lasttrain, lastval))
+        else:
+            self.valid = False
+            print("\nNOT valid neural net | Train loss:{:.4f} | Val loss: {:.4f}\n".format(lasttrain, lastval))
 
-        ## scale params
-        # self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
+    def load(self):
+        neural_model = NeuralNet(load=True, model_path=self.model_path)
+        return neural_model
+
+    def datascaler(self, samples, likes):
         self.samples_scaler = StandardScaler(with_mean=False)
         self.samples_scaler.fit(samples)
         sc_samples = self.samples_scaler.transform(samples)
@@ -78,34 +122,8 @@ class NeuralManager:
         self.likes_scaler.fit(likes.reshape(-1, 1))
         # # # apply transforms
         sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
+        return sc_samples, sc_likes
 
-        self.neural_model = NeuralNet(X=sc_samples, Y=sc_likes, n_input=self.dims,
-                                      n_output=1, hidden_layers_neurons=self.hidden_layers_neurons,
-                                      epochs=self.epochs, batch_size=self.batch_size,
-                                      learrning_rate=self.learning_rate,
-                                      patience=self.patience, psplit=self.psplit,
-                                      minsample=np.min(np.abs(self.samples)))
-
-        self.neural_model.train()
-        # neural_model.save_model('{}'.format(self.model_path))
-        if self.plot:
-            self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
-        lastval = self.neural_model.loss_val[-1]
-        lasttrain = self.neural_model.loss_train[-1]
-        ## preparing for testing
-        test_mse = self.neural_model.test_mse()
-        print("Test MSE: {:.4f} | Criterion: {:.4f}".format(test_mse, self.mse_criterion))
-        if test_mse < self.mse_criterion:
-            self.valid = True
-            print("\nValid Neural net | Train loss: {:.4f} | "
-                  "Val loss: {:.4f}\n".format(lasttrain, lastval))
-        else:
-            self.valid = False
-            print("\nNOT valid neural net | Train loss:{:.4f} | Val loss: {:.4f}\n".format(lasttrain, lastval))
-
-    def load(self):
-        neural_model = NeuralNet(load=True, model_path=self.model_path)
-        return neural_model
 
     def modelChecker(self):
         """

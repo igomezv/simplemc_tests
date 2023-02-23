@@ -827,11 +827,13 @@ class Sampler(object):
                                           rootname=self.outputname,
                                           neuralike_settings=self.neuralike_settings)
                     neural_on = True
-                if ncall >= 2*self.nlive:
+                if it > 0:
                     samples_to_neuralike = np.array(self.saved_v)[-self.nlive:]
                     samples_to_neuralike = np.concatenate((samples_to_neuralike, np.array(self.live_v)), axis=0)
+                    # samples_to_neuralike = np.concatenate((np.array(self.saved_v), np.array(self.live_v)), axis=0)
                     loglikes_to_neuralike = np.array(self.saved_logl)[-self.nlive:]
                     loglikes_to_neuralike = np.concatenate((loglikes_to_neuralike, np.array(self.live_logl)))
+                    # loglikes_to_neuralike = np.concatenate((np.array(self.saved_logl), np.array(self.live_logl)))
                 else:
                     samples_to_neuralike = np.array(self.live_v)
                     loglikes_to_neuralike = np.array(self.live_logl)

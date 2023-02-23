@@ -5,6 +5,7 @@ Date: April 2022
 import sys
 
 import numpy as np
+np.random.seed(0)
 import matplotlib.pyplot as plt
 from time import time
 import math
@@ -14,11 +15,13 @@ from torch import nn
 from torchinfo import summary
 from torch_optimizer import AdaBound
 from .pytorchtools import EarlyStopping
+import torchbnn as bnn
 from .nnogada.Nnogada import Nnogada
+from .nnogada.Hyperparameter import Hyperparameter
 
 
 class NeuralNet:
-    def __init__(self, X, Y, n_input, n_output, hidden_layers_neurons=200,
+    def __init__(self, n_train, X, Y, n_input, n_output, hidden_layers_neurons=200,
                  load=False, model_path=None, hyp_tunning='manual', **kwargs):
         """
         Read the network params
@@ -31,6 +34,7 @@ class NeuralNet:
 
         """
         hyp_tunning = 'auto'
+        self.n_train = n_train
         self.load = load
         self.model_path = model_path
         self.hidden_layers_neurons = hidden_layers_neurons
@@ -45,55 +49,45 @@ class NeuralNet:
             self.model = self.load_model()
             self.model.summary()
         else:
-            ntrain = int(psplit * len(X))
-            indx = [ntrain]
-            shuffle = np.random.permutation(len(X))
-            X = X[shuffle]
-            Y = Y[shuffle]
-            self.X_train, self.X_val = np.split(X, indx)
-            self.Y_train, self.Y_val = np.split(Y, indx)
-            ntrain_valtest = int(0.5 * len(self.Y_val))
-            indx_valtest = [ntrain_valtest]
-            self.X_val, self.X_test = np.split(self.X_val, indx_valtest)
-            self.Y_val, self.Y_test = np.split(self.Y_val, indx_valtest)
-            print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(self.X_train.shape, self.Y_train.shape))
-            print("Neuralike: Shape of X_val dataset: {} | Shape of Y_val dataset: {}".format(self.X_val.shape,
-                                                                                               self.Y_val.shape))
-            if hyp_tunning == 'auto':
-                population_size = 5  # max of individuals per generation
-                max_generations = 4  # number of generations
+            X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
+            if hyp_tunning == 'auto' and n_train == 0:
+                population_size = 4  # max of individuals per generation
+                max_generations = 5  # number of generations
                 gene_length = 4  # lenght of the gene, depends on how many hiperparameters are tested
                 k = 1  # num. of finralist individuals
 
                 t = time()
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'num_units': [100, 200], 'batch_size': [16, 64], 'learning_rate': [0.001, 0.0001]}
+                hyperparams = {'num_units': [50, 100], 'deep': [3, 4], 'batch_size': [8, 16], 'learning_rate': [1e-3, 1e-4]}
 
                 # generate a Nnogada instance
-                net_fit = Nnogada(hyp_to_find=hyperparams, X_train=self.X_train, Y_train=self.Y_train, X_val=self.X_val, Y_val=self.Y_val,
-                                  neural_library='torch')
+                epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
+                net_fit = Nnogada(hyp_to_find=hyperparams, X_train=X_train, Y_train=Y_train, X_val=X_val, Y_val=Y_val,
+                                  neural_library='torch', epochs=epochs)
                 # Set the possible values of hyperparameters and not use the default values from hyperparameters.py
                 net_fit.set_hyperparameters()
 
                 # Find best solutions
                 net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
                 # best solution
-                self.hidden_layers_neurons = np.int(net_fit.best['num_units'])
+                # self.hidden_layers_neurons = np.int(net_fit.best['num_units'])
                 self.batch_size = np.int(net_fit.best['batch_size'])
                 self.learning_rate = np.float(net_fit.best['learning_rate'])
                 # print("best individual", net_fit.best)
-                print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
+                # print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
                 print("Best number of learning rate:", net_fit.best['learning_rate'],type(self.learning_rate))
                 print("Best number of batch_size:", net_fit.best['batch_size'], type(self.batch_size))
                 print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
+
             self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons)
             self.model.apply(self.model.init_weights)
             self.model.float()
-    def train(self):
-        dataset_train = LoadDataSet(self.X_train, self.Y_train)
-        dataset_val = LoadDataSet(self.X_val, self.Y_val)
+    def train(self, X, Y):
+        X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
+        dataset_train = LoadDataSet(X_train, Y_train)
+        dataset_val = LoadDataSet(X_val, Y_val)
 
         trainloader = torch.utils.data.DataLoader(dataset_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
         validloader = torch.utils.data.DataLoader(dataset_val, batch_size=self.batch_size, shuffle=True, num_workers=1)
@@ -189,13 +183,12 @@ class NeuralNet:
         plt.plot(self.history['val_loss'], label='validation set')
         if ylogscale:
             plt.yscale('log')
-        plt.title('MSE train: {:.4f} | MSE val: {:.4f} | '
-                  'MSE test: {:.4f}'.format(self.loss_train[-1],
-                                            self.loss_val[-1],
-                                            self.test_mse()))
+        plt.title('MSE train: {:.4f} | MSE val: {:.4f} | '.format(self.loss_train[-1],
+                                                            self.loss_val[-1]))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
         plt.xlim(0, self.epochs)
+        plt.ylim(0, 10)
         plt.legend(['train', 'val'], loc='upper left')
         if save and figname:
             plt.savefig(figname)
@@ -203,10 +196,23 @@ class NeuralNet:
             plt.show()
         return True
 
-    def test_mse(self):
-        y_pred = self.predict(self.X_test)
-        mse = ((self.Y_test - y_pred) ** 2).mean()
-        return mse
+    def load_data(self, X, Y, psplit=0.8):
+        ntrain = int(psplit * len(X))
+        indx = [ntrain]
+        shuffle = np.random.permutation(len(X))
+        X = X[shuffle]
+        Y = Y[shuffle]
+        X_train, X_val = np.split(X, indx)
+        Y_train, Y_val = np.split(Y, indx)
+        print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X_train.shape, Y_train.shape))
+        print("Neuralike: Shape of X_val dataset: {} | Shape of Y_val dataset: {}".format(X_val.shape,
+                                                                                          Y_val.shape))
+        return X_train, X_val, Y_train, Y_val
+
+    # def test_mse(self):
+    #     y_pred = self.predict(self.X_test)
+    #     mse = ((self.Y_test - y_pred) ** 2).mean()
+    #     return mse
 
     # def tunning(self):
 
@@ -268,17 +274,28 @@ class MLP(nn.Module):
 
         l_input = nn.Linear(ncols, hidden_layers_neurons)
         a_input = nn.ReLU()
+        bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=hidden_layers_neurons)
+        bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
+                                         out_features=hidden_layers_neurons)
+        bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
+                                         out_features=1)
+
 
         l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
         a_hidden = nn.ReLU()
+        drop_hidden = nn.Dropout(0.2)
 
         l_output = nn.Linear(hidden_layers_neurons, noutput)
 
-        l = [l_input, a_input]
+        l = [l_input, a_input, drop_hidden]
+        lbayes = [bayesian_input, a_input]
         for _ in range(nlayers):
             l.append(l_hidden)
             l.append(a_hidden)
+            l.append(drop_hidden)
+            lbayes.append(bayesian_hidden)
         l.append(l_output)
+        lbayes.append(bayesian_output)
         self.module_list = nn.ModuleList(l)
 
     def forward(self, x):
