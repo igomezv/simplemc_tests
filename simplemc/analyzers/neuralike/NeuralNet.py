@@ -19,6 +19,13 @@ import torchbnn as bnn
 from .nnogada.Nnogada import Nnogada
 from .nnogada.Hyperparameter import Hyperparameter
 
+# if torch.cuda.is_available():
+# 	dev = "cuda:0"
+# else:
+# 	dev = "cpu"
+#
+# device = torch.device(dev)
+
 
 class NeuralNet:
     def __init__(self, n_train, X, Y, n_input, n_output, hidden_layers_neurons=200,
@@ -71,17 +78,18 @@ class NeuralNet:
                 # Find best solutions
                 net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
                 # best solution
-                # self.hidden_layers_neurons = np.int(net_fit.best['num_units'])
-                self.batch_size = np.int(net_fit.best['batch_size'])
-                self.learning_rate = np.float(net_fit.best['learning_rate'])
+                self.hidden_layers_neurons = int(net_fit.best['num_units'])
+                self.batch_size = int(net_fit.best['batch_size'])
+                self.learning_rate = float(net_fit.best['learning_rate'])
+                self.deep = int(net_fit.best['deep'])
                 # print("best individual", net_fit.best)
                 # print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
-                print("Best number of learning rate:", net_fit.best['learning_rate'],type(self.learning_rate))
+                print("Best number of learning rate:", net_fit.best['learning_rate'], type(self.learning_rate))
                 print("Best number of batch_size:", net_fit.best['batch_size'], type(self.batch_size))
                 print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
 
-            self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons)
+            self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons, nlayers=self.deep)
             self.model.apply(self.model.init_weights)
             self.model.float()
     def train(self, X, Y):
@@ -268,9 +276,9 @@ class MLP(nn.Module):
             Multilayer Perceptron for regression.
         """
         super().__init__()
-        ncols = np.int(ncols)
-        hidden_layers_neurons = np.int(hidden_layers_neurons)
-        noutput = np.int(noutput)
+        ncols = int(ncols)
+        hidden_layers_neurons = int(hidden_layers_neurons)
+        noutput = int(noutput)
 
         l_input = nn.Linear(ncols, hidden_layers_neurons)
         a_input = nn.ReLU()
