@@ -16,6 +16,7 @@ class AllDerived:
         self.Ol = Derivedparam('Ol', 0, '\Omega_\Lambda*')
         self.H0 = Derivedparam('H0', 0, 'H_0*')
         self.Age = Derivedparam('Age', 0, 'Age[Gyr]*')
+        self.Omrad = Derivedparam('Omrad', 0, '\Omega_r')
 
         # Parameters for the Omh2 test, to look for deviations from
         # the LCDM at three redshifts.
@@ -25,7 +26,7 @@ class AllDerived:
 
         # Parameter from DGP models.
         self.Orc = Derivedparam('Orc', 0, '\Omega_{rc}*')
-        self.list = [self.Ol, self.H0, self.Age, self.Omh12, self.Omh13, self.Omh23, self.Orc]
+        self.list = [self.Ol, self.H0, self.Age, self.Omrad, self.Omh12, self.Omh13, self.Omh23, self.Orc]
 
 
     def listDerived(self, like):
@@ -49,6 +50,7 @@ class AllDerived:
         self.Ol.setValue(self.computeDerived('Ol'))
         self.H0.setValue(self.computeDerived('H0'))
         self.Age.setValue(self.computeDerived('Age'))
+        self.Omrad.setValue(self.computeDerived('Omrad'))
         self.Omh12.setValue(self.computeDerived('Omh12'))
         self.Omh13.setValue(self.computeDerived('Omh13'))
         self.Omh23.setValue(self.computeDerived('Omh23'))
@@ -71,6 +73,14 @@ class AllDerived:
             for par in self.cpars:
                 if par.name == 'h':
                     return par.value*100
+        elif parname == 'Omrad':
+            omrad_fac = 4.48130979e-7
+            Tcmb = 2.7255
+            omrad_pref_ = omrad_fac * Tcmb ** 4
+            for par in self.cpars:
+                if par.name == 'h':
+                    # self.Omrad = self.omrad_pref_ / (self.h ** 2)
+                    return omrad_pref_ / (par.value **2)
         elif parname == 'Omh12':
             return self.Omh2(0.0, 0.57)
         elif parname == 'Omh13':
