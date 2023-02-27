@@ -5,7 +5,7 @@ Date: April 2022
 import sys
 
 import numpy as np
-np.random.seed(0)
+# np.random.seed(0)
 import matplotlib.pyplot as plt
 from time import time
 import math
@@ -23,8 +23,8 @@ from .nnogada.Hyperparameter import Hyperparameter
 # 	dev = "cuda:0"
 # else:
 # 	dev = "cpu"
-#
-# device = torch.device(dev)
+
+device = torch.device("cpu")
 
 
 class NeuralNet:
@@ -66,7 +66,7 @@ class NeuralNet:
                 t = time()
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'num_units': [50, 100], 'deep': [3, 4], 'batch_size': [8, 16], 'learning_rate': [1e-3, 1e-4]}
+                hyperparams = {'num_units': [100, 200], 'deep': [3, 4], 'batch_size': [16, 32], 'learning_rate': [0.01, 0.001]}
 
                 # generate a Nnogada instance
                 epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
@@ -86,12 +86,13 @@ class NeuralNet:
                 # print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
                 print("Best number of learning rate:", net_fit.best['learning_rate'], type(self.learning_rate))
                 print("Best number of batch_size:", net_fit.best['batch_size'], type(self.batch_size))
-                print("Total elapsed time:", (time() - t) / 60, "minutes")
+                # print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
 
             self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons, nlayers=self.deep)
             self.model.apply(self.model.init_weights)
             self.model.float()
+            print("Total elapsed time:", (time() - t) / 60, "minutes")
     def train(self, X, Y):
         X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
         dataset_train = LoadDataSet(X_train, Y_train)
@@ -112,7 +113,7 @@ class NeuralNet:
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=5)
         # it needs pytorch utilities
         summary(self.model)
-        t0 = time()
+        # t0 = time()
         # Run the training loop
         history_train = np.empty((1,))
         history_val = np.empty((1,))
@@ -174,8 +175,8 @@ class NeuralNet:
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
-        tf = time() - t0
-        print('\nTraining process has finished in {:.3f} minutes.'.format(tf/60))
+        # tf = time() - t0
+        # print('\nTraining process has finished in {:.3f} minutes.'.format(tf/60))
         self.history = {'loss': history_train, 'val_loss': history_val}
         self.loss_val = history_val[-5:]
         self.loss_train = history_train[-5:]
@@ -282,29 +283,31 @@ class MLP(nn.Module):
 
         l_input = nn.Linear(ncols, hidden_layers_neurons)
         a_input = nn.ReLU()
-        bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=hidden_layers_neurons)
-        bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
-                                         out_features=hidden_layers_neurons)
-        bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
-                                         out_features=1)
+        # bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=hidden_layers_neurons)
+        # bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
+        #                                  out_features=hidden_layers_neurons)
+        # bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
+        #                                  out_features=1)
 
 
         l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
         a_hidden = nn.ReLU()
-        drop_hidden = nn.Dropout(0.2)
+        drop_hidden = nn.Dropout(0.5)
 
         l_output = nn.Linear(hidden_layers_neurons, noutput)
 
         l = [l_input, a_input, drop_hidden]
-        lbayes = [bayesian_input, a_input]
+        # lbayes = [bayesian_input, a_input]
         for _ in range(nlayers):
             l.append(l_hidden)
             l.append(a_hidden)
             l.append(drop_hidden)
-            lbayes.append(bayesian_hidden)
+            # lbayes.append(bayesian_hidden)
+            # lbayes.append(a_hidden)
         l.append(l_output)
-        lbayes.append(bayesian_output)
+        # lbayes.append(bayesian_output)
         self.module_list = nn.ModuleList(l)
+        # self.module_list = nn.ModuleList(lbayes)
 
     def forward(self, x):
         for f in self.module_list:
