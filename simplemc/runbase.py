@@ -178,7 +178,7 @@ def ParseModel(model, **kwargs):
     elif model == "NLEDCosmology":
         T = NLEDCosmology()
     elif model == "NLED2Cosmology":
-        T = NLEDCosmology()
+        T = NLED2Cosmology()
     elif model == 'simple':
         T = SimpleModel(custom_parameters, custom_function)
     elif model == 'simple_cosmo':
