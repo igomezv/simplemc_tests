@@ -2,12 +2,14 @@ from deap import base, creator, tools, algorithms
 from scipy.stats import bernoulli
 import sys
 from bitstring import BitArray
-import time
+import numpy as np
+# import time
 import tensorflow as tf
 # try:
 import torch
 from torch import nn
 from torchinfo import summary
+import torchbnn as bnn
 from torch_optimizer import AdaBound
 import torch.nn.functional as F
 
@@ -127,7 +129,7 @@ class Nnogada:
         ga_individual_solution:
             Individual of the genetic algorithm.
         """
-        t = time.time()
+        # t = time.time()
         # Decode GA solution to integer for window_size and num_units
         hyp_vary_list = []
         self.df_colnames = []
@@ -170,20 +172,21 @@ class Nnogada:
                       callbacks=None, batch_size=self.batch_size.val, shuffle=1, verbose=int(self.verbose))
 
             loss, score = model.evaluate(self.X_val, self.Y_val, verbose=int(self.verbose))
-            t = time.time() - t
+            # t = time.time() - t
             if self.verbose:
-                print("Loss: {:.5f} Loss: {:.5f} Elapsed time: {:.2f}".format(score, loss, t))
+                # print("Loss: {:.5f} Loss: {:.5f} Elapsed time: {:.2f}".format(score, loss, t))
+                print("Loss: {:.5f} Loss: {:.5f} ".format(score, loss))
                 print("-------------------------------------------------\n")
 
             # results = [hyp for hyp in hyp_vary_list].extend([loss, score, t])
             # print(results)
-            self.history.append(hyp_vary_list+[loss, score, t])
+            # self.history.append(hyp_vary_list+[loss, score, t])
+            self.history.append(hyp_vary_list+[loss, score])
             return loss,
         elif self.neural_library == 'torch':
             batch_size = int(self.batch_size.val)
             # Initialize the MLP
-            self.model = MLP(int(self.X_train.shape[1]), int(self.Y_train.shape[1]), numneurons=self.num_units.val)
-                             # numlayers=self.deep.val)
+            self.model = MLP(int(self.X_train.shape[1]), int(self.Y_train.shape[1]), numneurons=self.num_units.val, numlayers=self.deep.val)
             self.model.apply(self.model.init_weights)
             self.model.float()
             dataset_train = LoadDataSet(self.X_train, self.Y_train)
@@ -256,15 +259,16 @@ class Nnogada:
                     print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                           '{:.5f}'.format(epoch + 1, self.epochs.val, loss.item(), valid_loss.item()), end='\r')
 
-            t = time.time() - t
-            if self.verbose:
-                print('\nTraining process has finished in {:.2f} minutes.'.format(t / 60))
-                print("-------------------------------------------------\n")
+            # t = time.time() - t
+            # if self.verbose:
+            #     # print('\nTraining process has finished in {:.2f} minutes.'.format(t / 60))
+            #     print("-------------------------------------------------\n")
             # history = {'loss': history_train, 'val_loss': history_val}
             self.loss_val = history_val[-5:]
             self.loss_train = history_train[-5:]
             # print("current loss: {} valid_loss: {} loss_val: {}".format(loss, valid_loss, self.loss_val[-1]))
-            self.history.append(hyp_vary_list + [float(loss), float(valid_loss), t])
+            # self.history.append(hyp_vary_list + [float(loss), float(valid_loss), t])
+            self.history.append(hyp_vary_list + [float(loss), float(valid_loss)])
             return self.loss_val[-1],
 
     def eaSimpleWithElitism(self, population, toolbox, cxpb, mutpb, ngen, stats=None,
@@ -418,7 +422,8 @@ class Nnogada:
         # minFitnessValues, meanFitnessValues, maxFitnessValues = logbook.select("min", "max", "avg")
         best_population = tools.selBest(population, k=k)
         # convert the history list in a data frame
-        self.df_colnames = self.df_colnames + ['loss', 'score', 'time']
+        # self.df_colnames = self.df_colnames + ['loss', 'score', 'time']
+        self.df_colnames = self.df_colnames + ['loss', 'score']
         self.history = pd.DataFrame(self.history, columns=self.df_colnames)
         self.history = self.history.sort_values(by='loss', ascending=True, ignore_index=True)
         print("\nBest 5 solutions:\n-----------------\n")
@@ -470,6 +475,43 @@ class MLP(nn.Module):
         for f in self.module_list:
             x = f(x)
         return x
+    def init_weights(self, m):
+        if type(m) == nn.Linear:
+            nn.init.xavier_normal_(m.weight)
+
+
+class BMLP(nn.Module):
+    def __init__(self, ncols, noutput, numneurons=200, dropout=0.5, numlayers=3):
+        """
+            Multilayer Perceptron for regression.
+        """
+        super().__init__()
+        ncols = int(ncols)
+        numneurons = int(numneurons)
+        noutput = int(noutput)
+
+        # l_input = nn.Linear(ncols, hidden_layers_neurons)
+        a_input = nn.ReLU()
+        bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=numneurons)
+        bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=numneurons,
+                                         out_features=numneurons)
+        bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=numneurons,
+                                         out_features=noutput)
+
+
+        a_hidden = nn.ReLU()
+        lbayes = [bayesian_input, a_input]
+        for _ in range(numlayers):
+            lbayes.append(bayesian_hidden)
+            lbayes.append(a_hidden)
+        lbayes.append(bayesian_output)
+        self.module_list = nn.ModuleList(lbayes)
+
+    def forward(self, x):
+        for f in self.module_list:
+            x = f(x)
+        return x
+
     def init_weights(self, m):
         if type(m) == nn.Linear:
             nn.init.xavier_normal_(m.weight)
