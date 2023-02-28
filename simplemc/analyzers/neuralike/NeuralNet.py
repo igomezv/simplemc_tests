@@ -59,14 +59,14 @@ class NeuralNet:
             X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
             if hyp_tunning == 'auto' and n_train == 0:
                 population_size = 4  # max of individuals per generation
-                max_generations = 5  # number of generations
+                max_generations = 4  # number of generations
                 gene_length = 4  # lenght of the gene, depends on how many hiperparameters are tested
                 k = 1  # num. of finralist individuals
 
                 t = time()
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'num_units': [100, 200], 'deep': [3, 4], 'batch_size': [16, 32], 'learning_rate': [0.01, 0.001]}
+                hyperparams = {'deep': [3, 4], 'batch_size': [16, 32], 'learning_rate': [0.01, 0.001]}
 
                 # generate a Nnogada instance
                 epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
@@ -78,7 +78,7 @@ class NeuralNet:
                 # Find best solutions
                 net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
                 # best solution
-                self.hidden_layers_neurons = int(net_fit.best['num_units'])
+                # self.hidden_layers_neurons = int(net_fit.best['num_units'])
                 self.batch_size = int(net_fit.best['batch_size'])
                 self.learning_rate = float(net_fit.best['learning_rate'])
                 self.deep = int(net_fit.best['deep'])
@@ -93,6 +93,7 @@ class NeuralNet:
             self.model.apply(self.model.init_weights)
             self.model.float()
             print("Total elapsed time:", (time() - t) / 60, "minutes")
+   
     def train(self, X, Y):
         X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
         dataset_train = LoadDataSet(X_train, Y_train)
