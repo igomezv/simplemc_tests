@@ -29,7 +29,7 @@ device = torch.device("cpu")
 
 class NeuralNet:
     def __init__(self, n_train, X, Y, n_input, n_output, hidden_layers_neurons=200,
-                 load=False, model_path=None, hyp_tunning='manual', **kwargs):
+                 load=False, model_path=None, dropout=0.2, hyp_tunning='manual', **kwargs):
         """
         Read the network params
         Parameters
@@ -47,49 +47,52 @@ class NeuralNet:
         self.hidden_layers_neurons = hidden_layers_neurons
         self.dims = n_input
         self.n_output = n_output
+        self.dropout = dropout
         self.epochs = kwargs.pop('epochs', 50)
         self.learning_rate = kwargs.pop('learning_rate', 5e-4)
         self.batch_size = kwargs.pop('batch_size', 32)
         self.patience = kwargs.pop('patience', 5)
+        self.deep = kwargs.pop('deep', 3)
         psplit = kwargs.pop('psplit', 0.7)
+        # self.bayesian = True
+        t = time()
         if load:
             self.model = self.load_model()
             self.model.summary()
         else:
             X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
             if hyp_tunning == 'auto' and n_train == 0:
-                population_size = 4  # max of individuals per generation
+                population_size = 3  # max of individuals per generation
                 max_generations = 4  # number of generations
                 gene_length = 4  # lenght of the gene, depends on how many hiperparameters are tested
                 k = 1  # num. of finralist individuals
 
-                t = time()
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'deep': [3, 4], 'batch_size': [16, 32], 'learning_rate': [0.01, 0.001]}
+                hyperparams = {'deep': [1, 2, 3, 4], 'learning_rate': [0.005, 0.001], 'num_units': [50, 100, 150, 200]}
 
                 # generate a Nnogada instance
                 epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
                 net_fit = Nnogada(hyp_to_find=hyperparams, X_train=X_train, Y_train=Y_train, X_val=X_val, Y_val=Y_val,
-                                  neural_library='torch', epochs=epochs)
+                                  neural_library='torch', epochs=epochs, dropout=self.dropout)
                 # Set the possible values of hyperparameters and not use the default values from hyperparameters.py
                 net_fit.set_hyperparameters()
 
                 # Find best solutions
                 net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
                 # best solution
-                # self.hidden_layers_neurons = int(net_fit.best['num_units'])
-                self.batch_size = int(net_fit.best['batch_size'])
+                self.hidden_layers_neurons = int(net_fit.best['num_units'])
+                # self.batch_size = int(net_fit.best['batch_size'])
                 self.learning_rate = float(net_fit.best['learning_rate'])
                 self.deep = int(net_fit.best['deep'])
                 # print("best individual", net_fit.best)
-                # print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
+                print("Best number of nodes:", net_fit.best['num_units'], type(self.hidden_layers_neurons))
                 print("Best number of learning rate:", net_fit.best['learning_rate'], type(self.learning_rate))
-                print("Best number of batch_size:", net_fit.best['batch_size'], type(self.batch_size))
+                print("Best number of deep:", net_fit.best['deep'], type(self.batch_size))
                 # print("Total elapsed time:", (time() - t) / 60, "minutes")
             # Initialize the MLP
 
-            self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons, nlayers=self.deep)
+            self.model = MLP(ncols=self.dims, noutput=self.n_output, hidden_layers_neurons=self.hidden_layers_neurons, nlayers=self.deep, dropout=self.dropout)
             self.model.apply(self.model.init_weights)
             self.model.float()
             print("Total elapsed time:", (time() - t) / 60, "minutes")
@@ -105,6 +108,9 @@ class NeuralNet:
         # Define the loss function and optimizer
         # loss_function = nn.L1Loss()
         loss_function = nn.MSELoss()
+        # if self.bayesian:
+        #     kl_loss = bnn.BKLLoss(reduction='mean', last_layer_only=False)
+        #     kl_weight = 0.01
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         # optimizer = torch.optim.Adadelta(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-5)
         # optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
@@ -137,7 +143,6 @@ class NeuralNet:
 
                 # Compute loss
                 loss = loss_function(outputs, targets)
-                # Perform backward pass
                 loss.backward()
 
                 # Perform optimization
@@ -284,43 +289,25 @@ class MLP(nn.Module):
 
         l_input = nn.Linear(ncols, hidden_layers_neurons)
         a_input = nn.ReLU()
-        # bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=hidden_layers_neurons)
-        # bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
-        #                                  out_features=hidden_layers_neurons)
-        # bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=hidden_layers_neurons,
-        #                                  out_features=1)
-
 
         l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
         a_hidden = nn.ReLU()
-        drop_hidden = nn.Dropout(0.5)
+        drop_hidden = nn.Dropout(dropout)
 
         l_output = nn.Linear(hidden_layers_neurons, noutput)
 
         l = [l_input, a_input, drop_hidden]
-        # lbayes = [bayesian_input, a_input]
         for _ in range(nlayers):
             l.append(l_hidden)
             l.append(a_hidden)
             l.append(drop_hidden)
-            # lbayes.append(bayesian_hidden)
-            # lbayes.append(a_hidden)
         l.append(l_output)
-        # lbayes.append(bayesian_output)
         self.module_list = nn.ModuleList(l)
-        # self.module_list = nn.ModuleList(lbayes)
 
     def forward(self, x):
         for f in self.module_list:
             x = f(x)
         return x
-
-    # def forward(self, x):
-    #     '''
-    #       Forward pass
-    #     '''
-    #     return self.model(x)
-
     def init_weights(self, m):
         if type(m) == nn.Linear:
             nn.init.xavier_normal_(m.weight)

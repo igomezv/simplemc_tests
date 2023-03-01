@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 class Nnogada:
     def __init__(self, hyp_to_find, X_train, Y_train, X_val, Y_val,
-                 regression=True, verbose=True,
+                 regression=True, verbose=True, dropout=0.5,
                  **kwargs):
         """
         Initialization of Nnogada class.
@@ -85,6 +85,7 @@ class Nnogada:
         self.act_fn = kwargs.pop('act_fn', act_fn)
         self.last_act_fn = kwargs.pop('last_act_fn', last_act_fn)
         self.loss_fn = kwargs.pop('loss_fn', loss_fn)
+        self.dropout = kwargs.pop('dropout', dropout)
 
         self.all_hyp_list = [self.deep, self.num_units, self.batch_size, self.learning_rate,
                              self.epochs, self.act_fn, self.last_act_fn, self.loss_fn]
@@ -186,7 +187,7 @@ class Nnogada:
         elif self.neural_library == 'torch':
             batch_size = int(self.batch_size.val)
             # Initialize the MLP
-            self.model = MLP(int(self.X_train.shape[1]), int(self.Y_train.shape[1]), numneurons=self.num_units.val, numlayers=self.deep.val)
+            self.model = MLP(int(self.X_train.shape[1]), int(self.Y_train.shape[1]), numneurons=self.num_units.val, numlayers=self.deep.val, dropout=self.dropout)
             self.model.apply(self.model.init_weights)
             self.model.float()
             dataset_train = LoadDataSet(self.X_train, self.Y_train)
@@ -256,7 +257,7 @@ class Nnogada:
 
                 history_val = np.append(history_val, valid_loss.item())
                 if self.verbose:
-                    print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
+                    print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss :'
                           '{:.5f}'.format(epoch + 1, self.epochs.val, loss.item(), valid_loss.item()), end='\r')
 
             # t = time.time() - t
@@ -431,8 +432,6 @@ class Nnogada:
         self.best = self.history.iloc[0]
 
         return best_population
-
-
 # for torch nets
 class LoadDataSet:
     def __init__(self, X, y, scale_data=False):
@@ -462,13 +461,15 @@ class MLP(nn.Module):
 
         l_hidden = nn.Linear(numneurons, numneurons)
         a_hidden = nn.ReLU()
+        drop_hidden = nn.Dropout(dropout)
 
         l_output = nn.Linear(numneurons, noutput)
 
-        l = [l_input, a_input]
+        l = [l_input, a_input, drop_hidden]
         for _ in range(numlayers):
             l.append(l_hidden)
             l.append(a_hidden)
+            l.append(drop_hidden)
         l.append(l_output)
         self.module_list = nn.ModuleList(l)
     def forward(self, x):
@@ -479,39 +480,39 @@ class MLP(nn.Module):
         if type(m) == nn.Linear:
             nn.init.xavier_normal_(m.weight)
 
-
-class BMLP(nn.Module):
-    def __init__(self, ncols, noutput, numneurons=200, dropout=0.5, numlayers=3):
-        """
-            Multilayer Perceptron for regression.
-        """
-        super().__init__()
-        ncols = int(ncols)
-        numneurons = int(numneurons)
-        noutput = int(noutput)
-
-        # l_input = nn.Linear(ncols, hidden_layers_neurons)
-        a_input = nn.ReLU()
-        bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=numneurons)
-        bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=numneurons,
-                                         out_features=numneurons)
-        bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=numneurons,
-                                         out_features=noutput)
-
-
-        a_hidden = nn.ReLU()
-        lbayes = [bayesian_input, a_input]
-        for _ in range(numlayers):
-            lbayes.append(bayesian_hidden)
-            lbayes.append(a_hidden)
-        lbayes.append(bayesian_output)
-        self.module_list = nn.ModuleList(lbayes)
-
-    def forward(self, x):
-        for f in self.module_list:
-            x = f(x)
-        return x
-
-    def init_weights(self, m):
-        if type(m) == nn.Linear:
-            nn.init.xavier_normal_(m.weight)
+#
+# class BMLP(nn.Module):
+#     def __init__(self, ncols, noutput, numneurons=200, dropout=0.5, numlayers=3):
+#         """
+#             Multilayer Perceptron for regression.
+#         """
+#         super().__init__()
+#         ncols = int(ncols)
+#         numneurons = int(numneurons)
+#         noutput = int(noutput)
+#
+#         # l_input = nn.Linear(ncols, hidden_layers_neurons)
+#         a_input = nn.ReLU()
+#         bayesian_input = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=ncols, out_features=numneurons)
+#         bayesian_hidden = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=numneurons,
+#                                          out_features=numneurons)
+#         bayesian_output = bnn.BayesLinear(prior_mu=0, prior_sigma=0.1, in_features=numneurons,
+#                                          out_features=noutput)
+#
+#
+#         a_hidden = nn.ReLU()
+#         lbayes = [bayesian_input, a_input]
+#         for _ in range(numlayers):
+#             lbayes.append(bayesian_hidden)
+#             lbayes.append(a_hidden)
+#         lbayes.append(bayesian_output)
+#         self.module_list = nn.ModuleList(lbayes)
+#
+#     def forward(self, x):
+#         for f in self.module_list:
+#             x = f(x)
+#         return x
+#
+#     def init_weights(self, m):
+#         if type(m) == nn.Linear:
+#             nn.init.xavier_normal_(m.weight)
