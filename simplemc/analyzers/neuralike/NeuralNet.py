@@ -202,7 +202,7 @@ class NeuralNet:
                                                             self.loss_val[-1]))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
-        plt.ylim(0, 1)
+        plt.ylim(0, 10)
         plt.xlim(0, self.epochs)
         plt.legend(['train', 'val'], loc='upper left')
         if save and figname:
@@ -292,15 +292,16 @@ class MLP(nn.Module):
 
         l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
         a_hidden = nn.ReLU()
-        drop_hidden = nn.Dropout(dropout)
+        # drop_hidden = nn.Dropout(dropout)
 
         l_output = nn.Linear(hidden_layers_neurons, noutput)
 
-        l = [l_input, a_input, drop_hidden]
+        # l = [l_input, a_input, drop_hidden]
+        l = [l_input, a_input]
         for _ in range(nlayers):
             l.append(l_hidden)
             l.append(a_hidden)
-            l.append(drop_hidden)
+            # l.append(drop_hidden)
         l.append(l_output)
         self.module_list = nn.ModuleList(l)
 
