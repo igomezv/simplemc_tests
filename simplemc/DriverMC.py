@@ -920,6 +920,7 @@ class DriverMC:
             learning_rate = self.config.getfloat('neuralike', 'learning_rate', fallback=5e-4)
             batch_size = self.config.getint('neuralike', 'batch_size', fallback=32)
             psplit = self.config.getfloat('neuralike', 'psplit', fallback=0.8)
+            n_layers = self.config.getint('neuralike', 'n_layers', fallback=4)
             hidden_layers_neurons = self.config.getint('neuralike', 'hidden_layers_neurons', fallback=100)
                 # [int(x) for x in self.config.get('neuralike', 'hidden_layers_neurons',
                 #                                                      fallback=[100, 100, 200]).split(',')]
@@ -936,6 +937,7 @@ class DriverMC:
             learning_rate = kwargs.pop('learning_rate', 5e-4)
             batch_size = kwargs.pop('batch_size', 32)
             psplit = kwargs.pop('psplit', 0.8)
+            n_layers = kwargs.pop('n_layers', 4)
             # hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', [100, 100, 200])
             hidden_layers_neurons = kwargs.pop('hidden_layers_neurons', 100)
             plot = kwargs.pop('plot', True)
@@ -948,6 +950,7 @@ class DriverMC:
             valid_loss = kwargs.pop('valid_loss', 0.01)
 
         return {'loglike': self.logLike, 'rootname': self.root,
+                'n_layers': n_layers,
                 'hidden_layers_neurons': hidden_layers_neurons,
                 'epochs': epochs, 'psplit': psplit,
                 'learning_rate': learning_rate, 'batch_size': batch_size,
