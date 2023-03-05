@@ -40,7 +40,7 @@ class NeuralNet:
             Data to train
 
         """
-        hyp_tunning = 'auto'
+        hyp_tunning = 'manual'
         self.n_train = n_train
         self.load = load
         self.model_path = model_path
@@ -62,14 +62,14 @@ class NeuralNet:
         else:
             X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
             if hyp_tunning == 'auto' and n_train == 0:
-                population_size = 3  # max of individuals per generation
-                max_generations = 4  # number of generations
+                population_size = 5  # max of individuals per generation
+                max_generations = 2  # number of generations
                 gene_length = 4  # lenght of the gene, depends on how many hiperparameters are tested
                 k = 1  # num. of finralist individuals
 
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'deep': [1, 2, 3, 4], 'learning_rate': [0.005, 0.001], 'num_units': [50, 100, 150, 200]}
+                hyperparams = {'batch_size': [4, 8], 'deep': [3, 4], 'learning_rate': [0.01, 0.001], 'num_units': [100, 200]}
 
                 # generate a Nnogada instance
                 epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
@@ -82,7 +82,7 @@ class NeuralNet:
                 net_fit.ga_with_elitism(population_size, max_generations, gene_length, k)
                 # best solution
                 self.hidden_layers_neurons = int(net_fit.best['num_units'])
-                # self.batch_size = int(net_fit.best['batch_size'])
+                self.batch_size = int(net_fit.best['batch_size'])
                 self.learning_rate = float(net_fit.best['learning_rate'])
                 self.deep = int(net_fit.best['deep'])
                 # print("best individual", net_fit.best)
@@ -111,8 +111,8 @@ class NeuralNet:
         # if self.bayesian:
         #     kl_loss = bnn.BKLLoss(reduction='mean', last_layer_only=False)
         #     kl_weight = 0.01
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        # optimizer = torch.optim.Adadelta(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-5)
+        # optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        optimizer = torch.optim.Adadelta(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-5)
         # optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=1e-5)
         # optimizer = AdaBound(self.model.parameters(), lr=self.learning_rate, final_lr=0.01, weight_decay=1e-10, gamma=0.1)
         # optimizer = torch.optim.Adagrad(self.model.parameters(), lr=self.learning_rate,
@@ -202,8 +202,8 @@ class NeuralNet:
                                                             self.loss_val[-1]))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
+        plt.ylim(0, 1)
         plt.xlim(0, self.epochs)
-        plt.ylim(0, 10)
         plt.legend(['train', 'val'], loc='upper left')
         if save and figname:
             plt.savefig(figname)
