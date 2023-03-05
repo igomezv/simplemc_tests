@@ -37,6 +37,7 @@ class NeuralManager:
             self.patience = neuralike_settings['patience']
             self.psplit = neuralike_settings['psplit']
             self.hidden_layers_neurons = neuralike_settings['hidden_layers_neurons']
+            self.n_layers = neuralike_settings['n_layers']
             self.plot = neuralike_settings['plot']
             self.valid_loss = neuralike_settings['valid_loss']
             self.nrand = neuralike_settings['nrand']
@@ -74,7 +75,7 @@ class NeuralManager:
         # if self.n_train == 0:
         sc_samples, sc_likes = self.datascaler(samples, likes)
         self.neural_model = NeuralNet(n_train=self.n_train, X=sc_samples, Y=sc_likes, n_input=self.dims,
-                                      n_output=1, hidden_layers_neurons=self.hidden_layers_neurons,
+                                      n_output=1, hidden_layers_neurons=self.hidden_layers_neurons, deep=self.n_layers,
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience, psplit=self.psplit,
