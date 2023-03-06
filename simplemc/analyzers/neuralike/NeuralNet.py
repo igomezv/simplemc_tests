@@ -222,7 +222,7 @@ class NeuralNet:
         Y = Y[shuffle]
         X_train, X_val = np.split(X, indx)
         Y_train, Y_val = np.split(Y, indx)
-        print("Neuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X_train.shape, Y_train.shape))
+        print("\nNeuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X_train.shape, Y_train.shape))
         print("Neuralike: Shape of X_val dataset: {} | Shape of Y_val dataset: {}".format(X_val.shape,
                                                                                           Y_val.shape))
         return X_train, X_val, Y_train, Y_val
