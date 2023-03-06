@@ -171,7 +171,6 @@ LMBD_par = Parameter("LMBD", 0.65, 0.02, (0, 1), "w_{cpl}")
 
 ## NLED
 # b_par = Parameter("b",  0., 0.01, (-27/125, 108/343), "b")
-b_par = Parameter("b",  0.1, 0.01, (-1, 1), "b")
-beta_par = Parameter("beta",  0.1, 0.01, (-3, 3), "\beta")
-# gamma_par =Parameter("gamma"), 0., 0.1, (-5, 5), "\gamma")
-alfa_par = Parameter('alfa', 0.1, 0.01, (-2, 2), "\alpha")
+b_par = Parameter("b",  0.1, 0.01, (-0.216, 0.314), "b")
+beta_par = Parameter("beta",  0.1, 0.01, (1, 1), "\\beta")
+alfa_par = Parameter('alfa', 0.1, 0.01, (3/4, 3/2), "\\alpha")
