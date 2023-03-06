@@ -79,18 +79,19 @@ class NeuraLike:
         return None
 
     def neural_switch(self, nc, samples, likes, logl_tolerance=0.05):
-        self.n_neuralikes += 1
-        self.ncalls_neural += nc
-        if nc > 1000:
-            self.trained_net = False
-            print("\nExcesive number of calls, neuralike disabled")
-        neuralike = likes[-1:]
-        # like in BAMBI paper, with sigma (tolerance) = 0.
-        if (np.min(likes) - logl_tolerance < neuralike) and (neuralike < np.max(likes) + logl_tolerance):
-            self.trained_net = True
-        else:
-            print("\nBad neuralikes predictions!")
-            self.trained_net = False
+        if self.trained_net:
+            self.n_neuralikes += 1
+            self.ncalls_neural += nc
+            if nc > 1000:
+                self.trained_net = False
+                print("\nExcesive number of calls, neuralike disabled")
+            neuralike = likes[-1:]
+            # like in BAMBI paper, with sigma (tolerance) = 0.
+            if (np.min(likes) - logl_tolerance < neuralike) and (neuralike < np.max(likes) + logl_tolerance):
+                self.trained_net = True
+            else:
+                print("\nBad neuralikes predictions!")
+                self.trained_net = False
     def likelihood(self, params):
         if self.trained_net:
             return self.net.neuralike(params)
