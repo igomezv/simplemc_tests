@@ -35,8 +35,8 @@ class NeuraLike:
     def run(self, delta_logz, it, nc, samples, likes, logl_tolerance=0.05):
         if self.training_flag(delta_logz, it):
             self.train(samples, likes)
-        if self.trained_net:
-            self.neural_switch(nc, samples, likes, logl_tolerance=logl_tolerance)
+        # if self.trained_net:
+        self.neural_switch(nc, samples, likes, logl_tolerance=logl_tolerance)
 
         info = "\nneural calls: {} | neuralikes: {} | "\
                "neural trains: {} | Using: ".format(self.ncalls_neural, self.n_neuralikes,
