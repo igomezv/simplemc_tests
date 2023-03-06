@@ -150,6 +150,7 @@ class NeuralNet:
 
                 # Print statistics
                 current_loss += loss.item()
+
                 if i % 10 == 0:
                     # print('Loss after mini-batch %5d: %.3f' %
                     #       #                 (i + 1, current_loss / 500))
@@ -173,6 +174,8 @@ class NeuralNet:
             history_val = np.append(history_val, valid_loss.item())
             print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
+            if valid_loss <= 0.05 and loss <= 0.05:
+                break
         # Process is complete.
             # early_stopping needs the validation loss to check if it has decresed,
             # and if it has, it will make a checkpoint of the current model
