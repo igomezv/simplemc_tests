@@ -156,7 +156,7 @@ class NeuralNet:
                     #       #                 (i + 1, current_loss / 500))
                     #       (i + 1, loss.item()), end='\r')
                     current_loss = 0.0
-            history_train = np.append(history_train, loss)
+            history_train = np.append(history_train, loss.item())
 
             valid_loss = 0.0
             self.model.eval()  # Optional when not using Model Specific layer
