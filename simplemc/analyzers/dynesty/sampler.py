@@ -830,7 +830,6 @@ class Sampler(object):
                 if len(self.saved_logl) >= self.nlive//2:
                     training_samples = np.concatenate((np.array(self.live_v), np.array(self.saved_v)[-self.nlive//2:]), axis=0)
                     training_logl = np.concatenate((np.array(self.live_logl), np.array(self.saved_logl)[-self.nlive//2:]), axis=0)
-                    print(np.shape(training_samples), np.shape(training_logl.reshape(-1, 1)))
                     neuralike.run(delta_logz, it, nc, samples= training_samples, likes=training_logl.reshape(-1, 1))
                     self.loglikelihood = neuralike.likelihood
 
