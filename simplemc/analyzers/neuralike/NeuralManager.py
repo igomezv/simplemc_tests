@@ -79,7 +79,8 @@ class NeuralManager:
                                       epochs=self.epochs, batch_size=self.batch_size,
                                       learrning_rate=self.learning_rate,
                                       patience=self.patience, psplit=self.psplit,
-                                      minsample=np.min(np.abs(self.samples)))
+                                      minsample=np.min(np.abs(self.samples)),
+                                      valid_loss=self.valid_loss)
 
 
 

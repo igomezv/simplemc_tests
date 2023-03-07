@@ -29,7 +29,8 @@ device = torch.device("cpu")
 
 class NeuralNet:
     def __init__(self, n_train, X, Y, n_input, n_output, hidden_layers_neurons=200,
-                 load=False, model_path=None, dropout=0.2, hyp_tunning='manual', **kwargs):
+                 load=False, model_path=None, dropout=0.2,
+                 valid_loss=0.5, hyp_tunning='manual', **kwargs):
         """
         Read the network params
         Parameters
@@ -41,6 +42,7 @@ class NeuralNet:
 
         """
         hyp_tunning = 'manual'
+        self.valid_loss = valid_loss
         self.n_train = n_train
         self.load = load
         self.model_path = model_path
@@ -174,7 +176,7 @@ class NeuralNet:
             history_val = np.append(history_val, valid_loss.item())
             print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
-            if valid_loss <= 0.01 and loss <= 0.01 and epoch >= 500:
+            if valid_loss <= self.valid_loss and loss <= self.valid_loss and epoch >= 500:
                 break
         # Process is complete.
             # early_stopping needs the validation loss to check if it has decresed,
