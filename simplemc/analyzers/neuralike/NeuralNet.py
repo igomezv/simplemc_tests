@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from time import time
 import math
-
+from sklearn.model_selection import train_test_split
 import torch
 from torch import nn
 from torchinfo import summary
@@ -29,7 +29,7 @@ device = torch.device("cpu")
 
 class NeuralNet:
     def __init__(self, n_train, X, Y, n_input, n_output, hidden_layers_neurons=200,
-                 load=False, model_path=None, dropout=0.2,
+                 load=False, model_path=None, dropout=0.5,
                  valid_loss=0.5, hyp_tunning='manual', **kwargs):
         """
         Read the network params
@@ -71,7 +71,7 @@ class NeuralNet:
 
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'batch_size': [4, 8], 'deep': [3, 4], 'learning_rate': [0.01, 0.001], 'num_units': [100, 200]}
+                hyperparams = {'batch_size': [16, 32], 'deep': [4, 5], 'learning_rate': [0.005, 0.001], 'num_units': [100, 200]}
 
                 # generate a Nnogada instance
                 epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
@@ -99,11 +99,13 @@ class NeuralNet:
             self.model.float()
             print("Total elapsed time:", (time() - t) / 60, "minutes")
    
-    def train(self, X, Y):
+    def train(self, X, Y, n_train=0):
+        if n_train >= 1:
+                self.learning_rate = self.learning_rate*0.5
         X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
         dataset_train = LoadDataSet(X_train, Y_train)
         dataset_val = LoadDataSet(X_val, Y_val)
-        counter_valid = 0
+        # counter_valid = 0
 
         trainloader = torch.utils.data.DataLoader(dataset_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
         validloader = torch.utils.data.DataLoader(dataset_val, batch_size=self.batch_size, shuffle=True, num_workers=1)
@@ -128,7 +130,7 @@ class NeuralNet:
         history_train = np.empty((1,))
         history_val = np.empty((1,))
         # initialize the early_stopping object
-        # early_stopping = EarlyStopping(patience=self.patience, verbose=False)
+        early_stopping = EarlyStopping(patience=self.patience, verbose=False)
         for epoch in range(0, self.epochs):
             # Set current loss value
             current_loss = 0.0
@@ -186,11 +188,11 @@ class NeuralNet:
         # Process is complete.
             # early_stopping needs the validation loss to check if it has decresed,
             # and if it has, it will make a checkpoint of the current model
-            # early_stopping(valid_loss, self.model)
+            early_stopping(valid_loss, self.model)
 
-            # if early_stopping.early_stop:
-            #     print("Early stopping")
-            #     break
+            if early_stopping.early_stop:
+                print("Early stopping")
+                break
         # tf = time() - t0
         # print('\nTraining process has finished in {:.3f} minutes.'.format(tf/60))
         self.history = {'loss': history_train, 'val_loss': history_val}
@@ -222,13 +224,7 @@ class NeuralNet:
         return True
 
     def load_data(self, X, Y, psplit=0.8):
-        ntrain = int(psplit * len(X))
-        indx = [ntrain]
-        shuffle = np.random.permutation(len(X))
-        X = X[shuffle]
-        Y = Y[shuffle]
-        X_train, X_val = np.split(X, indx)
-        Y_train, Y_val = np.split(Y, indx)
+        X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=psplit, random_state = 42)
         print("\nNeuralike: Shape of X dataset: {} | Shape of Y dataset: {}".format(X_train.shape, Y_train.shape))
         print("Neuralike: Shape of X_val dataset: {} | Shape of Y_val dataset: {}".format(X_val.shape,
                                                                                           Y_val.shape))
@@ -288,7 +284,7 @@ class LoadDataSet:
 #         # use the modules apply function to recursively apply the initialization
 #         self.model.apply(self.init_weights)
 class MLP(nn.Module):
-    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.2, nlayers=3):
+    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5, nlayers=3):
         """
             Multilayer Perceptron for regression.
         """
