@@ -177,12 +177,12 @@ class NeuralNet:
             history_val = np.append(history_val, valid_loss.item())
             print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
-            if valid_loss <= self.valid_loss and loss.item() <= self.valid_loss and epoch >= 500:
-                counter_valid += 1
-            else:
-                counter_valid = 0
-            if counter_valid >= 5:
-                break
+            # if valid_loss <= self.valid_loss and loss.item() <= self.valid_loss and epoch >= 500:
+            #     counter_valid += 1
+            # else:
+            #     counter_valid = 0
+            # if counter_valid >= 5:
+            #     break
         # Process is complete.
             # early_stopping needs the validation loss to check if it has decresed,
             # and if it has, it will make a checkpoint of the current model
