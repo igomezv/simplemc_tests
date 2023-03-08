@@ -92,7 +92,7 @@ class NeuralManager:
 
     def training(self, samples, likes):
         sc_samples, sc_likes = self.datascaler(samples, likes)
-        self.neural_model.train(X=sc_samples, Y=sc_likes)
+        self.neural_model.train(X=sc_samples, Y=sc_likes, n_train=self.n_train)
         # neural_model.save_model('{}'.format(self.model_path))
         if self.plot:
             self.neural_model.plot(save=True, figname='{}'.format(self.fig_path), show=False)
