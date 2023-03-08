@@ -128,7 +128,7 @@ class NeuralNet:
         history_train = np.empty((1,))
         history_val = np.empty((1,))
         # initialize the early_stopping object
-        early_stopping = EarlyStopping(patience=self.patience, verbose=False)
+        # early_stopping = EarlyStopping(patience=self.patience, verbose=False)
         for epoch in range(0, self.epochs):
             # Set current loss value
             current_loss = 0.0
@@ -181,16 +181,16 @@ class NeuralNet:
                 counter_valid += 1
             else:
                 counter_valid = 0
-            if counter_valid >= self.epochs//10:
+            if counter_valid >= 5:
                 break
         # Process is complete.
             # early_stopping needs the validation loss to check if it has decresed,
             # and if it has, it will make a checkpoint of the current model
-            early_stopping(valid_loss, self.model)
+            # early_stopping(valid_loss, self.model)
 
-            if early_stopping.early_stop:
-                print("Early stopping")
-                break
+            # if early_stopping.early_stop:
+            #     print("Early stopping")
+            #     break
         # tf = time() - t0
         # print('\nTraining process has finished in {:.3f} minutes.'.format(tf/60))
         self.history = {'loss': history_train, 'val_loss': history_val}
@@ -212,7 +212,7 @@ class NeuralNet:
                                                             self.loss_val[-1]))
         plt.ylabel('loss function')
         plt.xlabel('epoch')
-        plt.ylim(0, 10)
+        # plt.ylim(0, 10)
         # plt.xlim(0, self.epochs)
         plt.legend(['train', 'val'], loc='upper left')
         if save and figname:
