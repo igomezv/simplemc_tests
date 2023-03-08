@@ -103,6 +103,7 @@ class NeuralNet:
         X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
         dataset_train = LoadDataSet(X_train, Y_train)
         dataset_val = LoadDataSet(X_val, Y_val)
+        counter_valid = 0
 
         trainloader = torch.utils.data.DataLoader(dataset_train, batch_size=self.batch_size, shuffle=True, num_workers=1)
         validloader = torch.utils.data.DataLoader(dataset_val, batch_size=self.batch_size, shuffle=True, num_workers=1)
@@ -119,7 +120,7 @@ class NeuralNet:
         # optimizer = AdaBound(self.model.parameters(), lr=self.learning_rate, final_lr=0.01, weight_decay=1e-10, gamma=0.1)
         # optimizer = torch.optim.Adagrad(self.model.parameters(), lr=self.learning_rate,
         #                                 lr_decay=0, weight_decay=0, initial_accumulator_value=0, eps=1e-10)
-        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=5)
+        # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=self.epochs//4, verbose=True)
         # it needs pytorch utilities
         summary(self.model)
         # t0 = time()
@@ -176,7 +177,11 @@ class NeuralNet:
             history_val = np.append(history_val, valid_loss.item())
             print('Epoch: {}/{} | Training Loss: {:.5f} | Validation Loss:'
                   '{:.5f}'.format(epoch+1, self.epochs, loss.item(), valid_loss.item()), end='\r')
-            if valid_loss <= self.valid_loss and loss <= self.valid_loss and epoch >= 500:
+            if valid_loss <= self.valid_loss and loss.item() <= self.valid_loss and epoch >= 500:
+                counter_valid += 1
+            else:
+                counter_valid = 0
+            if counter_valid >= self.epochs//10:
                 break
         # Process is complete.
             # early_stopping needs the validation loss to check if it has decresed,
@@ -208,7 +213,7 @@ class NeuralNet:
         plt.ylabel('loss function')
         plt.xlabel('epoch')
         plt.ylim(0, 10)
-        plt.xlim(0, self.epochs)
+        # plt.xlim(0, self.epochs)
         plt.legend(['train', 'val'], loc='upper left')
         if save and figname:
             plt.savefig(figname)
@@ -283,7 +288,7 @@ class LoadDataSet:
 #         # use the modules apply function to recursively apply the initialization
 #         self.model.apply(self.init_weights)
 class MLP(nn.Module):
-    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5, nlayers=3):
+    def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.2, nlayers=3):
         """
             Multilayer Perceptron for regression.
         """
@@ -297,16 +302,16 @@ class MLP(nn.Module):
 
         l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
         a_hidden = nn.ReLU()
-        # drop_hidden = nn.Dropout(dropout)
+        drop_hidden = nn.Dropout(dropout)
 
         l_output = nn.Linear(hidden_layers_neurons, noutput)
 
-        # l = [l_input, a_input, drop_hidden]
-        l = [l_input, a_input]
+        l = [l_input, a_input, drop_hidden]
+        # l = [l_input, a_input]
         for _ in range(nlayers):
             l.append(l_hidden)
             l.append(a_hidden)
-            # l.append(drop_hidden)
+            l.append(drop_hidden)
         l.append(l_output)
         self.module_list = nn.ModuleList(l)
 
