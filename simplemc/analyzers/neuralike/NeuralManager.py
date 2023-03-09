@@ -114,13 +114,14 @@ class NeuralManager:
         return neural_model
 
     def datascaler(self, samples, likes):
-        self.samples_scaler = StandardScaler(with_mean=False)
+        # self.samples_scaler = StandardScaler(with_mean=False)
+        self.samples_scaler = MinMaxScaler(feature_range=(0.1, 1))
         self.samples_scaler.fit(samples)
         sc_samples = self.samples_scaler.transform(samples)
         # print(sc_samples)
         # # create scaler
-        self.likes_scaler = StandardScaler(with_mean=False)
-        # self.likes_scaler = MinMaxScaler(feature_range=(0.1, 1))
+        # self.likes_scaler = StandardScaler(with_mean=False)
+        self.likes_scaler = MinMaxScaler(feature_range=(0.1, 1))
         self.likes_scaler.fit(likes.reshape(-1, 1))
         # # # apply transforms
         sc_likes = self.likes_scaler.transform(likes.reshape(-1, 1))
