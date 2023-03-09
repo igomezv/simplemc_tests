@@ -92,6 +92,8 @@ class NeuraLike:
             else:
                 print("\nBad neuralikes predictions!")
                 self.trained_net = False
+            if ((self.n_neuralikes ) % self.updInt == 0) and self.n_neuralikes > 0:
+                self.trained_net = False
     def likelihood(self, params):
         if self.trained_net:
             return self.net.neuralike(params)

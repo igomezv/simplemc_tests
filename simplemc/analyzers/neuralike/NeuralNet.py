@@ -256,33 +256,6 @@ class LoadDataSet:
     def __getitem__(self, i):
         return self.X[i], self.y[i]
 
-
-# class MLP(nn.Module):
-#     def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5):
-#         """
-#             Multilayer Perceptron for regression. 3 hidden layers
-#         """
-#         super().__init__()
-#         self.model = nn.Sequential(
-#             nn.Linear(ncols, hidden_layers_neurons),
-#             # nn.SELU(),
-#             nn.ReLU(),
-#             # nn.Dropout(dropout),
-#             nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
-#             # nn.SELU(),
-#             nn.ReLU(),
-#             # nn.Dropout(dropout),
-#             nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
-#             # nn.SELU(),
-#             nn.ReLU(),
-#             nn.Linear(hidden_layers_neurons, hidden_layers_neurons),
-#             # nn.SELU(),
-#             nn.ReLU(),
-#             # nn.Dropout(dropout),
-#             nn.Linear(hidden_layers_neurons, noutput)
-#         )
-#         # use the modules apply function to recursively apply the initialization
-#         self.model.apply(self.init_weights)
 class MLP(nn.Module):
     def __init__(self, ncols, noutput, hidden_layers_neurons=200, dropout=0.5, nlayers=3):
         """
@@ -298,16 +271,16 @@ class MLP(nn.Module):
 
         l_hidden = nn.Linear(hidden_layers_neurons, hidden_layers_neurons)
         a_hidden = nn.ReLU()
-        drop_hidden = nn.Dropout(dropout)
+        # drop_hidden = nn.Dropout(dropout)
 
         l_output = nn.Linear(hidden_layers_neurons, noutput)
 
-        l = [l_input, a_input, drop_hidden]
-        # l = [l_input, a_input]
+        # l = [l_input, a_input, drop_hidden]
+        l = [l_input, a_input]
         for _ in range(nlayers):
             l.append(l_hidden)
             l.append(a_hidden)
-            l.append(drop_hidden)
+            # l.append(drop_hidden)
         l.append(l_output)
         self.module_list = nn.ModuleList(l)
 
