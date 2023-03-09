@@ -820,6 +820,7 @@ class Sampler(object):
             self.since_update += nc
             # simplemc
             # starts neuralike
+            self.train_dead_points = False
             if self.neuralike:
                 if neural_on is False:
                     from simplemc.analyzers.neuralike.NeuraLike import NeuraLike
@@ -827,11 +828,13 @@ class Sampler(object):
                                           rootname=self.outputname,
                                           neuralike_settings=self.neuralike_settings)
                     neural_on = True
-                elif len(self.saved_logl) > 0:
+                elif len(self.saved_logl) > 0 and self.train_dead_points:
                     neuralike_v = np.concatenate((np.array(self.saved_v)[-self.nlive:], np.array(self.live_v)), axis=0)
                     neuralike_logl = np.concatenate((np.array(self.saved_logl)[-self.nlive:], np.array(self.live_logl)), axis=0)
                     neuralike.run(delta_logz, it, nc, samples=neuralike_v, likes=neuralike_logl)
-                    self.loglikelihood = neuralike.likelihood
+                else:
+                    neuralike.run(delta_logz, it, nc, samples=np.array(self.live_v), likes=np.array(self.live_logl))
+                self.loglikelihood = neuralike.likelihood
 
 
             # Update evidence `logz` and information `h`.
