@@ -49,6 +49,7 @@ from .likelihoods.SimpleCMBLikelihood import PlanckLikelihood, PlanckLikelihood_
 from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN
 from .likelihoods.SNLikelihood import JLASN_Full
 from .likelihoods.PantheonSNLikelihood import PantheonSN, BinnedPantheon
+from .likelihoods.LsstSNLikelihood import SN_photo, SN_spec
 from .likelihoods.CompressedHDLikelihood import HubbleDiagram
 from .likelihoods.Compressedfs8Likelihood import fs8Diagram
 from .likelihoods.HubbleParameterLikelihood import RiessH0
@@ -64,7 +65,7 @@ from .likelihoods.RotationCurvesLikelihood import RotationCurvesLike
 # String parser Aux routines
 model_list = "LCDOM, LCDMasslessnu, nuLCDM, NeffLCDM, noradLCDM, nuoLCDM, nuwLCDM, oLCDM, wCDM, waCDM, owCDM,"\
     "owaCDM, JordiCDM, WeirdCDM, TLight, StepCDM, Spline, PolyCDM, fPolyCDM, Decay, Decay01, Decay05,"\
-    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology"
+    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM"
 
 
 def ParseModel(model, **kwargs):
@@ -116,6 +117,9 @@ def ParseModel(model, **kwargs):
         T = owa0CDMCosmology(varywa=False)
     elif model == "owaCDM":
         T = owa0CDMCosmology()
+    elif model == "nuowaCDM":
+        T = owa0CDMCosmology()
+        T.setVaryMnu()
     elif model == "JordiCDM":
         T = JordiCDMCosmology()
     elif model == "WeirdCDM":
@@ -202,7 +206,7 @@ def ParseModel(model, **kwargs):
 
 
 data_list = "BBAO, GBAO, GBAO_no6dF, CMASS, LBAO, LaBAO, LxBAO, MGS, Planck, WMAP, PlRd, WRd, PlDa, PlRdx10,"\
-    "CMBW, SN, SNx10, UnionSN, RiessH0, 6dFGS"
+    "CMBW, SN, SNx10, UnionSN, RiessH0, 6dFGS, SN_lsst_photo, SN_lsst_spec "
 
 
 def ParseDataset(datasets, **kwargs):
@@ -313,6 +317,10 @@ def ParseDataset(datasets, **kwargs):
             L.addLikelihood(JLASN_Full())
         elif name == 'SN':
             L.addLikelihood(BetouleSN())
+        elif name == 'SNlsstphoto':
+            L.addLikelihood(SN_photo())
+        elif name == 'SNlsstspec':
+            L.addLikelihood(SN_spec())
         # elif name == 'NeuralSN':
         #     L.addLikelihood(NeuralSN())
         elif name == 'SNx10':
