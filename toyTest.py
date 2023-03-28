@@ -16,7 +16,7 @@ show_plots = True  # choose False if you are in a server
 dims = 2
 nlive = 100
 # modelname can be {'eggbox', 'himmel', 'ring', 'square', 'gaussian'}
-modelname = 'gaussian'
+modelname = 'himmel'
 # ###### FIRST SAMPLING WITH ONLY DYNESTY
 # sampler1 = DriverMC(analyzername='nested', model='LCDM', datasets='HD')
 sampler1 = DriverMC(analyzername='nested', model=modelname)
@@ -32,16 +32,16 @@ loglikes = res1['result']['loglikes']
 tfnested = time.time() - ti
 
 # ###### SECOND SAMPLING WITH DYNESTY + NEURAL NETWORK
-# sampler2 = NestedSampler(loglike, priorTransform, ndim=dims,
-#                         bound='multi', sample='unif', nlive=nlive,
-#                         pool=pool, queue_size=nworkers,
-#                         use_pool={'loglikelihood': False}, neuralike=True, use)
+sampler2 = DriverMC(analyzername='nested', model=modelname)
+ti = time.time()
+res2 = sampler2.executer(useNeuralike=True, useGenetic=False, nlivepoints=1000,
+                         valid_loss=0.1, nstart_samples=200000, nstart_stop_criterion=10,
+                         updInt=1000,ncalls_excess=1000, learning_rate = 0.001,
+                         epochs=100, batch_size=16, patience=100)
 
-# print("\nNext sampling:")
-# ti = time.time()
-# sampler2.run_nested(dlogz=0.01, outputname=modelname+"_bambi", dumper=dumper, netError=0.1)
-# resultbambi = sampler2.results
-# tfbambi = time.time() - ti
+samplesneuralike = res2['result']['samples']
+neuralloglikes = res2['result']['loglikes']
+tfneural = time.time() - ti
 
 # ###### PRINT SUMMARY OF BOTH SAMPLING PROCESSES
 
@@ -61,19 +61,20 @@ if show_plots:
     ax = fig.add_subplot(111, projection='3d')
 
     ax.scatter(samplesnested[:, 0],samplesnested[:, 1],  loglikes, c='red', alpha=0.5)
+    ax.scatter(samplesneuralike[:, 0],samplesneuralike[:, 1],  neuralloglikes, c='green', alpha=0.5)
     # ax.scatter(bambidata[:, 0], bambidata[:, 1], zbambi, c='green', alpha=0.5)
     # plt.legend(["dynesty", "dynesty + neural net"],  loc="upper right")
 
-    plt.savefig(modelname+"_bambi3D.png")
+    plt.savefig(modelname+"_neuralike3D.png")
     plt.show()
 
     # 2D plots
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.scatter(samplesnested[:, 0], samplesnested[:, 1], c='red', alpha=0.5)
-    # plt.scatter(bambidata[:, 0], bambidata[:, 1], c='green', alpha=0.5)
-    plt.legend(["dynesty", "dynesty + neural net"],  loc="upper right")
+    plt.scatter(samplesneuralike[:, 0], samplesneuralike[:, 1], c='green', alpha=0.5)
+    plt.legend(["nested sampling", "nested sampling + neural net"],  loc="upper right")
     ax.set_aspect('equal', adjustable='box')
-    # plt.savefig(modelname+"_bambi2D.png")
+    plt.savefig(modelname+"_neuralike2D.png")
     plt.show()
 
