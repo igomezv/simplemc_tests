@@ -127,8 +127,9 @@ class GA_deap:
             # res.append("{}: {:.5f}".format(self.params[i].name, x))
         # res.append("Best Fitness: {:.5f}".format(best.fitness.values[0]))
 
-        # for i in range(self.HALL_OF_FAME_SIZE):
-        #    print(i, ": ", hof.items[i].fitness.values[0], " -> ", self.old_prior(i, hof.items[i]) )
+        for i in range(self.HALL_OF_FAME_SIZE):
+           print(i, ": ", hof.items[i].fitness.values[0], " -> ", hof.items[i])
+           # print(i, ": ", hof.items[i].fitness.values[0], " -> ", self.old_prior(i, hof.items[i]) )
 
         if self.plot_fitness:
             self.plotting(population, logbook, hof)

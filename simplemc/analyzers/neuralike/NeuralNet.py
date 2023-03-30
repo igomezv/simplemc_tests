@@ -41,7 +41,7 @@ class NeuralNet:
             Data to train
 
         """
-        hyp_tunning = 'manual'
+        hyp_tunning = 'auto'
         self.valid_loss = valid_loss
         self.n_train = n_train
         self.load = load
@@ -71,7 +71,7 @@ class NeuralNet:
 
                 # Define the hyperparameters for the search
                 #
-                hyperparams = {'batch_size': [16, 32], 'deep': [4, 5], 'learning_rate': [0.005, 0.001], 'num_units': [100, 200]}
+                hyperparams = {'batch_size': [4, 8], 'deep': [2, 3], 'learning_rate': [0.0005, 0.001], 'num_units': [50, 100]}
 
                 # generate a Nnogada instance
                 epochs = Hyperparameter("epochs", None, self.epochs, vary=False)
