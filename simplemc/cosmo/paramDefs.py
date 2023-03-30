@@ -22,14 +22,14 @@ mnu_par = Parameter("mnu", 0.06, 0.1, (0, 1.0), "\Sigma m_{\\nu}")
 Nnu_par = Parameter("Nnu", 3.046, 0.5, (3.0, 3.1), "N_{\\rm eff}")
 
 # Curvature and DE equation of state.
-Ok_par = Parameter("Ok", 0.0, 0.01, (-0.02, 0.02), "\Omega_k")
+Ok_par = Parameter("Ok", 0.0, 0.01, (-0.5, 0.5), "\Omega_k")
 w_par = Parameter("w", -1., 0.1, (-2.0, 0.0), "w_0")
-wa_par = Parameter("wa", 0.0, 0.1, (-2.0, 2.0), "w_a")
+wa_par = Parameter("wa", 0.0, 0.1, (-1.0, 1.0), "w_a")
 wb_par = Parameter("wb", 0.7, 0.2, (-2., 3.0), "w_b")
 wc_par = Parameter("wc", 0.7, 0.2, (-3., 5.0), "w_c")
 
 # Sigma 8 parameter.
-s8_par = Parameter("s8", 0.8, 0.01, (0.5, 1.0), "s8")
+s8_par = Parameter("s8", 0.8, 0.01, (0.6, 1.0), "\sigma_8")
 
 # This is the prefactor parameter c/rdH0.
 Pr_par = Parameter("Pr", 28.6, 4, (5, 70), "c/(H_0r_d)")
