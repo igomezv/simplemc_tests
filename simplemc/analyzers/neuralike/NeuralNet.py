@@ -41,7 +41,7 @@ class NeuralNet:
             Data to train
 
         """
-        hyp_tunning = 'auto'
+        hyp_tunning = 'manual'
         self.valid_loss = valid_loss
         self.n_train = n_train
         self.load = load
