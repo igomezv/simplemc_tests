@@ -15,6 +15,7 @@ from .models import EarlyDECosmology
 from .models import SlowRDECosmology
 from .models import DGPCDMCosmology
 from .models import AnisotropicCosmology
+from .models import RestrainedCosmology
 from .models import GraduatedCosmology
 from .models import QuintomCosmology
 from .models import RotationCurves
@@ -156,9 +157,12 @@ def ParseModel(model, **kwargs):
         T = SlowRDECosmology(varyOk=False)
     elif model == "Anisotropic":
         T = AnisotropicCosmology(varybd=False)
-        LCDMCosmology.rd_approx = "CuestaNeff"
-        T.setVaryNnu()
-        T.setVaryMnu()
+        # Comentar para Anisotropic_JAV 25/04/23
+        # LCDMCosmology.rd_approx = "CuestaNeff"
+        # T.setVaryNnu()
+        # T.setVaryMnu()
+    elif model == "Restrained":
+        T = RestrainedCosmology()
     elif model == "Binned":
         T = BinnedWCosmology()
     elif model == "Tanh":

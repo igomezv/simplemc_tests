@@ -20,6 +20,7 @@ from .PhiCDMCosmology import PhiCosmology
 from .PolyCDMCosmology import PolyCDMCosmology
 from .QuintomCosmology import QuintomCosmology
 from .RatraCosmology import SureshCosmology
+from .RestrainedCosmology import RestrainedCosmology
 from .RotationCurves import RotationCurves
 from .SimpleModel import SimpleModel
 from .SlowRDECosmology import SlowRDECosmology
