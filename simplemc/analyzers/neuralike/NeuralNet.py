@@ -101,6 +101,7 @@ class NeuralNet:
    
     def train(self, X, Y, n_train=0):
         if n_train >= 1:
+            if self.learning_rate > 0.00001:
                 self.learning_rate = self.learning_rate*0.5
         X_train, X_val, Y_train, Y_val = self.load_data(X, Y)
         dataset_train = LoadDataSet(X_train, Y_train)
