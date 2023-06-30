@@ -13,9 +13,9 @@ from simplemc.cosmo.Parameter import Parameter
 
 # Parameters are value, variation, bounds.
 # Base parameters.
-Om_par = Parameter("Om", 0.3038, 0.05, (0.1, 0.5), "\Omega_m")
+Om_par = Parameter("Om", 0.3038, 0.05, (0.05, 1.0), "\Omega_m")
 Obh2_par = Parameter("Obh2", 0.02234, 0.001, (0.02, 0.025), "\Omega_{b}h^2")
-h_par = Parameter("h", 0.6821, 0.05, (0.4, 0.9), "h")
+h_par = Parameter("h", 0.6821, 0.05, (0.4, 1.0), "h")
 
 # Neutrino mass and effective number.
 mnu_par = Parameter("mnu", 0.06, 0.1, (0, 1.0), "\Sigma m_{\\nu}")
