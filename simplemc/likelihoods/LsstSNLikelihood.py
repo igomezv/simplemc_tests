@@ -27,7 +27,10 @@ class LsstSNLikelihood(BaseLikelihood):
         self.mag = da[:, 2]
         self.dmag = da[:, 3]
         self.N = len(self.mag)
-        self.syscov = np.loadtxt(cov_filename, skiprows=0).reshape((self.N, self.N))
+        try:
+            self.syscov = np.loadtxt(cov_filename, skiprows=0).reshape((self.N, self.N))
+        except:
+            self.syscov = np.diag(np.loadtxt(cov_filename, skiprows=0))
         self.cov = np.copy(self.syscov)
         self.cov[np.diag_indices_from(self.cov)] += self.dmag ** 2
         self.xdiag = 1 / self.cov.diagonal()  # diagonal before marginalising constant
@@ -74,4 +77,12 @@ class SN_spec(LsstSNLikelihood):
     def __init__(self):
         LsstSNLikelihood.__init__(self, "SNlsstspec", cdir+"/data/Data_SNIa_LSST/hubble_diagram_Sr.txt",
                                         cdir+"/data/Data_SNIa_LSST/covsys_000_S.txt")
+
+class SN_large(LsstSNLikelihood):
+    """
+    Likelihood to binned spec dataset.
+    """
+    def __init__(self):
+        LsstSNLikelihood.__init__(self, "SNlsstLarge", cdir+"/data/Data_SNIa_LSST/lsst_large_hubble_diagram.txt",
+                                        cdir+"/data/Data_SNIa_LSST/lsst_large_syscov.txt")
 

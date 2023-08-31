@@ -51,7 +51,7 @@ from .likelihoods.CompressedSNLikelihood import BetouleSN, UnionSN
 from .likelihoods.SNLikelihood import JLASN_Full
 from .likelihoods.PantheonSNLikelihood import PantheonSN, BinnedPantheon
 from .likelihoods.PantheonPlusSNLikelihood import PantheonPlus
-from .likelihoods.LsstSNLikelihood import SN_photo, SN_spec
+from .likelihoods.LsstSNLikelihood import SN_photo, SN_spec, SN_large
 from .likelihoods.CompressedHDLikelihood import HubbleDiagram, HD23
 from .likelihoods.Compressedfs8Likelihood import fs8Diagram
 from .likelihoods.HubbleParameterLikelihood import RiessH0
@@ -211,7 +211,7 @@ def ParseModel(model, **kwargs):
 
 
 data_list = "BBAO, GBAO, GBAO_no6dF, CMASS, LBAO, LaBAO, LxBAO, MGS, Planck, WMAP, PlRd, WRd, PlDa, PlRdx10,"\
-    "CMBW, SN, SNx10, UnionSN, RiessH0, 6dFGS, SN_lsst_photo, SN_lsst_spec, PantheonPlus, DR16BAO, HD23"
+    "CMBW, SN, SNx10, UnionSN, RiessH0, 6dFGS, SNlsstphoto, SNlsstspec, SNlsstLarge, PantheonPlus, DR16BAO, HD23"
 
 
 def ParseDataset(datasets, **kwargs):
@@ -330,6 +330,8 @@ def ParseDataset(datasets, **kwargs):
             L.addLikelihood(SN_photo())
         elif name == 'SNlsstspec':
             L.addLikelihood(SN_spec())
+        elif name == 'SNlsstLarge':
+            L.addLikelihood(SN_large())
         # elif name == 'NeuralSN':
         #     L.addLikelihood(NeuralSN())
         elif name == 'SNx10':
