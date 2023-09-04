@@ -1,0 +1,6 @@
+SUMMARY
+-------
+analyzer: mcmc
+maxlike: 1969.8605
+loglikes: [1970.74 1970.12 1972.15 ... 1970.81 1970.14 1970.15]
+gr_diagnostic: 0.15895457545897262
