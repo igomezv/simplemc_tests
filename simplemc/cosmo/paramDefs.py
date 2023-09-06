@@ -35,8 +35,8 @@ s8_par = Parameter("s8", 0.8, 0.01, (0.6, 1.0), "s8")
 Pr_par = Parameter("Pr", 28.6, 4, (5, 70), "c/(H_0r_d)")
 
 # Poly Cosmology Parameters [arXiv: 1208.2542].
-Om1_par = Parameter("Om1", 0.0, 0.7, (-3, 3), "\Omega_1")
-Om2_par = Parameter("Om2", 0.0, 0.7, (-3, 3), "\Omega_2")
+Om1_par = Parameter("Om1", 0.0, 0.7, (-0.2, 0.5), "\Omega_1")
+Om2_par = Parameter("Om2", 0.0, 0.7, (-0.2, 0.5), "\Omega_2")
 
 # JordiCDM Cosmology Parameters.
 q_par = Parameter("q",  0.0, 0.2, (0, 1), "q")
@@ -140,7 +140,7 @@ nk_par = Parameter("nk", 0.0, 0.1, (-1, 1), "n")
 kk_par = Parameter("kk", 1.5, 0.1, (0.01, 3.14), "k")
 
 # Graduated DE [arXiv: 1912.08751].
-ggama_par = Parameter("ggama", -1.0, 0.1, (-1.3, -0.7), "\gamma")
+ggama_par = Parameter("ggama", -1.0, 0.1, (-1.5, -0.5), "\gamma")
 glambda_par = Parameter("glambda", 0, 0.2, (-10, 0), "\lambda")
 
 # Phi Cosmology, e-Scalar field [arXiv: 2009.01904].
@@ -174,3 +174,6 @@ LMBD_par = Parameter("LMBD", 0.65, 0.02, (0, 1), "w_{cpl}")
 b_par = Parameter("b",  0.1, 0.01, (-0.216, 0.314), "b")
 beta_par = Parameter("beta",  0.1, 0.01, (1, 1), "\\beta")
 alfa_par = Parameter('alfa', 0.1, 0.01, (3/4, 3/2), "\\alpha")
+
+## PEDE
+Ode_par = Parameter("Ode",  0.7, 0.01, (0.5, 0.9), "\Omega_{DE}")
