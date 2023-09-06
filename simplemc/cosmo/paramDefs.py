@@ -13,7 +13,7 @@ from simplemc.cosmo.Parameter import Parameter
 
 # Parameters are value, variation, bounds.
 # Base parameters.
-Om_par = Parameter("Om", 0.3038, 0.05, (0.05, 1.0), "\Omega_m")
+Om_par = Parameter("Om", 0.3038, 0.05, (0.05, 0.5), "\Omega_m")
 Obh2_par = Parameter("Obh2", 0.02234, 0.001, (0.02, 0.025), "\Omega_{b}h^2")
 h_par = Parameter("h", 0.6821, 0.05, (0.4, 1.0), "h")
 
@@ -141,7 +141,7 @@ kk_par = Parameter("kk", 1.5, 0.1, (0.01, 3.14), "k")
 
 # Graduated DE [arXiv: 1912.08751].
 ggama_par = Parameter("ggama", -1.0, 0.1, (-1.5, -0.5), "\gamma")
-glambda_par = Parameter("glambda", 0, 0.2, (-10, 0), "\lambda")
+glambda_par = Parameter("glambda", -20, 0.2, (-30, 0), "\lambda")
 
 # Phi Cosmology, e-Scalar field [arXiv: 2009.01904].
 phialp_par = Parameter("phialp", 1.0, 0.1,  (-3, 3.), "\\alpha")

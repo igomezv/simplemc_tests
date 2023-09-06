@@ -34,10 +34,11 @@ def plot_elipses(best, cov, par1, par2, par1_Ltx='name_1', par2_Ltx='name_2', ax
 
             maxdot = '{}o'.format(contour_col)
             plt.plot(mn[par1], mn[par2],maxdot) #, label=self.model)
-            plt.plot([mn[par1]-vec[0][0], mn[par1]+vec[0][0]],
-                [mn[par2]-vec[0][1],mn[par2]+vec[0][1]], axis_sty)
-            plt.plot([mn[par1]-vec[1][0],mn[par1]+vec[1][0]],
-                [mn[par2]-vec[1][1],mn[par2]+vec[1][1]],axis_sty)
+            # Uncomment following lines to plot the axis of the Fisher approx.
+            # plt.plot([mn[par1]-vec[0][0], mn[par1]+vec[0][0]],
+            #     [mn[par2]-vec[0][1],mn[par2]+vec[0][1]], axis_sty)
+            # plt.plot([mn[par1]-vec[1][0],mn[par1]+        vec[1][0]],
+            #     [mn[par2]-vec[1][1],mn[par2]+vec[1][1]],axis_sty)
 
             theta = sp.degrees(np.arctan2(*vecs[:,0][::-1]))
 
