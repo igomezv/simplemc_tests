@@ -33,5 +33,6 @@ from .wFourierCosmology import wFourierCosmology
 from .TanhCosmology import TanhCosmology
 from .NLEDCosmology import NLEDCosmology
 from .NLED2Cosmology import NLED2Cosmology
+from .PEDECosmology import PEDECosmology
 
 #from .ePhiCDMCosmology import ePhiCosmology
