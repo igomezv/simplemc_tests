@@ -68,7 +68,8 @@ from .likelihoods.RotationCurvesLikelihood import RotationCurvesLike
 # String parser Aux routines
 model_list = "LCDOM, LCDMasslessnu, nuLCDM, NeffLCDM, noradLCDM, nuoLCDM, nuwLCDM, oLCDM, wCDM, waCDM, owCDM,"\
     "owaCDM, JordiCDM, WeirdCDM, TLight, StepCDM, Spline, PolyCDM, fPolyCDM, Decay, Decay01, Decay05,"\
-    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM, PEDE"
+    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM, PEDE, Grad"
+
 
 
 def ParseModel(model, **kwargs):
@@ -175,6 +176,8 @@ def ParseModel(model, **kwargs):
         T = DGPCDMCosmology()
     elif model == 'Grad_Ok':
         T = GraduatedCosmology(varyOk=True)
+    elif model == 'Grad':
+        T = GraduatedCosmology(varyOk=False)
     elif model == 'Quintess':
         T = QuintomCosmology(vary_mquin=True)
     elif model == 'Phantom':
