@@ -4,6 +4,7 @@ import numpy as np
 import scipy.linalg as la
 from scipy.interpolate import interp1d
 from simplemc import cdir
+import pandas as pd
 
 
 class LsstSNLikelihood(BaseLikelihood):
@@ -24,7 +25,13 @@ class LsstSNLikelihood(BaseLikelihood):
         self.name_ = name
         BaseLikelihood.__init__(self, name)
         print("Loading", values_filename)
-        da = np.loadtxt(values_filename, skiprows=5)
+        if dataset_type == 'large_cov':
+            da = pd.read_csv(values_filename, skiprows=5, header=None, sep=' ')
+            da = da.iloc[:, 3:]
+            print(da.head())
+            da = da.values
+        else:
+            da = np.loadtxt(values_filename, skiprows=5)
         self.zcmb  = da[:, 0]
         self.mag = da[:, 2]
         self.dmag = da[:, 3]
@@ -93,7 +100,7 @@ class SN_large(LsstSNLikelihood):
     Likelihood to binned spec dataset.
     """
     def __init__(self):
-        LsstSNLikelihood.__init__(self, "SNlsstLarge", cdir+"/data/Data_SNIa_LSST/lsst_large_hubble_diagram.txt",
+        LsstSNLikelihood.__init__(self, "SNlsstLarge", cdir+"/data/Data_SNIa_LSST/hubble_diagram.txt",
                                         cdir+"/data/Data_SNIa_LSST/covsys_000.txt")
                                         # cdir+"/data/Data_SNIa_LSST/large_cov.dat")
 
