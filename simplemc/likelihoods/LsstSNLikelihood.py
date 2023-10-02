@@ -24,7 +24,10 @@ class LsstSNLikelihood(BaseLikelihood):
         self.name_ = name
         BaseLikelihood.__init__(self, name)
         print("Loading", values_filename)
-        da = np.loadtxt(values_filename, skiprows=5)
+        if dataset_type == 'large_cov':
+            da = np.loadtxt(values_filename, skiprows=0)
+        else:
+            da = np.loadtxt(values_filename, skiprows=5)
         self.zcmb  = da[:, 0]
         self.mag = da[:, 2]
         self.dmag = da[:, 3]
