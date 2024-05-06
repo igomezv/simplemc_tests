@@ -25,10 +25,4 @@ In this current repository I do some personal tests and experiments before contr
 
 Any question or suggestion please contact me.
 
-TO DO:
-
-- Prints of Pantheon likelihood.
-- Add warnings in bad combinations of RC and Simple likelihoods with some models.
-- Unify pybambi and nerualike.
-- Neural networks methods with dynesty multiprocessing fails. 
 
