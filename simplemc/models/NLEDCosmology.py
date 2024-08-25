@@ -1,5 +1,5 @@
 from simplemc.models.LCDMCosmology import LCDMCosmology
-from simplemc.cosmo.paramDefs import b_par, beta_par
+from simplemc.cosmo.paramDefs import b_par, beta_par, alfa_par
 import math as N
 
 #TODO Add more DE EoS for comparison
@@ -14,6 +14,7 @@ class NLEDCosmology(LCDMCosmology):
     def __init__(self, disable_radiation=False):
         self.b = b_par.value
         self.beta = beta_par.value
+        self.alfa = alfa_par.value
         # self.wa = wa_par.value
         LCDMCosmology.__init__(self)
 
@@ -23,6 +24,8 @@ class NLEDCosmology(LCDMCosmology):
         l = LCDMCosmology.freeParameters(self)
         l.append(b_par)
         l.append(beta_par)
+        ## for the 3rd model
+        l.append(alfa_par)
         return l
 
 
@@ -35,6 +38,8 @@ class NLEDCosmology(LCDMCosmology):
                 self.b = p.value
             elif p.name == "beta":
                 self.beta = p.value
+            elif p.name == "alfa":
+                self.alfa = p.value
             # elif p.name == "Ok":
             #     self.Ok = p.value
             #     self.setCurvature(self.Ok)
@@ -47,5 +52,7 @@ class NLEDCosmology(LCDMCosmology):
     ## i.e. H(z)^2/H(z=0)^2
     def RHSquared_a(self, a):
         NuContrib = self.NuDensity.rho(a) / self.h ** 2
-        return self.Ocb/a**3 + NuContrib +self.Omrad/a**4+(4*self.b*((self.Omrad/a**4)/(((24*self.beta*(self.h*100)**2)/a**4)+1)))
+        # return self.Ocb/a**3 + NuContrib +self.Omrad/a**4+(4*self.b*((self.Omrad/a**4)/(((24*self.beta*(self.h*100)**2)/a**4)+1)))
                 # Ocb/a**3+self.Ok/a**2+self.Omrad/a**4+NuContrib+(1.0-self.Om-self.Ok)*rhow)
+        #3rd model
+        return self.Ocb/a**3 + NuContrib +self.Omrad/a**4+(self.b*(self.Omrad/a**4))/((1+(24*self.beta*(self.h*100)**2)/a**4)**self.alfa)

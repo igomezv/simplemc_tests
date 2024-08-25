@@ -13,9 +13,9 @@ from simplemc.cosmo.Parameter import Parameter
 
 # Parameters are value, variation, bounds.
 # Base parameters.
-Om_par = Parameter("Om", 0.2, 0.05, (0.05, 0.5), "\Omega_m")
+Om_par = Parameter("Om", 0.2, 0.05, (0.1, 0.5), "\Omega_m")
 Obh2_par = Parameter("Obh2", 0.02234, 0.001, (0.02, 0.025), "\Omega_{b}h^2")
-h_par = Parameter("h", 0.6821, 0.05, (0.4, 1.0), "h")
+h_par = Parameter("h", 0.6821, 0.05, (0.4, 0.9), "h")
 
 # Neutrino mass and effective number.
 mnu_par = Parameter("mnu", 0.06, 0.1, (0, 1.0), "\Sigma m_{\\nu}")
@@ -171,9 +171,11 @@ LMBD_par = Parameter("LMBD", 0.65, 0.02, (0, 1), "w_{cpl}")
 
 ## NLED
 # b_par = Parameter("b",  0., 0.01, (-27/125, 108/343), "b")
-b_par = Parameter("b",  0.1, 0.01, (-0.216, 0.314), "b")
+# b_par = Parameter("b",  0.1, 0.01, (-0.216, 0.314), "b")
+b_par = Parameter("b",  0.1, 0.01, (0, 5), "b")
 beta_par = Parameter("beta",  0.1, 0.01, (1, 1), "\\beta")
-alfa_par = Parameter('alfa', 0.1, 0.01, (3/4, 3/2), "\\alpha")
+# alfa_par = Parameter('alfa', 0.1, 0.01, (3/4, 3/2), "\\alpha")
+alfa_par = Parameter('alfa', 0.1, 0.01, (-5, 5), "\\alpha")
 
 ## PEDE
 Ode_par = Parameter("Ode",  0.7, 0.01, (0.5, 0.9), "\Omega_{DE}")
