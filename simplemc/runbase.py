@@ -22,6 +22,8 @@ from .models import RotationCurves
 from .models import NLEDCosmology
 from .models import NLED2Cosmology
 from .models import PEDECosmology
+from .models import LHCDMCosmology
+from .models import IDECosmology
 
 #Non-parametric functions
 from .models import SplineLCDMCosmology
@@ -68,7 +70,7 @@ from .likelihoods.RotationCurvesLikelihood import RotationCurvesLike
 # String parser Aux routines
 model_list = "LCDOM, LCDMasslessnu, nuLCDM, NeffLCDM, noradLCDM, nuoLCDM, nuwLCDM, oLCDM, wCDM, waCDM, owCDM,"\
     "owaCDM, JordiCDM, WeirdCDM, TLight, StepCDM, Spline, PolyCDM, fPolyCDM, Decay, Decay01, Decay05,"\
-    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM, PEDE, Grad"
+    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM, PEDE, Grad, LHDM, IDE, LHCDM"
 
 
 
@@ -194,6 +196,10 @@ def ParseModel(model, **kwargs):
         T = NLED2Cosmology()
     elif model == "PEDE":
         T = PEDECosmology()
+    elif model == 'LHCDM':
+        T = LHCDMCosmology()
+    elif model == 'IDE':
+        T = IDECosmology()
     elif model == 'simple':
         T = SimpleModel(custom_parameters, custom_function)
     elif model == 'simple_cosmo':

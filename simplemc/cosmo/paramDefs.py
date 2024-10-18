@@ -179,3 +179,8 @@ alfa_par = Parameter('alfa', 0.1, 0.01, (-5, 5), "\\alpha")
 
 ## PEDE
 Ode_par = Parameter("Ode",  0.7, 0.01, (0.5, 0.9), "\Omega_{DE}")
+
+# Background equivalence models
+# wCDM, Lambda(H)CDM and IDE
+alpha_1_par = Parameter('alpha_1', 0.01, 0.01, (-0.5, 0.5), '\\alpha_{1}')
+gamma_ide_par = Parameter('gamma_ide', 0.01, 0.01, (-0.5, 0.5), '\\gamma')
