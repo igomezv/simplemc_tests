@@ -34,5 +34,7 @@ from .TanhCosmology import TanhCosmology
 from .NLEDCosmology import NLEDCosmology
 from .NLED2Cosmology import NLED2Cosmology
 from .PEDECosmology import PEDECosmology
+from .IDECosmology import IDECosmology
+from .LHCDMCosmology import LHCDMCosmology
 
 #from .ePhiCDMCosmology import ePhiCosmology
