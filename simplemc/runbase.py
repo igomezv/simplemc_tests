@@ -10,7 +10,7 @@ from .models import PolyCDMCosmology
 from .models import JordiCDMCosmology
 from .models import WeirdCDMCosmology
 from .models import TiredLightDecorator
-from .models import DecayLCDMCosmology
+# from .models import DecayLCDMCosmology
 from .models import EarlyDECosmology
 from .models import SlowRDECosmology
 from .models import DGPCDMCosmology
@@ -18,12 +18,14 @@ from .models import AnisotropicCosmology
 from .models import RestrainedCosmology
 from .models import GraduatedCosmology
 from .models import QuintomCosmology
+from .models import QuintomDarkEnergy
 from .models import RotationCurves
 from .models import NLEDCosmology
 from .models import NLED2Cosmology
 from .models import PEDECosmology
 from .models import LHCDMCosmology
 from .models import IDECosmology
+from .models import BECCosmology
 
 #Non-parametric functions
 from .models import SplineLCDMCosmology
@@ -70,7 +72,7 @@ from .likelihoods.RotationCurvesLikelihood import RotationCurvesLike
 # String parser Aux routines
 model_list = "LCDOM, LCDMasslessnu, nuLCDM, NeffLCDM, noradLCDM, nuoLCDM, nuwLCDM, oLCDM, wCDM, waCDM, owCDM,"\
     "owaCDM, JordiCDM, WeirdCDM, TLight, StepCDM, Spline, PolyCDM, fPolyCDM, Decay, Decay01, Decay05,"\
-    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM, PEDE, Grad, LHDM, IDE, LHCDM"
+    "EarlyDE, EarlyDE_rd_DE, SlowRDE, NLEDCosmology, NLED2Cosmology, nuowaCDM, PEDE, Grad, LHDM, IDE, LHCDM, QuintomDarkEnergy"
 
 
 
@@ -136,14 +138,14 @@ def ParseModel(model, **kwargs):
         T = StepCDMCosmology()
     elif model == "Spline":
         T = SplineLCDMCosmology()
-    elif model == "DecayFrac":
-        T = DecayLCDMCosmology()
-    elif model == "Decay":
-        T = DecayLCDMCosmology(varyxfrac=False, xfrac=1.0)
-    elif model == "Decay01":
-        T = DecayLCDMCosmology(varyxfrac=False, xfrac=0.1)
-    elif model == "Decay05":
-        T = DecayLCDMCosmology(varyxfrac=False, xfrac=0.5)
+    # elif model == "DecayFrac":
+    #     T = DecayLCDMCosmology()
+    # elif model == "Decay":
+    #     T = DecayLCDMCosmology(varyxfrac=False, xfrac=1.0)
+    # elif model == "Decay01":
+    #     T = DecayLCDMCosmology(varyxfrac=False, xfrac=0.1)
+    # elif model == "Decay05":
+    #     T = DecayLCDMCosmology(varyxfrac=False, xfrac=0.5)
     elif model == "PolyCDM":
         T = PolyCDMCosmology()
     elif model == "fPolyCDM":
@@ -188,6 +190,8 @@ def ParseModel(model, **kwargs):
         T = QuintomCosmology(vary_mquin=True, vary_mphan=True)
     elif model == 'Quintom_couple':
         T = QuintomCosmology(vary_mquin=True, vary_mphan=True, vary_coupling=True)
+    elif model == 'QuintomDarkEnergy':
+        T = QuintomDarkEnergy()
     elif model == "Rotation":
         T = RotationCurves()
     elif model == "NLEDCosmology":

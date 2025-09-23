@@ -4,7 +4,7 @@
 from .AnisotropicCosmology import AnisotropicCosmology
 from .BinnedWCosmology import BinnedWCosmology
 from .CompressPantheon import CompressPantheon
-from .DecayLCDMCosmology import DecayLCDMCosmology
+# from .DecayLCDMCosmology import DecayLCDMCosmology
 from .DGPCDMCosmology import DGPCDMCosmology
 from .EarlyDECosmology import EarlyDECosmology
 from .EarlyPhiCosmology import EarlyPhiCosmology
@@ -19,6 +19,7 @@ from .OzcosCosmology import OzcosCosmology
 from .PhiCDMCosmology import PhiCosmology
 from .PolyCDMCosmology import PolyCDMCosmology
 from .QuintomCosmology import QuintomCosmology
+from .QuintomDarkEnergy import QuintomDarkEnergy
 from .RatraCosmology import SureshCosmology
 from .RestrainedCosmology import RestrainedCosmology
 from .RotationCurves import RotationCurves

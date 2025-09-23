@@ -122,7 +122,12 @@ alpha_par = Parameter("alpha", 0., 0.01, (-1, 1), "alpha")
 mquin_par = Parameter("mquin", 1.7, 0.2, (0, 4.0), "m_{\phi}")
 mphan_par = Parameter("mphan", 0.8, 0.2, (0, 3.0), "m_{\psi}")
 iniphi_par = Parameter("iniphi", 0.5, 0.1, (0, 1.5), "\phi_0")
-coupling_par = Parameter("beta",  1.0, 0.5, (-10, 10), "\\beta")
+coupling_par = Parameter("beta",  1.0, 0.5, (-10, 10), "\beta")
+
+# Quintom Dark energy.
+alphaphi_par = Parameter("alphaphi", 1.7, 0.2, (0.1, 4.0), "\alpha_{\phi}")
+alphapsi_par = Parameter("alphapsi", 0.8, 0.2, (0.1, 3.0), "\alpha_{\psi}")
+# using iniphi_par and coupling_par from above QuintomCosmology.
 
 # Fourier series expansion for w(z) [arXiv: 1901.08679].
 a0_par = Parameter("a0", -2., 0.1, (-3.0, -1.0), "a_0")
@@ -184,3 +189,9 @@ Ode_par = Parameter("Ode",  0.7, 0.01, (0.5, 0.9), "\Omega_{DE}")
 # wCDM, Lambda(H)CDM and IDE
 alpha_1_par = Parameter('alpha_1', 0.01, 0.01, (-0.5, 0.5), '\\alpha_{1}')
 gamma_ide_par = Parameter('gamma_ide', 0.01, 0.01, (-0.5, 0.5), '\\gamma')
+
+# BEC Cosmology Model Parameters (Bose-Einstein Condensate for Dark Matter)
+# Omega_chi_par = Parameter("Omega_chi", 0.26, 0.05, (0.1, 0.5), "\Omega_{\chi}")  # Dark matter contribution from BEC
+r_chi_par = Parameter("r_chi", 3.5, 0.1, (2.0, 4.0), "r_{\chi}")  # Strength of BEC contribution
+sigma_par = Parameter("sigma", 0.02, 0.001, (0.0, 0.1), "\sigma")  # Some scale factor for BEC term
+zcr_par = Parameter("zcr", 0.65, 0.05, (0.0, 1.0), "z_{cr}")  # Critical redshift for BEC evolution
