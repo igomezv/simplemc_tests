@@ -350,7 +350,6 @@ class QuintomDarkEnergy(LCDMCosmology):
         self.sf_hubble = interp1d(self.lna, Hub, bounds_error=False, fill_value='extrapolate')
         return True
 
-
     def RHSquared_a(self, a):
         """ This is relative hsquared as a function of a, i.e. H(z)^2/H(z=0)^2. """
 
